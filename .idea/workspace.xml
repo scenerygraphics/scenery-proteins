@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="" />
+    <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/JavaFXGridPaneExample.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/JavaFXTexturedCubeExample.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/JavaFXTexturedCubeJavaExample.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -44,10 +51,18 @@
       <option name="presentableId" value="Default" />
       <updated>1576759399533</updated>
       <workItem from="1576759405332" duration="10000" />
+      <workItem from="1576760392108" duration="8000" />
+      <workItem from="1578481677903" duration="680000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1578481678077">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1578481678077" />
   </component>
 </project>

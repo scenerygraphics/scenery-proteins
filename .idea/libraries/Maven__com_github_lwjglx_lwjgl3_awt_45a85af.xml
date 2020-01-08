@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.lwjglx:lwjgl3-awt:45a85af">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/lwjglx/lwjgl3-awt/45a85af/lwjgl3-awt-45a85af.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/lwjglx/lwjgl3-awt/45a85af/lwjgl3-awt-45a85af-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/lwjglx/lwjgl3-awt/45a85af/lwjgl3-awt-45a85af-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
