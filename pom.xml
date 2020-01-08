@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>graphics.scenery</groupId>
-    <artifactId>scenery-javafx</artifactId>
+    <artifactId>scenery-proteins</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
     <name>scenery-proteins</name>
