@@ -17,7 +17,7 @@ class ProteinClassTest: SceneryBase("ProteinClassTest", windowWidth = 1280, wind
 
         scene.addChild(protein.primaryStruc())
 
-        val lightbox = Box(GLVector(25.0f, 25.0f, 25.0f), insideNormals = true)
+        val lightbox = Box(GLVector(50.0f, 50.0f, 50.0f), insideNormals = true)
         lightbox.name = "Lightbox"
         lightbox.material.diffuse = GLVector(0.1f, 0.1f, 0.1f)
         lightbox.material.roughness = 1.0f

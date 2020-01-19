@@ -7,8 +7,10 @@ data class AminoAcidBonds(val structure: Structure)  {
     val chains = structure.chains
     val groups = chains.flatMap { it.atomGroups }
 
+
     fun aminoBonds(): ArrayList<Bond> {
         val bonds = ArrayList<Bond>()
+        /*
         groups.forEach {
             when (it.pdbName) {
                 "ACE"-> { val atomsMap0 = HashMap<Atom, Int>()
@@ -4723,6 +4725,8 @@ data class AminoAcidBonds(val structure: Structure)  {
 
             }
         }
+
+     */
         return bonds
     }
 

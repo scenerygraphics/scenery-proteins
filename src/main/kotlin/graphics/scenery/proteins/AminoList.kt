@@ -1,10 +1,9 @@
 package graphics.scenery.proteins
-import org.biojava.nbio.structure.*
 
-class BondsMap()  {
+class AminoList  {
 
 
-    fun bonds(): List<AminoAcid> {
+    fun aminoAcids(): List<AminoAcid> {
 
         val ACE = AminoAcid("ACE", listOf(
                 Triple("1HH3'", "CA'", 1),

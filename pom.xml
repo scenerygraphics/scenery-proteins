@@ -103,6 +103,7 @@
 
         <cleargl.version>2.2.6</cleargl.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <spirvcrossj.version>0.6.0-1.1.106.0</spirvcrossj.version>
 
         <license.licenseName>lgpl_v3</license.licenseName>
         <license.copyrightOwners>the scenery development team</license.copyrightOwners>
@@ -159,19 +160,30 @@
 
         <dependency>
             <groupId>org.biojava</groupId>
-            <artifactId>core</artifactId>
-            <version>1.9.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.biojava</groupId>
             <artifactId>biojava-core</artifactId>
             <version>5.3.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.biojava</groupId>
             <artifactId>biojava-structure</artifactId>
             <version>5.3.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>graphics.scenery</groupId>
+            <artifactId>spirvcrossj</artifactId>
+            <version>${spirvcrossj.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>graphics.scenery</groupId>
+            <artifactId>spirvcrossj</artifactId>
+            <version>${spirvcrossj.version}</version>
+            <classifier>${lwjgl.natives}</classifier>
+            <scope>runtime</scope>
+        </dependency>
+
 
     </dependencies>
 
@@ -180,7 +192,15 @@
             <id>scijava.public</id>
             <url>https://maven.scijava.org/content/groups/public</url>
         </repository>
+
+        <repository>
+            <id>biojava-maven-repo</id>
+            <name>BioJava repository</name>
+            <url>http://www.biojava.org/download/maven/</url>
+        </repository>
     </repositories>
+
+
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>

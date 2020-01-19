@@ -2,33 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_sun_xml_bind_jaxb_core_2_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_sun_xml_bind_jaxb_impl_2_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_dbcp_commons_dbcp_1_2_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_pool_commons_pool_1_3.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__java3d_vecmath_1_3_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_activation_activation_1_1_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_annotation_javax_annotation_api_1_3_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_xml_bind_jaxb_api_2_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_api_2_6_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_core_2_6_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_slf4j_impl_2_6_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_biojava_alignment_5_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_biojava_core_5_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_biojava_structure_5_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_bytecode_1_9_3.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_core_1_9_3.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_thirdparty_forester_1_038.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jgrapht_jgrapht_core_1_3_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jheaps_jheaps_0_9.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_rcsb_ciftools_java_0_5_4.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_rcsb_mmtf_api_1_0_9.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_rcsb_mmtf_codec_1_0_9.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_rcsb_mmtf_serialization_1_0_9.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/PDB/AminoListTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_dbcp_commons_dbcp_1_2_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_pool_commons_pool_1_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_bytecode_1_9_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_core_1_9_3.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/scenery-proteins.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/scenery-proteins.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenery-javafx.iml" beforeDir="false" afterPath="$PROJECT_DIR$/scenery-javafx.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcid.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcid.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcidBonds.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcidBonds.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/BondsMap.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/PDB/BondTest.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$myProtein.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$myProtein.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$1$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$2$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$5.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$cylinders$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$cylinders$1$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,11 +38,19 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
   <component name="ProjectId" id="1VCaC0Z5Cby74bUkCGksvBUVKlG" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
@@ -58,7 +59,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.ProteinClassTest">
     <configuration name="BondTest.main" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="scenery-proteins" />
       <extension name="coverage">
@@ -75,8 +76,24 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="ProteinClassTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="scenery-proteins" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="graphics.scenery.tests.examples.PDB.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="graphics.scenery.tests.examples.PDB" />
+      <option name="MAIN_CLASS_NAME" value="graphics.scenery.tests.examples.PDB.ProteinClassTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.ProteinClassTest" />
         <item itemvalue="JUnit.BondTest.main" />
       </list>
     </recent_temporary>
@@ -107,7 +124,11 @@
       <workItem from="1576760392108" duration="8000" />
       <workItem from="1578481677903" duration="1195000" />
       <workItem from="1578486396548" duration="12000" />
-      <workItem from="1578998249680" duration="1357000" />
+      <workItem from="1578998249680" duration="2515000" />
+      <workItem from="1579087908126" duration="3696000" />
+      <workItem from="1579172504746" duration="1128000" />
+      <workItem from="1579179098511" duration="1089000" />
+      <workItem from="1579457208629" duration="435000" />
     </task>
     <servers />
   </component>
@@ -115,9 +136,80 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1578998254452">
+    <state x="421" y="97" key="FileChooserDialogImpl" timestamp="1579172907004">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1578998254452" />
+    <state x="421" y="97" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1579172907004" />
+    <state width="1237" height="195" key="GridCell.Tab.0.bottom" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.0.bottom/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.0.center" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.0.center/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.0.left" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.0.left/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.0.right" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.0.right/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.1.bottom" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.1.center" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.1.center/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.1.left" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.1.left/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state width="1237" height="195" key="GridCell.Tab.1.right" timestamp="1579457653006">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="195" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1579457214163">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1579457214163" />
+    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1579088312468">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup/0.0.1280.680@0.0.1280.680" timestamp="1579088312468" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt</url>
+          <line>487</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt</url>
+          <line>1070</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt</url>
+          <line>1158</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt</url>
+          <line>126</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt</url>
+          <line>133</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

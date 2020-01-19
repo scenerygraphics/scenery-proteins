@@ -2,6 +2,7 @@ package graphics.scenery
 
 import cleargl.GLVector
 import graphics.scenery.proteins.AminoAcidBonds
+import graphics.scenery.proteins.AminoList
 import org.biojava.nbio.structure.*
 import org.biojava.nbio.structure.io.PDBFileReader
 import java.io.FileNotFoundException
@@ -110,12 +111,53 @@ class Protein(val structure: Structure): Mesh("Protein") {
         c.instancedProperties["ModelMatrix1"] = { c.model }
         c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
-        //val bonds: MutableList<Bond> = atoms.filter { it.bonds != null }.flatMap { it.bonds }.toMutableList()
+       // val bonds: MutableList<Bond> = atoms.filter { it.bonds != null }.flatMap { it.bonds }.toMutableList()
+        val bonds = ArrayList<Bond>()
 
+        val aminoList = AminoList()
+        val chains = structure.chains
+        val groups = chains.flatMap { it.atomGroups }
 
-        val aminoBondClass = AminoAcidBonds(structure)
+        //This creates bonds for all the amino acids stored in the pdb
+        aminoList.aminoAcids().forEach {
+            val name = it.name
+            //please not that these bonds are not the bonds stored in the pdb-file but the hardcoded bonds from the AminoList
+            val bondList = it.bonds
+            //TODO maybe the few lines below can be written more elegant?
+            groups.forEach{
+                val atoms = it.atoms
+                if(it.pdbName == name) bondList.forEach{ val triple = it
+                    atoms.forEach{ val atom1 = it
+                    atoms.forEach {
+                        val atom2 = it
+                        if((atom1.name + "'") == triple.first && (atom2.name +"'") == triple.second){
+                            val bond = BondImpl(atom1, atom2, triple.third)
+                            bonds.add(bond)
+                        }
+                    }}
+                }
+            }
+        }
+        chains.forEach{
+            val groups = it.atomGroups
+            while(groups.size > 1) {
+                val group1 = groups[0]
+                val group2 = groups[1]
+                group1.atoms.forEach{
+                    val atom1 = it
+                    group2.atoms.forEach{
+                        val atom2 = it
+                        if(atom1.name == "C" && atom2.name == "N") {
+                            val bond = BondImpl(atom1, atom2, 1)
+                            bonds.add(bond)
+                        }
+                    }
+                }
+                groups.removeAt(0)
+            }
+        }
 
-        val cylinders = aminoBondClass.aminoBonds().map {
+        val cylinders = bonds.map {
             val bond = Mesh()
             bond.parent = primaryStruc
             val atomA = it.atomA
@@ -128,8 +170,6 @@ class Protein(val structure: Structure): Mesh("Protein") {
         c.instances.addAll(cylinders)
 
         primaryStruc.addChild(c)
-
-        
 
         return primaryStruc
 
