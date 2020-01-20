@@ -7,7 +7,7 @@ import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.PrimaryStructure
 import org.junit.Test
 
-class ProteinClassTest: SceneryBase("ProteinClassTest", windowWidth = 1280, windowHeight = 720) {
+class PrimaryStructureTest: SceneryBase("ProteinClassTest", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
