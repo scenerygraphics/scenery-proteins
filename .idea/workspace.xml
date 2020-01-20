@@ -2,26 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/PDB/AminoListTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_dbcp_commons_dbcp_1_2_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_pool_commons_pool_1_3.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_bytecode_1_9_3.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_core_1_9_3.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/scenery-proteins.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/scenery-proteins.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenery-javafx.iml" beforeDir="false" afterPath="$PROJECT_DIR$/scenery-javafx.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcid.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcid.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcidBonds.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcidBonds.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/BondsMap.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/PDB/BondTest.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$myProtein.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$myProtein.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$1$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$2$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$cylinders$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$primaryStruc$cylinders$1$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,6 +110,7 @@
       <workItem from="1579172504746" duration="1128000" />
       <workItem from="1579179098511" duration="1089000" />
       <workItem from="1579457208629" duration="435000" />
+      <workItem from="1579463202382" duration="855000" />
     </task>
     <servers />
   </component>
@@ -172,10 +154,10 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state width="1237" height="195" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
-    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1579457214163">
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1579463213552">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1579457214163" />
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1579463213552" />
     <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1579088312468">
       <screen x="0" y="0" width="1280" height="680" />
     </state>

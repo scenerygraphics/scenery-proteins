@@ -4,6 +4,7 @@ import cleargl.GLVector
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
+import graphics.scenery.proteins.PrimaryStructure
 import org.junit.Test
 
 class ProteinClassTest: SceneryBase("ProteinClassTest", windowWidth = 1280, windowHeight = 720) {
@@ -15,7 +16,9 @@ class ProteinClassTest: SceneryBase("ProteinClassTest", windowWidth = 1280, wind
 
         val protein = Protein.fromID("3nir")
 
-        scene.addChild(protein.primaryStruc())
+        val prim = PrimaryStructure(protein.structure)
+
+        scene.addChild(prim.primaryStruc())
 
         val lightbox = Box(GLVector(50.0f, 50.0f, 50.0f), insideNormals = true)
         lightbox.name = "Lightbox"
