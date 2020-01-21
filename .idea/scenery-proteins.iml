@@ -307,6 +307,7 @@
     <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-core:2.3.0" level="project" />
     <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.3.0" level="project" />
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.biojava:biojava-modfinder:5.3.0" level="project" />
     <orderEntry type="library" name="Maven: graphics.scenery:spirvcrossj:0.6.0-1.1.106.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: graphics.scenery:spirvcrossj:natives-windows:0.6.0-1.1.106.0" level="project" />
   </component>

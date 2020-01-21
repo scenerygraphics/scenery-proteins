@@ -38,7 +38,7 @@ class Protein(val structure: Structure): Mesh("Protein") {
                 }
         }
 
-        fun fromFile(path: String   ): Protein {
+        fun fromFile(path: String): Protein {
             val reader = PDBFileReader()
             //print("Please enter the path of your PDB-File: ")
             //val readPath = readLine()
