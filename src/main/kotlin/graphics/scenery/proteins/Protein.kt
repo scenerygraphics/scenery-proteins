@@ -1,8 +1,5 @@
 package graphics.scenery
 
-import cleargl.GLVector
-import graphics.scenery.proteins.AminoAcidBonds
-import graphics.scenery.proteins.AminoList
 import org.biojava.nbio.structure.*
 import org.biojava.nbio.structure.io.PDBFileReader
 import java.io.FileNotFoundException

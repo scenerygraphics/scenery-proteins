@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_biojava_modfinder_5_3_0.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/scenery-proteins.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/scenery-proteins.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenery-javafx.iml" beforeDir="false" afterPath="$PROJECT_DIR$/scenery-javafx.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcidBonds.kt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/SecondaryStructure.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/SecondaryStructure.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/PDB/SecondaryStructureCalcTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/PDB/SecondaryStructureCalcTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,7 +129,7 @@
       <workItem from="1579179098511" duration="1089000" />
       <workItem from="1579457208629" duration="435000" />
       <workItem from="1579463202382" duration="855000" />
-      <workItem from="1579603404252" duration="1984000" />
+      <workItem from="1579603404252" duration="2232000" />
     </task>
     <servers />
   </component>
