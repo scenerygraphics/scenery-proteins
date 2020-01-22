@@ -80,6 +80,8 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
                 }
             }
         }
+
+        //calculates the bonds between amino acids
         chains.forEach{
             val groups = it.atomGroups
             while(groups.size > 1) {

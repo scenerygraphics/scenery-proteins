@@ -10,8 +10,6 @@ class SecondaryStructureDataStructureTest {
     fun main() {
         val protein = Protein.fromID("3nir")
         val ss = SecondaryStructure(protein)
-        ss.secondaryStruc().forEach{
-            print(it.type)
-        }
+        ss.secondaryStruc()
     }
 }
