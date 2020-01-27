@@ -25,13 +25,12 @@ class BSpline(val knots: List<GLVector>) {
         t.add(c.last())
 
         val d = ArrayList<GLVector>()
-        val j: Int
         for (j in 0.. p + 1) {
             d.add(c[j + k - p])
         }
-        val r: Int
+
         for (r in 1.. p + 1) {
-            for(j in p downTo r-1) {
+            for(j in p downTo r) {
                 val alpha = (u - t[j+k-p].x()) / (t[j+1+k-r].x() - t[j+k-p].x())
                 val beta = (u - t[j +k-p].y()) / (t[j+1+k].y() - t[j+k-p].y())
                 val gamma = (u - t[j+k-p].z()) / (t[j+1+k].z() - t[j+k-p].z())
