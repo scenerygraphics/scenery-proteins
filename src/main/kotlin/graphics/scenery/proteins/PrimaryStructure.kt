@@ -68,15 +68,17 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
             //TODO maybe the few lines below can be written more elegant?
             groups.forEach{
                 val atoms = it.atoms
-                if(it.pdbName == name) bondList.forEach{ val triple = it
-                    atoms.forEach{ val atom1 = it
-                        atoms.forEach {
-                            val atom2 = it
-                            if((atom1.name + "'") == triple.first && (atom2.name +"'") == triple.second){
-                                val bond = BondImpl(atom1, atom2, triple.third)
-                                bonds.add(bond)
-                            }
-                        }}
+                if(it.pdbName == name){
+                    bondList.forEach { val triple = it
+                        atoms.forEach{ val atom1 = it
+                            atoms.forEach {
+                                val atom2 = it
+                                if((atom1.name + "'") == triple.first && (atom2.name +"'") == triple.second){
+                                    val bond = BondImpl(atom1, atom2, triple.third)
+                                    bonds.add(bond)
+                                }
+                            }}
+                    }
                 }
             }
         }
