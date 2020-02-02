@@ -8,9 +8,10 @@ import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucInfo
 
-class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
 
-    fun secondaryStruc(): Node {
+class SecondaryStructureSticks(val protein: Protein): Mesh("SecondaryStructureSticks") {
+
+    fun secondaryStrucSticks(): Node {
 
         val struc = protein.structure
         val ssc = SecStrucCalc()
@@ -35,37 +36,52 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
 
         val chains = struc.chains
         val groups = chains.flatMap { it.atomGroups }
-        val points = ArrayList<GLVector>()
+        val bonds = ArrayList<Bond>()
 
         //calculates the bonds between the amino acids
         chains.forEach{
             val groups = it.atomGroups
             while(groups.size > 1) {
                 val group1 = groups[0]
+                val group2 = groups[1]
                 group1.atoms.forEach{
-                    if(it.name == "C" || it.name == "CA" || it.name == "N") {
-                        val point = GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
-                        points.add(point)
+                    val atom1 = it
+                    group2.atoms.forEach{
+                        val atom2 = it
+                        if(atom1.name == "C" && atom2.name == "N") {
+                            val bond = BondImpl(atom1, atom2, 1)
+                            bonds.add(bond)
+                        }
                     }
                 }
                 groups.removeAt(0)
             }
         }
 
-        val spline = CatmulSpline(points)
-
-        val catmulChain = spline.CatMulRomChain()
-
-        val cylinders = catmulChain.map {
-            val section = Mesh()
-            section.parent = backBone
-            val i = catmulChain.indexOf(it)
-            if(i < catmulChain.size) {
-                section.orientBetweenPoints(it, catmulChain[i + 1],
-                        true, true)
+        //calculates the bonds within the amino acid (only the back bone)
+        groups.forEach {
+            val atoms = it.atoms
+            atoms.forEach{
+                val atom1 = it
+                atoms.forEach{
+                    val atom2 = it
+                    if((atom1.name == "CA" && atom2.name == "N") || (atom1.name == "CA" && atom2.name == "C")) {
+                        val bond = BondImpl(atom1, atom2, 1)
+                        bonds.add(bond)
+                    }
+                }
             }
-            section.instancedProperties["ModelMatrix1"] = { section.model }
-            section
+        }
+
+        val cylinders = bonds.map {
+            val bond = Mesh()
+            bond.parent = backBone
+            val atomA = it.atomA
+            val atomB = it.atomB
+            bond.orientBetweenPoints(GLVector(atomA.x.toFloat(), atomA.y.toFloat(), atomA.z.toFloat()),
+                    GLVector(atomB.x.toFloat(), atomB.y.toFloat(), atomB.z.toFloat()), true, true)
+            bond.instancedProperties["ModelMatrix1"] = { bond.model }
+            bond
         }
         c.instances.addAll(cylinders)
 
@@ -73,4 +89,6 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
 
         return backBone
     }
+
+
 }

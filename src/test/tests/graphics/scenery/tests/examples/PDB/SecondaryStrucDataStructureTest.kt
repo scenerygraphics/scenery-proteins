@@ -1,7 +1,7 @@
 package graphics.scenery.tests.examples.PDB
 
 import graphics.scenery.Protein
-import graphics.scenery.proteins.SecondaryStructure
+import graphics.scenery.proteins.SecondaryStructureSticks
 import org.junit.Test
 
 class SecondaryStructureDataStructureTest {
@@ -9,7 +9,7 @@ class SecondaryStructureDataStructureTest {
     @Test
     fun main() {
         val protein = Protein.fromID("3nir")
-        val ss = SecondaryStructure(protein)
-        ss.secondaryStruc()
+        val ss = SecondaryStructureSticks(protein)
+        ss.secondaryStrucSticks()
     }
 }

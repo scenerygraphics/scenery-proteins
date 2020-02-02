@@ -4,8 +4,8 @@ import cleargl.GLVector
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.PrimaryStructure
 import graphics.scenery.proteins.SecondaryStructure
+import graphics.scenery.proteins.SecondaryStructureSticks
 import org.junit.Test
 
 class BackBoneTest: SceneryBase("ProteinClassTest", windowWidth = 1280, windowHeight = 720) {

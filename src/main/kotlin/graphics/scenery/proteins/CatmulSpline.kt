@@ -39,10 +39,11 @@ class CatmulSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f)
         return curvePoints
     }
 
-    fun CatMulRomChain(points: ArrayList<GLVector>): ArrayList<GLVector> {
+    fun CatMulRomChain(): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
-        for (i in 0..points.size-3) {
-            val c = CatmulRomSpline(points[i], points[i+1], points[i+2], points[i+3])
+        for (i in 0..atomCoordinates.size-3) {
+            val c = CatmulRomSpline(atomCoordinates[i], atomCoordinates[i+1],
+                    atomCoordinates[i+2], atomCoordinates[i+3])
             chainPoints.addAll(c)
         }
         return chainPoints
