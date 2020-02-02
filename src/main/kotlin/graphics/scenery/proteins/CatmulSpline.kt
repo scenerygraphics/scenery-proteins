@@ -41,7 +41,8 @@ class CatmulSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f)
 
     fun CatMulRomChain(): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
-        for (i in 0..atomCoordinates.size-3) {
+        val j = atomCoordinates.size-4
+        for (i in 0..j) {
             val c = CatmulRomSpline(atomCoordinates[i], atomCoordinates[i+1],
                     atomCoordinates[i+2], atomCoordinates[i+3])
             chainPoints.addAll(c)
