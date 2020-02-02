@@ -11,7 +11,7 @@ class CatmulSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f)
                 + (Pj.z()-Pi.z()).pow(2)).pow(exp) + ti)
     }
 
-    fun CatmulRomSpline(P0: GLVector, P1: GLVector, P2: GLVector, P3: GLVector, n: Int = 100): List<GLVector> {
+    fun CatmulRomSpline(P0: GLVector, P1: GLVector, P2: GLVector, P3: GLVector, n: Int = 10): List<GLVector> {
 
         val curvePoints = ArrayList<GLVector>()
 

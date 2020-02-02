@@ -28,21 +28,20 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
 
         val backBone = Node("BackBone")
 
-        val c = Cylinder(0.025f, 1.0f, 10)
+        val c = Cylinder(0.0125f, 0.001f, 10)
         c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
         c.instancedProperties["ModelMatrix"] = {c.model}
         c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
         val chains = struc.chains
-        val groups = chains.flatMap { it.atomGroups }
         val points = ArrayList<GLVector>()
 
         //calculates the bonds between the amino acids
         chains.forEach{
             val groups = it.atomGroups
             while(groups.size > 1) {
-                val group1 = groups[0]
-                group1.atoms.forEach{
+                val groupi = groups[0]
+                groupi.atoms.forEach{
                     if(it.name == "C" || it.name == "CA" || it.name == "N") {
                         val point = GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
                         points.add(point)
