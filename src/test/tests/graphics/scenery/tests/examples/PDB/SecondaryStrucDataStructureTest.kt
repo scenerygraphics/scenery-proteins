@@ -4,13 +4,12 @@ import graphics.scenery.Protein
 import graphics.scenery.proteins.SecondaryStructureSticks
 import org.junit.Test
 
-
-class SecondaryStructureCalcTest {
+class SecondaryStructureDataStructureTest {
 
     @Test
     fun main() {
-        val p = Protein.fromID("3nir")
-        val ss = SecondaryStructureSticks(p)
+        val protein = Protein.fromID("3nir")
+        val ss = SecondaryStructureSticks(protein)
         ss.secondaryStrucSticks()
     }
 }
