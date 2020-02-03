@@ -4,53 +4,22 @@ import cleargl.GLVector
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.CatmullRomSpline
+import graphics.scenery.proteins.SecondaryStructure
+import graphics.scenery.proteins.SecondaryStructureSticks
 import org.junit.Test
 
-class CatmulTestDetail: SceneryBase("CatmulTestDetail", windowWidth = 1280, windowHeight = 720) {
-
+class BackBoneTestStick: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
-        val node = Node("TestCatmulSpline")
-
-        val c = Cylinder(0.25f, 0.1f, 10)
-        c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
-        c.instancedProperties["ModelMatrix"] = {c.model}
-        c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
-
-        val p0 = GLVector(0.0f, 0.0f, 0.0f)
-        val p1 = GLVector(10f, 30f, 50f)
-        val p2 = GLVector(40f, 60f, 90f)
-        val p3 = GLVector(100f, 80f, 110f)
-        val a = ArrayList<GLVector>()
-        a.add(p0)
-        a.add(p1)
-        a.add(p2)
-        a.add(p3)
-
-        val spline = CatmullRomSpline(a)
-        val catmulChain = spline.CatMulRomChain()
-
-        val cylinders = catmulChain.map {
-            val section = Mesh()
-            section.parent = node
-            val i = catmulChain.indexOf(it)
-            if(i < catmulChain.size) {
-                section.orientBetweenPoints(it, catmulChain[i + 1],
-                        true, true)
-            }
-            section.instancedProperties["ModelMatrix1"] = { section.model }
-            section
-        }
-        c.instances.addAll(cylinders)
-
-        node.addChild(c)
-
-        scene.addChild(node)
 
         val rowSize = 10f
 
+        val protein = Protein.fromID("3nir")
+
+        val back = SecondaryStructureSticks(protein)
+
+        scene.addChild(back.secondaryStrucSticks())
 
         val lightbox = Box(GLVector(50.0f, 50.0f, 50.0f), insideNormals = true)
         lightbox.name = "Lightbox"

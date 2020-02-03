@@ -3,7 +3,7 @@ package graphics.scenery.proteins
 import cleargl.GLVector
 import kotlin.math.pow
 
-class CatmulSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f) {
+class CatmullRomSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f) {
 
     fun getT(ti: Float, Pi: GLVector, Pj: GLVector): Float {
         val exp: Float = (alpha*0.5).toFloat()
@@ -11,7 +11,7 @@ class CatmulSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f)
                 + (Pj.z()-Pi.z()).pow(2)).pow(exp) + ti)
     }
 
-    fun CatmulRomSpline(P0: GLVector, P1: GLVector, P2: GLVector, P3: GLVector, n: Int = 10): List<GLVector> {
+    fun CatmulRomSpline(P0: GLVector, P1: GLVector, P2: GLVector, P3: GLVector, n: Int = 100): List<GLVector> {
 
         val curvePoints = ArrayList<GLVector>()
 
@@ -39,12 +39,12 @@ class CatmulSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f)
         return curvePoints
     }
 
-    fun CatMulRomChain(): ArrayList<GLVector> {
+    fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
         val j = atomCoordinates.size-4
         for (i in 0..j) {
             val c = CatmulRomSpline(atomCoordinates[i], atomCoordinates[i+1],
-                    atomCoordinates[i+2], atomCoordinates[i+3])
+                    atomCoordinates[i+2], atomCoordinates[i+3], n)
             chainPoints.addAll(c)
         }
         return chainPoints

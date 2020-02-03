@@ -2,7 +2,7 @@ package graphics.scenery.tests.examples.PDB
 
 import cleargl.GLVector
 import graphics.scenery.Protein
-import graphics.scenery.proteins.CatmulSpline
+import graphics.scenery.proteins.CatmullRomSpline
 import org.junit.Test
 
 class CatmulTest {
@@ -21,7 +21,7 @@ class CatmulTest {
                 }
             }
         }
-        val c = CatmulSpline(a)
+        val c = CatmullRomSpline(a)
         val x = c.CatMulRomChain()
         print(x)
     }

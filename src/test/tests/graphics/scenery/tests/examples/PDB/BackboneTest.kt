@@ -15,7 +15,7 @@ class BackBoneTest: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2zzm")
+        val protein = Protein.fromID("3nir")
 
         val back = SecondaryStructure(protein)
 

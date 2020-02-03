@@ -2,8 +2,6 @@ package graphics.scenery.proteins
 
 import cleargl.GLVector
 import graphics.scenery.*
-import org.biojava.nbio.structure.Bond
-import org.biojava.nbio.structure.BondImpl
 import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucInfo
@@ -28,21 +26,29 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
 
         val backBone = Node("BackBone")
 
-        val c = Cylinder(0.0125f, 0.001f, 10)
+        /*
+        val c = Cylinder(0.00125f, 0.001f, 10)
         c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
         c.instancedProperties["ModelMatrix"] = {c.model}
         c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
+         */
+
+        val s = Sphere(0.1f, 2)
+        s.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
+        s.instancedProperties["ModelMatrix"] =  { s.model }
+        s.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+
+
         val chains = struc.chains
         val points = ArrayList<GLVector>()
 
-        //calculates the bonds between the amino acids
         chains.forEach{
             val groups = it.atomGroups
             while(groups.size > 1) {
                 val groupi = groups[0]
                 groupi.atoms.forEach{
-                    if(it.name == "C" || it.name == "CA" || it.name == "N") {
+                    if(it.name == "N") {
                         val point = GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
                         points.add(point)
                     }
@@ -51,10 +57,10 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
             }
         }
 
-        val spline = CatmulSpline(points)
+        val spline = CatmullRomSpline(points)
 
-        val catmulChain = spline.CatMulRomChain()
-
+        val catmulChain = spline.CatMulRomChain(n = 10000)
+        /*
         val cylinders = catmulChain.map {
             val section = Mesh()
             section.parent = backBone
@@ -69,6 +75,19 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
         c.instances.addAll(cylinders)
 
         backBone.addChild(c)
+
+         */
+
+        val spheres = catmulChain.map {
+            val sphere = Mesh()
+            sphere.parent = backBone
+            sphere.instancedProperties["ModelMatrix"] = { sphere.model }
+            sphere.position = it
+            sphere
+        }
+        s.instances.addAll(spheres)
+
+        backBone.addChild(s)
 
         return backBone
     }
