@@ -3,14 +3,29 @@ package graphics.scenery.proteins
 import cleargl.GLVector
 import kotlin.math.pow
 
+/**
+ * This class offers the logic for creating a CatmuLL Rom Spline. This is essentially
+ * a spline going through control points. For more information see:
+ * https://en.wikipedia.org/wiki/Centripetal_Catmull–Rom_spline
+ * @param atomCoordinates the list of control points
+ * @param alpha determines the kind of Catmull Rom Spline, set in range of 0..1
+ */
 class CatmullRomSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f) {
 
+    /**
+     * Calculates the parameter t.
+     */
     fun getT(ti: Float, Pi: GLVector, Pj: GLVector): Float {
         val exp: Float = (alpha*0.5).toFloat()
         return(((Pj.x()-Pi.x()).pow(2) + (Pj.y()-Pi.y()).pow(2)
                 + (Pj.z()-Pi.z()).pow(2)).pow(exp) + ti)
     }
 
+    /**
+     * this function returns the spline points between two points. Please note you still four points
+     * to have a smooth curve.
+     * @param n number of points defining the spline
+     */
     fun CatmulRomSpline(P0: GLVector, P1: GLVector, P2: GLVector, P3: GLVector, n: Int = 100): List<GLVector> {
 
         val curvePoints = ArrayList<GLVector>()
@@ -35,10 +50,13 @@ class CatmullRomSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0
             t += ((t2-t1)/n)
         }
 
-
         return curvePoints
     }
 
+    /**
+     * Returns the actual curve with all the points.
+     * @param n number of points the curve has
+     */
     fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
         val j = atomCoordinates.size-4

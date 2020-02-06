@@ -4,8 +4,7 @@ import cleargl.GLVector
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.SecondaryStructure
-import graphics.scenery.proteins.SecondaryStructureSticks
+import graphics.scenery.proteins.BackBoneSticks
 import org.junit.Test
 
 class BackBoneTestStick: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight = 720) {
@@ -17,9 +16,9 @@ class BackBoneTestStick: SceneryBase("BackBoneTest", windowWidth = 1280, windowH
 
         val protein = Protein.fromID("3nir")
 
-        val back = SecondaryStructureSticks(protein)
+        val back = BackBoneSticks(protein)
 
-        scene.addChild(back.secondaryStrucSticks())
+        scene.addChild(back.backBoneSticks())
 
         val lightbox = Box(GLVector(50.0f, 50.0f, 50.0f), insideNormals = true)
         lightbox.name = "Lightbox"

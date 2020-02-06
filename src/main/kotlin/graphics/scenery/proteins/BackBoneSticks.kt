@@ -8,10 +8,18 @@ import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucInfo
 
+/**
+ * Visualizes the backbone via sticks which represent the C-alpha-chain.
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ * @param protein protein you want to show
+ */
+class BackBoneSticks(val protein: Protein): Mesh("SecondaryStructureSticks") {
 
-class SecondaryStructureSticks(val protein: Protein): Mesh("SecondaryStructureSticks") {
-
-    fun secondaryStrucSticks(): Node {
+    /**
+     * This function returns the node with all the cylinders representing the bonds
+     * in the C-alpha-chain.
+     */
+    fun backBoneSticks(): Node {
 
         val struc = protein.structure
         val ssc = SecStrucCalc()
@@ -38,7 +46,7 @@ class SecondaryStructureSticks(val protein: Protein): Mesh("SecondaryStructureSt
         val groups = chains.flatMap { it.atomGroups }
         val bonds = ArrayList<Bond>()
 
-        //calculates the bonds between the amino acids
+        //calculates the bonds between two groups
         chains.forEach{
             val groups = it.atomGroups
             while(groups.size > 1) {
@@ -58,7 +66,7 @@ class SecondaryStructureSticks(val protein: Protein): Mesh("SecondaryStructureSt
             }
         }
 
-        //calculates the bonds within the amino acid (only the back bone)
+        //calculates the bonds of the C-alpha track within the same group
         groups.forEach {
             val atoms = it.atoms
             atoms.forEach{
