@@ -10,7 +10,7 @@ import java.nio.IntBuffer
 import kotlin.math.acos
 import kotlin.math.sign
 
-class CurveGeometry(val curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"), HasGeometry {
+class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"), HasGeometry {
     override val vertexSize = 3
     override val texcoordSize = 2
     override var geometryType = GeometryType.TRIANGLES
@@ -59,12 +59,12 @@ class CurveGeometry(val curve: CatmullRomSpline, n: Int = 100): Node("CurveGeome
         val z = x*x + y*y
         val normal = GLVector(x,y,z)
         normals.add(normal)
-        binormals[0] = tangents[0].cross(normal)
-        
-        for(i in 0 until cur.size) {
+        binormals.add(tangents[0].cross(normal))
+
+        for(i in 0 until cur.size-1) {
             val b = tangents[i].cross(tangents[i+1])
             if (b.length2() < 0.0000001f) {
-                normals[i+1] = normals[i]
+                normals.add(normals[i])
             }
             else {
                 val x = normals[i].x()
@@ -74,9 +74,9 @@ class CurveGeometry(val curve: CatmullRomSpline, n: Int = 100): Node("CurveGeome
                 val emptyMatrix = GLMatrix()
                 val rotationMatrix = GLMatrix(makeRotationAxis(emptyMatrix.floatArray,
                         0, theta, x,y,z, normals[i].toFloatArray()))
-                normals[i+1] = rotationMatrix.mult(normals[i])
+                normals.add(rotationMatrix.mult(normals[i]))
             }
-            binormals[i+1] = tangents[i+1].cross(normals[i+1])
+            binormals.add(tangents[i+1].cross(normals[i+1]))
         }
         return Triple(tangents, normals, binormals)
     }
