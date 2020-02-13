@@ -1,6 +1,8 @@
 package graphics.scenery.proteins
 
+import cleargl.GLMatrix
 import cleargl.GLVector
+import com.jogamp.opengl.math.FloatUtil.makeRotationAxis
 import graphics.scenery.*
 import org.lwjgl.opengl.GL
 import java.nio.FloatBuffer
@@ -57,16 +59,24 @@ class CurveGeometry(val curve: CatmullRomSpline, n: Int = 100): Node("CurveGeome
         val z = x*x + y*y
         val normal = GLVector(x,y,z)
         normals.add(normal)
-
+        binormals[0] = tangents[0].cross(normal)
+        
         for(i in 0 until cur.size) {
             val b = tangents[i].cross(tangents[i+1])
-            if (b.length2() == 0.0f) {
+            if (b.length2() < 0.0000001f) {
                 normals[i+1] = normals[i]
             }
             else {
+                val x = normals[i].x()
+                val y = normals[i].y()
+                val z = normals[i].z()
                 val theta = acos(tangents[i].times(tangents[i+1]))
-                
+                val emptyMatrix = GLMatrix()
+                val rotationMatrix = GLMatrix(makeRotationAxis(emptyMatrix.floatArray,
+                        0, theta, x,y,z, normals[i].toFloatArray()))
+                normals[i+1] = rotationMatrix.mult(normals[i])
             }
+            binormals[i+1] = tangents[i+1].cross(normals[i+1])
         }
         return Triple(tangents, normals, binormals)
     }
