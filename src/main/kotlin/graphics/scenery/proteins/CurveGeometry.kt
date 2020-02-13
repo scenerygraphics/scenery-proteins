@@ -5,6 +5,7 @@ import graphics.scenery.*
 import org.lwjgl.opengl.GL
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
+import kotlin.math.acos
 import kotlin.math.sign
 
 class CurveGeometry(val curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"), HasGeometry {
@@ -42,17 +43,31 @@ class CurveGeometry(val curve: CatmullRomSpline, n: Int = 100): Node("CurveGeome
 
 
     fun computeFrenetFrames(): Triple<List<GLVector>, List<GLVector>, List<GLVector>> {
+
         val tangents = ArrayList<GLVector>()
         val normals = ArrayList<GLVector>()
         val binormals = ArrayList<GLVector>()
+
+        //adds all the tangent vectors
         cur.forEach{tangents.add(getTangent(cur.indexOf(it)))}
+
         //initial normal vector perpendicular to first tangent vector
         val x = tangents[0].x()*-1
         val y = tangents[0].y()*1
         val z = x*x + y*y
         val normal = GLVector(x,y,z)
-        
+        normals.add(normal)
 
+        for(i in 0 until cur.size) {
+            val b = tangents[i].cross(tangents[i+1])
+            if (b.length2() == 0.0f) {
+                normals[i+1] = normals[i]
+            }
+            else {
+                val theta = acos(tangents[i].times(tangents[i+1]))
+                
+            }
+        }
         return Triple(tangents, normals, binormals)
     }
 }
