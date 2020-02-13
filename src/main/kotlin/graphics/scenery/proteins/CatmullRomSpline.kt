@@ -22,7 +22,7 @@ class CatmullRomSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0
     }
 
     /**
-     * this function returns the spline points between two points. Please note you still four points
+     * this function returns the spline points between two points. Please note you need four points
      * to have a smooth curve.
      * @param n number of points defining the spline
      */
