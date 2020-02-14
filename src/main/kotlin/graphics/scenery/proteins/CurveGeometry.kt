@@ -15,7 +15,7 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     override val texcoordSize = 2
     override var geometryType = GeometryType.TRIANGLES
 
-    override var vertices: FloatBuffer = BufferUtils.allocateFloat(0)
+    override var vertices: FloatBuffer = BufferUtils.allocateFloat(curve.CatMulRomChain(n).size*3*2*3)
     override var normals: FloatBuffer = BufferUtils.allocateFloat(0)
     override var texcoords: FloatBuffer = BufferUtils.allocateFloat(0)
     override var indices: IntBuffer = BufferUtils.allocateInt(0)
@@ -27,9 +27,17 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         for(i in 0 until cur.size) {
             val basisArray = ArrayList<Float>()
             this.computeFrenetFrames().first[i].toFloatArray().forEach { basisArray.add(it)}
+            basisArray.add(0f)
             this.computeFrenetFrames().second[i].toFloatArray().forEach{ basisArray.add(it) }
+            basisArray.add(0f)
             this.computeFrenetFrames().third[i].toFloatArray().forEach{ basisArray.add(it)}
-            val matrix = GLMatrix(basisArray.toFloatArray())
+            basisArray.add(0f)
+            basisArray.add(0f)
+            basisArray.add(0f)
+            basisArray.add(0f)
+            basisArray.add(1f)
+            val array = basisArray.toFloatArray()
+            val matrix = GLMatrix(array)
             bases.add(matrix)
         }
         val curveGeometry = ArrayList<ArrayList<GLVector>>()
@@ -37,37 +45,38 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
             val basis = it.inverse
             val shape = ArrayList<GLVector>()
             baseShape.invoke().forEach {
-                val vertex = basis.mult(it)
+                val vector4D = GLVector(it.x(), it.y(), it.z(), 0f)
+                val vector = basis.mult(vector4D)
+                val vertex = GLVector(vector.x(), vector.y(), vector.z())
                 shape.add(vertex)
             }
             curveGeometry.add(shape)
         }
-        val verticesStorage = ArrayList<Float>()
+
         for (j in 0 until curveGeometry.size-1) {
             for(i in 0 until curveGeometry[j].size) {
                 if(i != curveGeometry[j].size -1) {
-                    verticesStorage.add(curveGeometry[j][i].x())
-                    verticesStorage.add(curveGeometry[j][i].y())
-                    verticesStorage.add(curveGeometry[j][i].z())
-                    verticesStorage.add(curveGeometry[j+1][i].x())
-                    verticesStorage.add(curveGeometry[j+1][i].y())
-                    verticesStorage.add(curveGeometry[j+1][i].z())
-                    verticesStorage.add(curveGeometry[j][i+1].x())
-                    verticesStorage.add(curveGeometry[j][i+1].y())
-                    verticesStorage.add(curveGeometry[j][i+1].z())
-                    verticesStorage.add(curveGeometry[j][i+1].x())
-                    verticesStorage.add(curveGeometry[j][i+1].y())
-                    verticesStorage.add(curveGeometry[j][i+1].z())
-                    verticesStorage.add(curveGeometry[j+1][i+1].x())
-                    verticesStorage.add(curveGeometry[j+1][i+1].y())
-                    verticesStorage.add(curveGeometry[j+1][i+1].z())
-                    verticesStorage.add(curveGeometry[j+1][i].x())
-                    verticesStorage.add(curveGeometry[j+1][i].y())
-                    verticesStorage.add(curveGeometry[j+1][i].z())
+                    vertices.put(curveGeometry[j][i].x())
+                    vertices.put(curveGeometry[j][i].y())
+                    vertices.put(curveGeometry[j][i].z())
+                    vertices.put(curveGeometry[j+1][i].x())
+                    vertices.put(curveGeometry[j+1][i].y())
+                    vertices.put(curveGeometry[j+1][i].z())
+                    vertices.put(curveGeometry[j][i+1].x())
+                    vertices.put(curveGeometry[j][i+1].y())
+                    vertices.put(curveGeometry[j][i+1].z())
+                    vertices.put(curveGeometry[j][i+1].x())
+                    vertices.put(curveGeometry[j][i+1].y())
+                    vertices.put(curveGeometry[j][i+1].z())
+                    vertices.put(curveGeometry[j+1][i+1].x())
+                    vertices.put(curveGeometry[j+1][i+1].y())
+                    vertices.put(curveGeometry[j+1][i+1].z())
+                    vertices.put(curveGeometry[j+1][i].x())
+                    vertices.put(curveGeometry[j+1][i].y())
+                    vertices.put(curveGeometry[j+1][i].z())
                 }
             }
         }
-        vertices.put(verticesStorage.toFloatArray())
     }
 
     fun getTangent(i: Int): GLVector {
