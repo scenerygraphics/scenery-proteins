@@ -23,23 +23,60 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     private val cur = curve.CatMulRomChain(n)
 
     fun drawSpline(baseShape: (() -> List<GLVector>)) {
-        cur.forEach {
-            val p = it
-            baseShape.invoke().forEach{
-                /*Todo! here the vertices need to be added. You have to implement a frenet frame which
-                  Todo! rides along the curve. Use this frame to calculate the coordinates for your base
-                  Todo! shape at a given point in the curve. For all these new points find an algorithm
-                  Todo! which orders and stores them as triangles.  */
+        val bases = ArrayList<GLMatrix>()
+        for(i in 0 until cur.size) {
+            val basisArray = ArrayList<Float>()
+            this.computeFrenetFrames().first[i].toFloatArray().forEach { basisArray.add(it)}
+            this.computeFrenetFrames().second[i].toFloatArray().forEach{ basisArray.add(it) }
+            this.computeFrenetFrames().third[i].toFloatArray().forEach{ basisArray.add(it)}
+            val matrix = GLMatrix(basisArray.toFloatArray())
+            bases.add(matrix)
+        }
+        val curveGeometry = ArrayList<ArrayList<GLVector>>()
+        bases.forEach {
+            val basis = it.inverse
+            val shape = ArrayList<GLVector>()
+            baseShape.invoke().forEach {
+                val vertex = basis.mult(it)
+                shape.add(vertex)
+            }
+            curveGeometry.add(shape)
+        }
+        val verticesStorage = ArrayList<Float>()
+        for (j in 0 until curveGeometry.size-1) {
+            for(i in 0 until curveGeometry[j].size) {
+                if(i != curveGeometry[j].size -1) {
+                    verticesStorage.add(curveGeometry[j][i].x())
+                    verticesStorage.add(curveGeometry[j][i].y())
+                    verticesStorage.add(curveGeometry[j][i].z())
+                    verticesStorage.add(curveGeometry[j+1][i].x())
+                    verticesStorage.add(curveGeometry[j+1][i].y())
+                    verticesStorage.add(curveGeometry[j+1][i].z())
+                    verticesStorage.add(curveGeometry[j][i+1].x())
+                    verticesStorage.add(curveGeometry[j][i+1].y())
+                    verticesStorage.add(curveGeometry[j][i+1].z())
+                    verticesStorage.add(curveGeometry[j][i+1].x())
+                    verticesStorage.add(curveGeometry[j][i+1].y())
+                    verticesStorage.add(curveGeometry[j][i+1].z())
+                    verticesStorage.add(curveGeometry[j+1][i+1].x())
+                    verticesStorage.add(curveGeometry[j+1][i+1].y())
+                    verticesStorage.add(curveGeometry[j+1][i+1].z())
+                    verticesStorage.add(curveGeometry[j+1][i].x())
+                    verticesStorage.add(curveGeometry[j+1][i].y())
+                    verticesStorage.add(curveGeometry[j+1][i].z())
+                }
             }
         }
+        vertices.put(verticesStorage.toFloatArray())
     }
 
     fun getTangent(i: Int): GLVector {
         val s = cur.size
         return when(i) {
             0 -> ((cur[i+1] - cur[i]).normalized)
-            s -> ((cur[i] - cur[i-1].normalized))
-            else -> ((cur[i + 1] - cur[i - 1]).normalized)
+            (s-2) -> ((cur[i+1] - cur[i]).normalized)
+            (s-1) -> ((cur[i] - cur[i-1]).normalized)
+            else -> ((cur[i+1] - cur[i-1]).normalized)
         }
     }
 
@@ -51,19 +88,27 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         val binormals = ArrayList<GLVector>()
 
         //adds all the tangent vectors
-        cur.forEach{tangents.add(getTangent(cur.indexOf(it)))}
+        for(i in 0 until cur.size) {
+            tangents.add(getTangent(i))
+        }
 
         //initial normal vector perpendicular to first tangent vector
-        val x = tangents[0].x()*-1
-        val y = tangents[0].y()*1
-        val z = x*x + y*y
-        val normal = GLVector(x,y,z)
+        var vec: GLVector
+        vec = if(tangents[0].x() >= 0.9f || tangents[0].z() >= 0.9f) {
+            GLVector(0f, 1f, 0f)
+        }
+        else {
+            GLVector(1f, 0f, 0f)
+        }
+
+        val normal = tangents[0].cross(vec)
+
         normals.add(normal)
         binormals.add(tangents[0].cross(normal))
 
-        for(i in 0 until cur.size-1) {
+        for(i in 0 until (tangents.size-1)) {
             val b = tangents[i].cross(tangents[i+1])
-            if (b.length2() < 0.0000001f) {
+            if (b.length2() < 0.000001f) {
                 normals.add(normals[i])
             }
             else {
@@ -74,7 +119,9 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                 val emptyMatrix = GLMatrix()
                 val rotationMatrix = GLMatrix(makeRotationAxis(emptyMatrix.floatArray,
                         0, theta, x,y,z, normals[i].toFloatArray()))
-                normals.add(rotationMatrix.mult(normals[i]))
+                val normal4D = GLVector(normals[i].x(), normals[i].y(), normals[i].z(), 0f)
+                val rot = rotationMatrix.mult(normal4D)
+                normals.add(GLVector(rot.x(), rot.y(), rot.z()))
             }
             binormals.add(tangents[i+1].cross(normals[i+1]))
         }
