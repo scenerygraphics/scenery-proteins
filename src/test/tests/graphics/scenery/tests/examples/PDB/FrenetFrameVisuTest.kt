@@ -9,7 +9,7 @@ import graphics.scenery.proteins.CurveGeometry
 import graphics.scenery.proteins.SecondaryStructure
 import org.junit.Test
 
-class CatmullVisuTest: SceneryBase("Catmull Visualization Test", windowWidth = 1280, windowHeight = 720) {
+class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth = 1280, windowHeight = 720) {
 
     override fun init() {
 
@@ -40,20 +40,22 @@ class CatmullVisuTest: SceneryBase("Catmull Visualization Test", windowWidth = 1
         s.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
         for(i in 0 until catmulChain.size) {
-            val arrow1 = Arrow(frenet.first[i])
-            val arrow2 = Arrow(frenet.second[i])
-            val arrow3 = Arrow(frenet.third[i])
+            val arrow1 = Arrow(frenet[i].tangent)
+            val arrow2 = frenet[i].normal?.let { Arrow(it) }
+            val arrow3 = frenet[i].bitangent?.let { Arrow(it) }
             val p = catmulChain[i]
             val e = 0.005f
-            arrow1.position = p
-            arrow2.position = p
-            arrow3.position = p
-            arrow1.edgeWidth = e
-            arrow2.edgeWidth = e
-            arrow3.edgeWidth = e
-            scene.addChild(arrow1)
-            scene.addChild(arrow2)
-            scene.addChild(arrow3)
+            if( arrow2 != null && arrow3 != null) {
+                arrow1.position = p
+                arrow2.position = p
+                arrow3.position = p
+                arrow1.edgeWidth = e
+                arrow2.edgeWidth = e
+                arrow3.edgeWidth = e
+                scene.addChild(arrow1)
+                scene.addChild(arrow2)
+                scene.addChild(arrow3)
+            }
         }
 
 
