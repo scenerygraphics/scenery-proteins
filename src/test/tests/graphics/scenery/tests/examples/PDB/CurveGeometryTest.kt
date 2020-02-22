@@ -31,9 +31,9 @@ class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, wi
         val geo = CurveGeometry(catmullRom, 2)
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
-            list.add(GLVector(1f, 1f, 0f))
-            list.add(GLVector(1f, -1f, 0f))
-            list.add(GLVector(-1f, -1f, 0f))
+            list.add(GLVector(0f, 0.1f, 0.1f))
+            list.add(GLVector(0f, -0.1f, 0.1f))
+            list.add(GLVector(0f, -0.1f, -0.1f))
             return list
         }
         geo.drawSpline { triangle() }
