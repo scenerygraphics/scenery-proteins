@@ -29,7 +29,7 @@ class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", wind
         points.add(GLVector(12f, 8f, -1f))
 
         val catmullRom = CatmullRomSpline(points)
-        val geo = CurveGeometry(catmullRom, 100)
+        val geo = CurveGeometry(catmullRom, 10)
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
             list.add(GLVector(0.1f, 0.1f, 0f))
@@ -43,6 +43,10 @@ class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", wind
         s.instancedProperties["ModelMatrix"] =  { s.model }
         s.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
+        val c = Cylinder(0.025f, 1.0f, 10)
+        c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
+        c.instancedProperties["ModelMatrix1"] = { c.model }
+        c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
         val spheres = geo.drawSpline{ triangle() }.flatMap {
             it.map {
@@ -56,6 +60,7 @@ class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", wind
         s.instances.addAll(spheres)
 
         curve.addChild(s)
+
 
         scene.addChild(curve)
 

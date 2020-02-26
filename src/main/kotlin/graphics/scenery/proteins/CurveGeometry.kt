@@ -15,7 +15,7 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     override val texcoordSize = 2
     override var geometryType = GeometryType.TRIANGLES
 
-    override var vertices: FloatBuffer = BufferUtils.allocateFloat(curve.CatMulRomChain(n).size*9*2*3)
+    override var vertices: FloatBuffer = BufferUtils.allocateFloat(0)
     override var normals: FloatBuffer = BufferUtils.allocateFloat(0)
     override var texcoords: FloatBuffer = BufferUtils.allocateFloat(0)
     override var indices: IntBuffer = BufferUtils.allocateInt(0)
@@ -63,48 +63,39 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
             }
             curveGeometry.add(shape)
         }
-        print(curveGeometry)
 
         val verticesVectors = ArrayList<GLVector>()
-        for (j in 0 until curveGeometry.size-1) {
-            for(i in 0 until curveGeometry[j].size) {
-                if(i != curveGeometry[j].size -1) {
 
-                    vertices.put(curveGeometry[j][i].x())
-                    vertices.put(curveGeometry[j][i].y())
-                    vertices.put(curveGeometry[j][i].z())
-                    verticesVectors.add(curveGeometry[j][i])
+        curveGeometry.forEachIndexed { shapeIndex, shape ->
+            if (shapeIndex < curveGeometry.lastIndex) {
+                shape.forEachIndexed { vertexIndex, vertex ->
+                    if(vertexIndex < shape.lastIndex) {
+                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
+                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
 
-                    vertices.put(curveGeometry[j][i+1].x())
-                    vertices.put(curveGeometry[j][i+1].y())
-                    vertices.put(curveGeometry[j][i+1].z())
-                    verticesVectors.add(curveGeometry[j][i+1])
+                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                    }
+                    if(vertexIndex == shape.lastIndex) {
+                        verticesVectors.add(curveGeometry[shapeIndex][0])
+                        verticesVectors.add(curveGeometry[shapeIndex+1][0])
+                        verticesVectors.add(curveGeometry[shapeIndex+1][shape.lastIndex])
 
-                    vertices.put(curveGeometry[j+1][i].x())
-                    vertices.put(curveGeometry[j+1][i].y())
-                    vertices.put(curveGeometry[j+1][i].z())
-                    verticesVectors.add(curveGeometry[j+1][i])
-
-                    /*
-                    vertices.put(curveGeometry[j][i+1].x())
-                    vertices.put(curveGeometry[j][i+1].y())
-                    vertices.put(curveGeometry[j][i+1].z())
-                    verticesVectors.add(curveGeometry[j][i+1])
-
-                    vertices.put(curveGeometry[j+1][i+1].x())
-                    vertices.put(curveGeometry[j+1][i+1].y())
-                    vertices.put(curveGeometry[j+1][i+1].z())
-                    verticesVectors.add(curveGeometry[j+1][i+1])
-
-                    vertices.put(curveGeometry[j+1][i].x())
-                    vertices.put(curveGeometry[j+1][i].y())
-                    vertices.put(curveGeometry[j+1][i].z())
-                    verticesVectors.add(curveGeometry[j+1][i])
-                    */
+                        verticesVectors.add(curveGeometry[shapeIndex+1][shape.lastIndex])
+                        verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
+                        verticesVectors.add(curveGeometry[shapeIndex][0])
+                    }
                 }
             }
         }
+        vertices = BufferUtils.allocateFloat(verticesVectors.size*3)
+        verticesVectors.forEach{
+            vertices.put(it.xyz().toFloatArray())
+        }
         vertices.flip()
+        texcoords = BufferUtils.allocateFloat(verticesVectors.size*2)
         recalculateNormals()
         return curveGeometry
     }
