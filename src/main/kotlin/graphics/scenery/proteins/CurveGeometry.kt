@@ -22,23 +22,23 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
 
     private val cur = curve.CatMulRomChain(n)
 
-    fun drawSpline(baseShape: (() -> List<GLVector>)) {
+    fun drawSpline(baseShape: (() -> List<GLVector>)): ArrayList<ArrayList<GLVector>> {
         data class TranslationMatrix(val matrix: GLMatrix, val translation: GLVector)
         val bases = ArrayList<TranslationMatrix>()
         computeFrenetFrames().forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
                 val basisArray = ArrayList<Float>()
-                basisArray.add(t.x())
                 basisArray.add(n.x())
                 basisArray.add(b.x())
+                basisArray.add(t.x())
                 basisArray.add(0f)
-                basisArray.add(t.y())
                 basisArray.add(n.y())
                 basisArray.add(b.y())
+                basisArray.add(t.y())
                 basisArray.add(0f)
-                basisArray.add(t.z())
                 basisArray.add(n.z())
                 basisArray.add(b.z())
+                basisArray.add(t.z())
                 basisArray.add(0f)
                 basisArray.add(0f)
                 basisArray.add(0f)
@@ -63,7 +63,9 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
             }
             curveGeometry.add(shape)
         }
+        print(curveGeometry)
 
+        val verticesVectors = ArrayList<GLVector>()
         for (j in 0 until curveGeometry.size-1) {
             for(i in 0 until curveGeometry[j].size) {
                 if(i != curveGeometry[j].size -1) {
@@ -71,33 +73,40 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                     vertices.put(curveGeometry[j][i].x())
                     vertices.put(curveGeometry[j][i].y())
                     vertices.put(curveGeometry[j][i].z())
+                    verticesVectors.add(curveGeometry[j][i])
 
+                    vertices.put(curveGeometry[j][i+1].x())
+                    vertices.put(curveGeometry[j][i+1].y())
+                    vertices.put(curveGeometry[j][i+1].z())
+                    verticesVectors.add(curveGeometry[j][i+1])
 
                     vertices.put(curveGeometry[j+1][i].x())
                     vertices.put(curveGeometry[j+1][i].y())
                     vertices.put(curveGeometry[j+1][i].z())
+                    verticesVectors.add(curveGeometry[j+1][i])
 
+                    /*
                     vertices.put(curveGeometry[j][i+1].x())
                     vertices.put(curveGeometry[j][i+1].y())
                     vertices.put(curveGeometry[j][i+1].z())
-
-                    vertices.put(curveGeometry[j][i+1].x())
-                    vertices.put(curveGeometry[j][i+1].y())
-                    vertices.put(curveGeometry[j][i+1].z())
+                    verticesVectors.add(curveGeometry[j][i+1])
 
                     vertices.put(curveGeometry[j+1][i+1].x())
                     vertices.put(curveGeometry[j+1][i+1].y())
                     vertices.put(curveGeometry[j+1][i+1].z())
+                    verticesVectors.add(curveGeometry[j+1][i+1])
 
                     vertices.put(curveGeometry[j+1][i].x())
                     vertices.put(curveGeometry[j+1][i].y())
                     vertices.put(curveGeometry[j+1][i].z())
-
+                    verticesVectors.add(curveGeometry[j+1][i])
+                    */
                 }
             }
         }
         vertices.flip()
         recalculateNormals()
+        return curveGeometry
     }
 
     fun getTangent(i: Int): GLVector {

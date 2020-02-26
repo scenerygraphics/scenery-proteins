@@ -9,7 +9,7 @@ import graphics.scenery.proteins.CurveGeometry
 import graphics.scenery.proteins.SecondaryStructure
 import org.junit.Test
 
-class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, windowHeight = 720) {
+class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", windowWidth = 1280, windowHeight = 720) {
 
     override fun init() {
 
@@ -17,6 +17,7 @@ class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, wi
 
         val rowSize = 10f
 
+        val curve = Node("curve")
         val points = ArrayList<GLVector>()
         points.add(GLVector(0f, 0f, 0f))
         points.add(GLVector(2f, 1f, 0f))
@@ -36,9 +37,27 @@ class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, wi
             list.add(GLVector(-0.1f, -0.1f, 0f))
             return list
         }
-        geo.drawSpline { triangle() }
 
-        scene.addChild(geo)
+        val s = Sphere(0.03f, 10)
+        s.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
+        s.instancedProperties["ModelMatrix"] =  { s.model }
+        s.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+
+
+        val spheres = geo.drawSpline{ triangle() }.flatMap {
+            it.map {
+                val sphere = Mesh()
+                sphere.parent = curve
+                sphere.instancedProperties["ModelMatrix"] = { sphere.model }
+                sphere.position = it
+                sphere
+            }
+        }
+        s.instances.addAll(spheres)
+
+        curve.addChild(s)
+
+        scene.addChild(curve)
 
         val lightbox = Box(GLVector(25.0f, 25.0f, 25.0f), insideNormals = true)
         lightbox.name = "Lightbox"
