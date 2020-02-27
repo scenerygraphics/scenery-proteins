@@ -28,7 +28,7 @@ class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, wi
         points.add(GLVector(12f, 8f, -1f))
 
         val catmullRom = CatmullRomSpline(points)
-        val geo = CurveGeometry(catmullRom, 100)
+        val geo = CurveGeometry(catmullRom, 4)
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
             list.add(GLVector(0.1f, 0.1f, 0f))

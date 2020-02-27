@@ -9,7 +9,12 @@ import java.nio.FloatBuffer
 import java.nio.IntBuffer
 import kotlin.math.acos
 import kotlin.math.sign
-
+/**
+ * Constructs a geometry along the calculates points of a Spline (in this case a Catmull Rom Spline).
+ * This class inherits from Node and HasGeometry
+ * The number n corresponds to the number of segments you wish to have between you control points.
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
 class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"), HasGeometry {
     override val vertexSize = 3
     override val texcoordSize = 2
@@ -22,7 +27,14 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
 
     private val cur = curve.CatMulRomChain(n)
 
-    fun drawSpline(baseShape: (() -> List<GLVector>)): ArrayList<ArrayList<GLVector>> {
+    /**
+     * This function renders the spline.
+     * @param [baseShape] It takes a lambda as a parameter, which is the shape of the
+     * curve. If you choose, for example, to have a square as a base shape, your spline will look like
+     * a banister. Please not that the base shape needs an equal number of points in each segments but it
+     * can very well vary in thickness.
+     */
+    fun drawSpline(baseShape: (() -> List<GLVector>)){
         data class TranslationMatrix(val matrix: GLMatrix, val translation: GLVector)
         val bases = ArrayList<TranslationMatrix>()
         computeFrenetFrames().forEach { (t, n, b, tr) ->
@@ -97,9 +109,12 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         vertices.flip()
         texcoords = BufferUtils.allocateFloat(verticesVectors.size*2)
         recalculateNormals()
-        return curveGeometry
     }
 
+    /**
+     * This function calculates the tangent at a given index in the catmull rom curve.
+     * @param [i] index of the curve (not the geometry!)
+     */
     fun getTangent(i: Int): GLVector {
         val s = cur.size
         return when(i) {
@@ -111,6 +126,11 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     }
 
 
+    /**
+     * This function returns the frenet frames along the curve. This is essentially a new
+     * coordinate system which represents the form of the curve. For details concerning the
+     * calculation see: http://www.cs.indiana.edu/pub/techreports/TR425.pdf
+     */
     data class FrenetFrame(val tangent: GLVector, var normal: GLVector?, var bitangent: GLVector?, val translation: GLVector)
     fun computeFrenetFrames(): List<FrenetFrame> {
 

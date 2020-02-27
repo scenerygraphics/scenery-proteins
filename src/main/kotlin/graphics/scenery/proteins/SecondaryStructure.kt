@@ -48,7 +48,7 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
             while(groups.size > 1) {
                 val groupi = groups[0]
                 groupi.atoms.forEach{
-                    if(it.name == "N") {
+                    if(it.name == "CA") {
                         val point = GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
                         points.add(point)
                     }
@@ -60,6 +60,7 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
         val spline = CatmullRomSpline(points)
 
         val catmulChain = spline.CatMulRomChain(n = 10000)
+        val geo = CurveGeometry(spline)
         /*
         val cylinders = catmulChain.map {
             val section = Mesh()

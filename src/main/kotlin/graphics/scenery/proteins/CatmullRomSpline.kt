@@ -7,11 +7,11 @@ import kotlin.math.pow
  * This class offers the logic for creating a CatmuLL Rom Spline. This is essentially
  * a spline going through control points. For more information see:
  * https://en.wikipedia.org/wiki/Centripetal_Catmull–Rom_spline
- * @param atomCoordinates the list of control points
+ * @param controlPoints the list of control points
  * @param alpha determines the kind of Catmull Rom Spline, set in range of 0..1
  */
-class CatmullRomSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0.5f) {
-
+class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5f) {
+    
     /**
      * Calculates the parameter t.
      */
@@ -59,10 +59,10 @@ class CatmullRomSpline(val atomCoordinates: List<GLVector>, val alpha: Float = 0
      */
     fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
-        val j = atomCoordinates.size-4
+        val j = controlPoints.size-4
         for (i in 0..j) {
-            val c = CatmulRomSpline(atomCoordinates[i], atomCoordinates[i+1],
-                    atomCoordinates[i+2], atomCoordinates[i+3], n)
+            val c = CatmulRomSpline(controlPoints[i], controlPoints[i+1],
+                    controlPoints[i+2], controlPoints[i+3], n)
             chainPoints.addAll(c)
         }
         return chainPoints
