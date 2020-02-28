@@ -17,52 +17,33 @@ class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", wind
 
         val rowSize = 10f
 
-        val curve = Node("curve")
         val points = ArrayList<GLVector>()
+        points.add(GLVector(-8f, -9f, -9f))
+        points.add(GLVector(-7f, -5f, -7f))
+        points.add(GLVector(-5f, -5f, -5f))
+        points.add(GLVector(-4f, -2f, -3f))
+        points.add(GLVector(-2f, -3f, -4f))
+        points.add(GLVector(-1f, -1f, -1f))
         points.add(GLVector(0f, 0f, 0f))
         points.add(GLVector(2f, 1f, 0f))
-        points.add(GLVector(1f, 3f, 5f))
-        points.add(GLVector(5f, 5f, 1f))
-        points.add(GLVector(5f, 10f, 1f))
-        points.add(GLVector(7f, 11f, 5f))
-        points.add(GLVector(9f, 7f, 3f))
-        points.add(GLVector(12f, 8f, -1f))
+
+
 
         val catmullRom = CatmullRomSpline(points)
-        val geo = CurveGeometry(catmullRom, 10)
+        val geo = CurveGeometry(catmullRom, 200)
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
-            list.add(GLVector(0.1f, 0.1f, 0f))
-            list.add(GLVector(0.1f, -0.1f, 0f))
-            list.add(GLVector(-0.1f, -0.1f, 0f))
+            list.add(GLVector(0.3f, 0.3f, 0f))
+            list.add(GLVector(0.3f, -0.3f, 0f))
+            list.add(GLVector(-0.3f, -0.3f, 0f))
             return list
         }
 
-        val s = Sphere(0.03f, 10)
-        s.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
-        s.instancedProperties["ModelMatrix"] =  { s.model }
-        s.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
 
-        val c = Cylinder(0.025f, 1.0f, 10)
-        c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
-        c.instancedProperties["ModelMatrix1"] = { c.model }
-        c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
-
-        val spheres = geo.drawSpline{ triangle() }.flatMap {
-            it.map {
-                val sphere = Mesh()
-                sphere.parent = curve
-                sphere.instancedProperties["ModelMatrix"] = { sphere.model }
-                sphere.position = it
-                sphere
-            }
-        }
-        s.instances.addAll(spheres)
-
-        curve.addChild(s)
+        geo.drawSpline { triangle() }
 
 
-        scene.addChild(curve)
+        scene.addChild(geo)
 
         val lightbox = Box(GLVector(25.0f, 25.0f, 25.0f), insideNormals = true)
         lightbox.name = "Lightbox"
@@ -99,13 +80,14 @@ class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", wind
         val cam: Camera = DetachedHeadCamera()
         with(cam) {
             position = GLVector(0.0f, 0.2f, 12.0f)
-            perspectiveCamera(50.0f, windowWidth.toFloat(), windowHeight.toFloat())
+            perspectiveCamera(25.0f, windowWidth.toFloat(), windowHeight.toFloat())
             active = true
 
             scene.addChild(this)
         }
 
         cam.addChild(cameraLight)
+
     }
 
     override fun inputSetup() {
