@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoAcidBonds.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Protein.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,6 +129,8 @@
       <workItem from="1579457208629" duration="435000" />
       <workItem from="1579463202382" duration="855000" />
       <workItem from="1579603404252" duration="2302000" />
+      <workItem from="1583502252333" duration="80000" />
+      <workItem from="1583502356386" duration="441000" />
     </task>
     <servers />
   </component>
@@ -138,6 +138,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="321" y="69" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1583502284928">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="321" y="69" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1280.680@0.0.1280.680" timestamp="1583502284928" />
     <state x="421" y="97" key="FileChooserDialogImpl" timestamp="1579172907004">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
@@ -174,34 +178,13 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state width="1237" height="195" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1579457653006" />
-    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1579603406731">
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog" timestamp="1583502356770">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1579603406731" />
+    <state x="337" y="166" key="com.intellij.ide.util.TipDialog/0.0.1280.680@0.0.1280.680" timestamp="1583502356770" />
     <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1579088312468">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="303" y="1" width="672" height="678" key="search.everywhere.popup/0.0.1280.680@0.0.1280.680" timestamp="1579088312468" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt</url>
-          <line>487</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt</url>
-          <line>1070</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/AminoList.kt</url>
-          <line>1158</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

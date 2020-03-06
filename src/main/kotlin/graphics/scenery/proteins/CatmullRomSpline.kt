@@ -8,14 +8,16 @@ import kotlin.math.pow
  * a spline going through control points. For more information see:
  * https://en.wikipedia.org/wiki/Centripetal_Catmull–Rom_spline
  * @param controlPoints the list of control points
- * @param alpha determines the kind of Catmull Rom Spline, set in range of 0..1
+ * @param alpha determines the kind of Catmull Rom Spline, set in range of 0..1, the
+ * resulting curve for alpha = 0 is a standart Catmull Rom Spline, for alpha = 1 we get
+ * a chordal Catmull Rom Spline.
  */
 class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5f) {
     
     /**
-     * Calculates the parameter t.
+     * Calculates the parameter t; t is an intermediate product for the calculation of the spline
      */
-    fun getT(ti: Float, Pi: GLVector, Pj: GLVector): Float {
+    private fun getT(ti: Float, Pi: GLVector, Pj: GLVector): Float {
         val exp: Float = (alpha*0.5).toFloat()
         return(((Pj.x()-Pi.x()).pow(2) + (Pj.y()-Pi.y()).pow(2)
                 + (Pj.z()-Pi.z()).pow(2)).pow(exp) + ti)
@@ -24,22 +26,22 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
     /**
      * this function returns the spline points between two points. Please note you need four points
      * to have a smooth curve.
-     * @param n number of points defining the spline
+     * @param n number of points between the segments
      */
-    fun CatmulRomSpline(P0: GLVector, P1: GLVector, P2: GLVector, P3: GLVector, n: Int = 100): List<GLVector> {
+    private fun CatmulRomSpline(p0: GLVector, p1: GLVector, p2: GLVector, p3: GLVector, n: Int = 100): List<GLVector> {
 
-        val curvePoints = ArrayList<GLVector>()
+        val curvePoints = ArrayList<GLVector>(controlPoints.size*n)
 
         val t0 = 0.toFloat()
-        val t1 = getT(t0, P0, P1)
-        val t2 = getT(t1, P1, P2)
-        val t3 = getT(t2, P2, P3)
+        val t1 = getT(t0, p0, p1)
+        val t2 = getT(t1, p1, p2)
+        val t3 = getT(t2, p2, p3)
 
         var t = t1
         while(t<t2) {
-            val A1 = P0.times((t1-t)/(t1-t0)) + P1.times((t-t0)/(t1-t0));
-            val A2 = P1.times((t2-t)/(t2-t1)) + P2.times((t-t1)/(t2-t1));
-            val A3 = P2.times((t3-t)/(t3-t2)) + P3.times((t-t2)/(t3-t2));
+            val A1 = p0.times((t1-t)/(t1-t0)) + p1.times((t-t0)/(t1-t0));
+            val A2 = p1.times((t2-t)/(t2-t1)) + p2.times((t-t1)/(t2-t1));
+            val A3 = p2.times((t3-t)/(t3-t2)) + p3.times((t-t2)/(t3-t2));
 
             val B1 = A1.times((t2-t)/(t2-t0)) + A2.times((t-t0)/(t2-t0));
             val B2 = A2.times((t3-t)/(t3-t1)) + A3.times((t-t1)/(t3-t1));
@@ -60,7 +62,7 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
     fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
         val j = controlPoints.size-4
-        for (i in 0..j) {
+        for (i in controlPoints.indices step 4) {
             val c = CatmulRomSpline(controlPoints[i], controlPoints[i+1],
                     controlPoints[i+2], controlPoints[i+3], n)
             chainPoints.addAll(c)
