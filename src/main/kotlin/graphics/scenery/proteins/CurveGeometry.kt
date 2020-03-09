@@ -33,7 +33,8 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      * can very well vary in thickness.
      */
     fun drawSpline(baseShape: (() -> List<GLVector>)) {
-        val bases = ArrayList<GLMatrix>()
+        data class TranslationMatrix(val matrix: GLMatrix, val translation: GLVector)
+        val bases = ArrayList<TranslationMatrix>()
         computeFrenetFrames().forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
                 val basisArray = ArrayList<Float>()
@@ -54,23 +55,20 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                 basisArray.add(0f)
                 basisArray.add(1f)
                 val array = basisArray.toFloatArray()
-                val invertedMatrix = GLMatrix(array)
-                val matrix = invertedMatrix.inverse
-                matrix[0, 3] = tr.x()
-                matrix[1, 3] = tr.y()
-                matrix[2, 3] = tr.z()
-                print(matrix)
-                bases.add(matrix)
+                val matrix = GLMatrix(array)
+                val translationMatrix = TranslationMatrix(matrix, tr)
+                bases.add(translationMatrix)
             }
         }
 
         val curveGeometry = ArrayList<ArrayList<GLVector>>()
-        bases.forEach { it ->
-            val basis = it
+        bases.forEach { (m,t) ->
+            val basis = m.inverse
             val shape = ArrayList<GLVector>()
             baseShape.invoke().forEach {
                 val vector4D = GLVector(it.x(), it.y(), it.z(), 1f)
-                val vertex = basis.mult(vector4D)
+                val vector = basis.mult(vector4D)
+                val vertex = GLVector(vector.x()+t.x(), vector.y()+t.y(), vector.z()+t.z())
                 shape.add(vertex)
             }
             curveGeometry.add(shape)
@@ -79,26 +77,23 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         val verticesVectors = ArrayList<GLVector>()
 
         curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
-            shape.forEachIndexed { vertexIndex, _ ->
-                if(vertexIndex < shape.lastIndex) {
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+            shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
 
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
-                }
-                if(vertexIndex == shape.lastIndex) {
-                    verticesVectors.add(curveGeometry[shapeIndex][0])
-                    verticesVectors.add(curveGeometry[shapeIndex+1][0])
-                    verticesVectors.add(curveGeometry[shapeIndex+1][shape.lastIndex])
+                verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
+                verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
 
-                    verticesVectors.add(curveGeometry[shapeIndex+1][shape.lastIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][0])
-                }
+                verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
             }
+            verticesVectors.add(curveGeometry[shapeIndex][0])
+            verticesVectors.add(curveGeometry[shapeIndex + 1][0])
+            verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+
+            verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+            verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
+            verticesVectors.add(curveGeometry[shapeIndex][0])
         }
         vertices = BufferUtils.allocateFloat(verticesVectors.size*3)
         verticesVectors.forEach{
