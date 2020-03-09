@@ -62,9 +62,9 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
     fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
         val j = controlPoints.size-4
-        for (i in controlPoints.indices step 4) {
-            val c = CatmulRomSpline(controlPoints[i], controlPoints[i+1],
-                    controlPoints[i+2], controlPoints[i+3], n)
+        controlPoints.dropLast(3).forEachIndexed {  index, _ ->
+            val c = CatmulRomSpline(controlPoints[index], controlPoints[index+1],
+                    controlPoints[index+2], controlPoints[index+3], n)
             chainPoints.addAll(c)
         }
         return chainPoints

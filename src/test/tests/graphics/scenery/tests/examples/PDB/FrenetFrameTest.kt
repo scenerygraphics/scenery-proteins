@@ -21,6 +21,5 @@ class FrenetFrameTest {
 
         val catmullRom = CatmullRomSpline(points)
         val curve = CurveGeometry(catmullRom, 4)
-        print(curve.computeFrenetFrames())
     }
 }
