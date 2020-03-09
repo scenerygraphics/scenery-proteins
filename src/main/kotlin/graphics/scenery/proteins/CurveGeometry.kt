@@ -118,7 +118,9 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         }
     }
 
-    //data class to store Frenet Frames (wandering coordinate systems)
+    /**
+     * data class to store Frenet Frames (wandering coordinate systems)
+     */
     data class FrenetFrame(val tangent: GLVector, var normal: GLVector?, var bitangent: GLVector?, val translation: GLVector)
     /**
      * This function returns the frenet frames along the curve. This is essentially a new

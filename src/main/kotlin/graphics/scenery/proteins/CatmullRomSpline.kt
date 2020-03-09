@@ -7,8 +7,8 @@ import kotlin.math.pow
  * This class offers the logic for creating a CatmuLL Rom Spline. This is essentially
  * a spline going through control points. For more information see:
  * https://en.wikipedia.org/wiki/Centripetal_Catmull–Rom_spline
- * @param controlPoints the list of control points
- * @param alpha determines the kind of Catmull Rom Spline, set in range of 0..1, the
+ * [controlPoints] the list of control points
+ * [alpha] determines the kind of Catmull Rom Spline, set in range of 0..1, the
  * resulting curve for alpha = 0 is a standart Catmull Rom Spline, for alpha = 1 we get
  * a chordal Catmull Rom Spline.
  */
@@ -23,10 +23,10 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
                 + (Pj.z()-Pi.z()).pow(2)).pow(exp) + ti)
     }
 
-    /**
+    /*
      * this function returns the spline points between two points. Please note you need four points
      * to have a smooth curve.
-     * @param n number of points between the segments
+     * [n] is the number of points between the segments
      */
     private fun CatmulRomSpline(p0: GLVector, p1: GLVector, p2: GLVector, p3: GLVector, n: Int = 100): List<GLVector> {
 
@@ -57,7 +57,7 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
 
     /**
      * Returns the actual curve with all the points.
-     * @param n number of points the curve has
+     * [n] number of points the curve has
      */
     fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()

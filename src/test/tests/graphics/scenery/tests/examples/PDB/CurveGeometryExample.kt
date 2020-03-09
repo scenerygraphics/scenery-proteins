@@ -9,6 +9,11 @@ import graphics.scenery.proteins.CurveGeometry
 import graphics.scenery.proteins.SecondaryStructure
 import org.junit.Test
 
+/**
+ * Just a quick example of the curve with a triangle as a baseShape.
+ *
+ * @author Justin Bürger
+ */
 class CurveGeometryBaseShapeTest: SceneryBase("CurveGeometryBaseShapeTest", windowWidth = 1280, windowHeight = 720) {
 
     override fun init() {
