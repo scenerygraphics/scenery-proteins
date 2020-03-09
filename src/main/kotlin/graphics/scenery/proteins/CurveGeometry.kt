@@ -4,6 +4,7 @@ import cleargl.GLMatrix
 import cleargl.GLVector
 import com.jogamp.opengl.math.FloatUtil.makeRotationAxis
 import graphics.scenery.*
+import java.lang.IllegalStateException
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 import kotlin.math.acos
@@ -23,7 +24,7 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     override var texcoords: FloatBuffer = BufferUtils.allocateFloat(0)
     override var indices: IntBuffer = BufferUtils.allocateInt(0)
 
-    private val cur = curve.CatMulRomChain(n)
+    private val curve = curve.CatMulRomChain(n)
 
     /**
      * This function renders the spline.
@@ -34,20 +35,20 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      */
     fun drawSpline(baseShape: (() -> List<GLVector>)) {
         val bases = ArrayList<GLMatrix>()
-        computeFrenetFrames().forEach { (t, n, b, tr) ->
+        computeFrenetFrames(curve).forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
-                val basisArray = ArrayList<Float>()
-                basisArray.add(n.x())
-                basisArray.add(b.x())
-                basisArray.add(t.x())
+                val basisArray = ArrayList<Float>(16)
+                basisArray.add(n.normalized.x())
+                basisArray.add(b.normalized.x())
+                basisArray.add(t.normalized.x())
                 basisArray.add(0f)
-                basisArray.add(n.y())
-                basisArray.add(b.y())
-                basisArray.add(t.y())
+                basisArray.add(n.normalized.y())
+                basisArray.add(b.normalized.y())
+                basisArray.add(t.normalized.y())
                 basisArray.add(0f)
-                basisArray.add(n.z())
-                basisArray.add(b.z())
-                basisArray.add(t.z())
+                basisArray.add(n.normalized.z())
+                basisArray.add(b.normalized.z())
+                basisArray.add(t.normalized.z())
                 basisArray.add(0f)
                 basisArray.add(0f)
                 basisArray.add(0f)
@@ -60,22 +61,20 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                 matrix[3, 2] = tr.z()
                 bases.add(matrix)
             }
+            else {
+                throw IllegalStateException("Tangent and normal must not be null!")
+            }
         }
 
-        val curveGeometry = ArrayList<ArrayList<GLVector>>()
-        bases.forEach {
-            val basis = it
-            val shape = ArrayList<GLVector>()
-            baseShape.invoke().forEach {
-                val vector4D = GLVector(it.x(), it.y(), it.z(), 1f)
+        val curveGeometry = bases.map { basis ->
+            baseShape.invoke().map { v ->
+                val vector4D = GLVector(v.x(), v.y(), v.z(), 1f)
                 val vector = basis.mult(vector4D)
-                shape.add(vector.xyz())
+                vector.xyz()
             }
-            curveGeometry.add(shape)
         }
 
         val verticesVectors = ArrayList<GLVector>()
-
         curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
             shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
 
@@ -109,17 +108,17 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      * [i] index of the curve (not the geometry!)
      */
     private fun getTangent(i: Int): GLVector {
-        val s = cur.size
+        val s = curve.size
         return when(i) {
-            0 -> ((cur[i+1] - cur[i]).normalized)
-            (s-2) -> ((cur[i+1] - cur[i]).normalized)
-            (s-1) -> ((cur[i] - cur[i-1]).normalized)
-            else -> ((cur[i+1] - cur[i-1]).normalized)
+            0 -> ((curve[i+1] - curve[i]).normalized)
+            (s-2) -> ((curve[i+1] - curve[i]).normalized)
+            (s-1) -> ((curve[i] - curve[i-1]).normalized)
+            else -> ((curve[i+1] - curve[i-1]).normalized)
         }
     }
 
     /**
-     * data class to store Frenet Frames (wandering coordinate systems)
+     * Data class to store Frenet frames (wandering coordinate systems), consisting of [tangent], [normal], [bitangent]
      */
     data class FrenetFrame(val tangent: GLVector, var normal: GLVector?, var bitangent: GLVector?, val translation: GLVector)
     /**
@@ -127,57 +126,57 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      * coordinate system which represents the form of the curve. For details concerning the
      * calculation see: http://www.cs.indiana.edu/pub/techreports/TR425.pdf
      */
-    fun computeFrenetFrames(): List<FrenetFrame> {
+    fun computeFrenetFrames(curv: ArrayList<GLVector>): List<FrenetFrame> {
 
-        val frenetFrameList = ArrayList<FrenetFrame>(cur.size)
+        val frenetFrameList = ArrayList<FrenetFrame>(curv.size)
 
         //adds all the tangent vectors
-        for(i in 0 until cur.size) {
-            val frenetFrame = FrenetFrame(getTangent(i), null, null, cur[i])
+        curv.forEachIndexed { index, _ ->
+            val frenetFrame = FrenetFrame(getTangent(index), null, null, curv[index])
             frenetFrameList.add(frenetFrame)
         }
 
         //initial normal vector perpendicular to first tangent vector
-        var vec: GLVector
-        vec = if(frenetFrameList[0].tangent.x() >= 0.9f || frenetFrameList[0].tangent.z() >= 0.9f) {
+        val vec = if(frenetFrameList[0].tangent.x() >= 0.9f || frenetFrameList[0].tangent.z() >= 0.9f) {
             GLVector(0f, 1f, 0f)
         }
         else {
             GLVector(1f, 0f, 0f)
         }
 
-        val normal = frenetFrameList[0].tangent.cross(vec)
+        val normal = frenetFrameList[0].tangent.cross(vec).normalized
 
         frenetFrameList[0].normal = normal
-        frenetFrameList[0].bitangent = frenetFrameList[0].tangent.cross(normal)
+        frenetFrameList[0].bitangent = frenetFrameList[0].tangent.cross(normal).normalized
 
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
-            if (frenetFrameList[0].normal != null && frenetFrameList[0].bitangent != null) {
-                val b = firstFrame.tangent.cross(secondFrame.tangent)
+                val b = firstFrame.tangent.cross(secondFrame.tangent).normalized
                 //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
-                if (b.length2() < 0.0000001f) {
+                if (b.length2() < 0.00001f) {
                     secondFrame.normal = firstFrame.normal
                 } else {
-                    val x = firstFrame.normal?.x()
-                    val y = firstFrame.normal?.y()
-                    val z = firstFrame.normal?.z()
+                    val firstNormal = firstFrame.normal
 
                     val theta = acos(firstFrame.tangent.times(secondFrame.tangent))
                     val emptyMatrix = GLMatrix()
-                    if (x != null && y != null && z != null) {
-                        val normal = firstFrame.normal
-                        if(normal != null) {
-                            val rotationMatrix = GLMatrix(makeRotationAxis(emptyMatrix.floatArray,
-                                    0, theta, x, y, z, normal.toFloatArray()))
-                            val normal4D = GLVector(x, y, z, 0f)
+                    if (normal != null && firstNormal != null) {
+                            val rotationMatrix = GLMatrix(makeRotationAxis(
+                                    emptyMatrix.floatArray,
+                                    0,
+                                    theta,
+                                    firstNormal.x(),
+                                    firstNormal.y(),
+                                    firstNormal.z(),
+                                    normal.toFloatArray()
+                            ))
+                            val normal4D = GLVector(firstNormal.x(), firstNormal.y(), firstNormal.z(), 0f)
                             val rot = rotationMatrix.mult(normal4D)
                             val newNormal = (GLVector(rot.x(), rot.y(), rot.z()))
-                            secondFrame.normal = newNormal
-                        }
+                            secondFrame.normal = newNormal.normalized
                     }
                 }
-                secondFrame.bitangent = (secondFrame.tangent.cross(secondFrame.normal))
-            }
+                secondFrame.bitangent = secondFrame.tangent.cross(secondFrame.normal).normalized
+
         }
             return frenetFrameList
     }
