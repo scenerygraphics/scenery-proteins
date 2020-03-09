@@ -27,14 +27,13 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
 
     /**
      * This function renders the spline.
-     * @param [baseShape] It takes a lambda as a parameter, which is the shape of the
+     * [baseShape] It takes a lambda as a parameter, which is the shape of the
      * curve. If you choose, for example, to have a square as a base shape, your spline will look like
      * a banister. Please not that the base shape needs an equal number of points in each segments but it
      * can very well vary in thickness.
      */
     fun drawSpline(baseShape: (() -> List<GLVector>)) {
-        data class TranslationMatrix(val matrix: GLMatrix, val translation: GLVector)
-        val bases = ArrayList<TranslationMatrix>()
+        val bases = ArrayList<GLMatrix>()
         computeFrenetFrames().forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
                 val basisArray = ArrayList<Float>()
@@ -55,21 +54,22 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                 basisArray.add(0f)
                 basisArray.add(1f)
                 val array = basisArray.toFloatArray()
-                val matrix = GLMatrix(array)
-                val translationMatrix = TranslationMatrix(matrix, tr)
-                bases.add(translationMatrix)
+                val matrix = GLMatrix(array).inverse
+                matrix[3, 0] = tr.x()
+                matrix[3, 1] = tr.y()
+                matrix[3, 2] = tr.z()
+                bases.add(matrix)
             }
         }
 
         val curveGeometry = ArrayList<ArrayList<GLVector>>()
-        bases.forEach { (m,t) ->
-            val basis = m.inverse
+        bases.forEach {
+            val basis = it
             val shape = ArrayList<GLVector>()
             baseShape.invoke().forEach {
                 val vector4D = GLVector(it.x(), it.y(), it.z(), 1f)
                 val vector = basis.mult(vector4D)
-                val vertex = GLVector(vector.x()+t.x(), vector.y()+t.y(), vector.z()+t.z())
-                shape.add(vertex)
+                shape.add(vector.xyz())
             }
             curveGeometry.add(shape)
         }
@@ -106,7 +106,7 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
 
     /**
      * This function calculates the tangent at a given index in the catmull rom curve.
-     * @param [i] index of the curve (not the geometry!)
+     * [i] index of the curve (not the geometry!)
      */
     private fun getTangent(i: Int): GLVector {
         val s = cur.size
