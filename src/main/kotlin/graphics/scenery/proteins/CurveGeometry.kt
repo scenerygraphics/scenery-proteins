@@ -37,14 +37,19 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         val bases = ArrayList<GLMatrix>()
         computeFrenetFrames(curve).forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
-                val matrix = GLMatrix(floatArrayOf(
+                val inverseMatrix = GLMatrix(floatArrayOf(
                         n.x(), b.x(), t.x(), 0f,
                         n.y(), b.y(), t.y(), 0f,
                         n.z(), b.z(), t.z(), 0f,
                         0f, 0f, 0f, 1f)).inverse
-                matrix[3, 0] = tr.x()
-                matrix[3, 1] = tr.y()
-                matrix[3, 2] = tr.z()
+                val nn = GLVector(inverseMatrix[0, 0], inverseMatrix[1, 0], inverseMatrix[2, 0]).normalized
+                val nb = GLVector(inverseMatrix[0, 1],inverseMatrix[1, 1], inverseMatrix[2, 1]).normalized
+                val nt = GLVector(inverseMatrix[0, 2], inverseMatrix[1, 2], inverseMatrix[2, 2]).normalized
+                val matrix = GLMatrix(floatArrayOf(
+                        nn.x(), nb.x(), nt.x(), 0f,
+                        nn.y(), nb.y(), nt.y(), 0f,
+                        nn.z(), nb.z(), nt.z(), 0f,
+                        tr.x(), tr.y(), tr.z(), 1f))
                 bases.add(matrix)
             }
             else {
@@ -153,19 +158,20 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                                     firstNormal.x(),
                                     firstNormal.y(),
                                     firstNormal.z(),
-                                    normal.toFloatArray()
+                                    firstNormal.toFloatArray()
                             ))
-                            val normal4D = GLVector(firstNormal.x(), firstNormal.y(), firstNormal.z(), 0f)
-                            val rot = rotationMatrix.mult(normal4D)
-                            val newNormal = (GLVector(rot.x(), rot.y(), rot.z()))
-                            secondFrame.normal = newNormal.normalized
+                            val normal4D = GLVector(firstNormal.x(), firstNormal.y(), firstNormal.z(), 1f)
+                            secondFrame.normal = rotationMatrix.mult(normal4D).xyz().normalized
+                    }
+                    else {
+                        throw IllegalStateException("Normals must not be null!")
                     }
                 }
                 secondFrame.bitangent = secondFrame.tangent.cross(secondFrame.normal).normalized
-
         }
             return frenetFrameList
     }
+
     fun getCurve(): ArrayList<GLVector> {
         return curve
     }

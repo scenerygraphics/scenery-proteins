@@ -59,7 +59,7 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
      * Returns the actual curve with all the points.
      * [n] number of points the curve has
      */
-    fun CatMulRomChain(n: Int = 100): ArrayList<GLVector> {
+    fun catMullRomChain(n: Int = 100): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
         val j = controlPoints.size-4
         controlPoints.dropLast(3).forEachIndexed {  index, _ ->
