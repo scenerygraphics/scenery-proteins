@@ -1,9 +1,12 @@
 package graphics.scenery.proteins
-
 import cleargl.GLMatrix
 import cleargl.GLVector
 import com.jogamp.opengl.math.FloatUtil.makeRotationAxis
-import graphics.scenery.*
+import graphics.scenery.BufferUtils
+import graphics.scenery.GeometryType
+import graphics.scenery.HasGeometry
+import graphics.scenery.Node
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
@@ -29,7 +32,8 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     /**
      * This function renders the spline.
      * [baseShape] It takes a lambda as a parameter, which is the shape of the
-     * curve. If you choose, for example, to have a square as a base shape, your spline will look like
+     * curve.
+     * If you choose, for example, to have a square as a base shape, your spline will look like
      * a banister. Please not that the base shape needs an equal number of points in each segments but it
      * can very well vary in thickness.
      */
@@ -66,24 +70,30 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         }
 
         val verticesVectors = ArrayList<GLVector>()
-        curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
-            shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
+        //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
+        if(curveGeometry.distinctBy{ it.size }.size == 1) {
+            curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
+                shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
 
-                verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
-                verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
+                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
 
-                verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                }
+                verticesVectors.add(curveGeometry[shapeIndex][0])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][0])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+
+                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+                verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
+                verticesVectors.add(curveGeometry[shapeIndex][0])
             }
-            verticesVectors.add(curveGeometry[shapeIndex][0])
-            verticesVectors.add(curveGeometry[shapeIndex + 1][0])
-            verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-
-            verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-            verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
-            verticesVectors.add(curveGeometry[shapeIndex][0])
+        }
+        else {
+            throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
         vertices = BufferUtils.allocateFloat(verticesVectors.size*3)
         verticesVectors.forEach{
@@ -141,37 +151,40 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         frenetFrameList[0].bitangent = frenetFrameList[0].tangent.cross(normal).normalized
 
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
-                val b = firstFrame.tangent.cross(secondFrame.tangent).normalized
-                //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
-                if (b.length2() < 0.00001f) {
-                    secondFrame.normal = firstFrame.normal
-                } else {
-                    val firstNormal = firstFrame.normal
+            val b = firstFrame.tangent.cross(secondFrame.tangent).normalized
+            //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
+            if (b.length2() < 0.00001f) {
+                secondFrame.normal = firstFrame.normal
+            } else {
+                val firstNormal = firstFrame.normal
 
-                    val theta = acos(firstFrame.tangent.times(secondFrame.tangent))
-                    val emptyMatrix = GLMatrix()
-                    if (normal != null && firstNormal != null) {
-                            val rotationMatrix = GLMatrix(makeRotationAxis(
-                                    emptyMatrix.floatArray,
-                                    0,
-                                    theta,
-                                    firstNormal.x(),
-                                    firstNormal.y(),
-                                    firstNormal.z(),
-                                    firstNormal.toFloatArray()
-                            ))
-                            val normal4D = GLVector(firstNormal.x(), firstNormal.y(), firstNormal.z(), 1f)
-                            secondFrame.normal = rotationMatrix.mult(normal4D).xyz().normalized
-                    }
-                    else {
-                        throw IllegalStateException("Normals must not be null!")
-                    }
+                val theta = acos(firstFrame.tangent.times(secondFrame.tangent))
+                val emptyMatrix = GLMatrix()
+                if (normal != null && firstNormal != null) {
+                    val rotationMatrix = GLMatrix(makeRotationAxis(
+                            emptyMatrix.floatArray,
+                            0,
+                            theta,
+                            firstNormal.x(),
+                            firstNormal.y(),
+                            firstNormal.z(),
+                            firstNormal.toFloatArray()
+                    ))
+                    val normal4D = GLVector(firstNormal.x(), firstNormal.y(), firstNormal.z(), 1f)
+                    secondFrame.normal = rotationMatrix.mult(normal4D).xyz().normalized
                 }
-                secondFrame.bitangent = secondFrame.tangent.cross(secondFrame.normal).normalized
+                else {
+                    throw IllegalStateException("Normals must not be null!")
+                }
+            }
+            secondFrame.bitangent = secondFrame.tangent.cross(secondFrame.normal).normalized
         }
-            return frenetFrameList
+        return frenetFrameList
     }
 
+    /**
+     * Getter for the curve.
+     */
     fun getCurve(): ArrayList<GLVector> {
         return curve
     }

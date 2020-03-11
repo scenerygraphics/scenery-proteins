@@ -11,7 +11,7 @@ import graphics.scenery.numerics.Random
 /**
  * This is the test class for the [CatmullRomSpline]
  *
- *
+ *@author Justin Bürger
  */
 class CatmullRomSplineTest {
     private val logger by LazyLogger()
