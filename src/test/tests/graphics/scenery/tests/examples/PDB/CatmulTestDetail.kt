@@ -30,7 +30,7 @@ class CatmulTestDetail: SceneryBase("CatmulTestDetail", windowWidth = 1280, wind
         a.add(p3)
 
         val spline = CatmullRomSpline(a)
-        val catmulChain = spline.CatMulRomChain()
+        val catmulChain = spline.catMullRomChain()
 
         val cylinders = catmulChain.map {
             val section = Mesh()

@@ -5,7 +5,7 @@ import graphics.scenery.Protein
 import graphics.scenery.proteins.CatmullRomSpline
 import org.junit.Test
 
-class CatmulTest {
+class CatmullTest {
 
     @Test
     fun main() {
@@ -22,7 +22,7 @@ class CatmulTest {
             }
         }
         val c = CatmullRomSpline(a)
-        val x = c.CatMulRomChain()
+        val x = c.catMullRomChain()
         print(x)
     }
 }
