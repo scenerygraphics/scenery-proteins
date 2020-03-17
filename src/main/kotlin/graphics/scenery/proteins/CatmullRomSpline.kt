@@ -1,6 +1,7 @@
 package graphics.scenery.proteins
 
 import cleargl.GLVector
+import graphics.scenery.numerics.Random
 import kotlin.math.pow
 
 /**
@@ -66,10 +67,24 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
      * [n] number of points the curve has
      */
     fun catMullRomChain(n: Int = 100): ArrayList<GLVector> {
-        val chainPoints = ArrayList<GLVector>()
-        controlPoints.dropLast(3).forEachIndexed {  index, _ ->
-            val c = CatmulRomSpline(controlPoints[index], controlPoints[index+1],
-                    controlPoints[index+2], controlPoints[index+3], n)
+        val chainPoints = ArrayList<GLVector>((controlPoints.size + 2)*n)
+
+        //Add two additional control points for the curve to be complete
+        val firstControlPoint = controlPoints.first()
+        val firstPoint = Random.randomVectorFromRange(3, firstControlPoint.length2()-1,
+                firstControlPoint.length2())
+        val lastControlPoint = controlPoints.last()
+        val lastPoint = Random.randomVectorFromRange(3, lastControlPoint.length2()-1,
+                lastControlPoint.length2())
+        val newControlPoints = ArrayList<GLVector>(controlPoints.size + 2)
+        newControlPoints.add(firstPoint)
+        controlPoints.forEach { newControlPoints.add(it) }
+        newControlPoints.add(lastPoint)
+
+        //Calculate the whole chain
+        newControlPoints.dropLast(3).forEachIndexed {  index, _ ->
+            val c = CatmulRomSpline(newControlPoints[index], newControlPoints[index+1],
+                    newControlPoints[index+2], newControlPoints[index+3], n)
             chainPoints.addAll(c)
         }
         return chainPoints

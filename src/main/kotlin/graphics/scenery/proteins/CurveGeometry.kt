@@ -1,4 +1,5 @@
 package graphics.scenery.proteins
+
 import cleargl.GLMatrix
 import cleargl.GLVector
 import com.jogamp.opengl.math.FloatUtil.makeRotationAxis
@@ -11,6 +12,7 @@ import java.lang.IllegalStateException
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 import kotlin.math.acos
+
 /**
  * Constructs a geometry along the calculates points of a Spline (in this case a Catmull Rom Spline).
  * This class inherits from Node and HasGeometry

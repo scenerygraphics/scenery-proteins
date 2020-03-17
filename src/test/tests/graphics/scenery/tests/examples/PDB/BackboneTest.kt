@@ -14,11 +14,11 @@ class BackBoneTest: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2zzt")
+        val protein = Protein.fromID("3nir")
 
         val back = SecondaryStructure(protein)
 
-        scene.addChild(back.backBone())
+        scene.addChild(back.ribbonDiagram())
 
         val lightbox = Box(GLVector(50.0f, 50.0f, 50.0f), insideNormals = true)
         lightbox.name = "Lightbox"
