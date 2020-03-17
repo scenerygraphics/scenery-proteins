@@ -42,12 +42,13 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
             val points = ArrayList<GLVector>(secStruc.range.length)
             val type = secStruc.type
             //The dssp is not exhaustive; therefore, we need to make sure every group is included
-            groups.forEachIndexed { index, group ->
-                val r = group.residueNumber
-                if(secStruc.range.contains(r, map)) {
-                    group.atoms.forEach{
-                        if(it.name == "CA") {
-                            points.add(GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
+            groups.forEach {group ->
+                for( i in 0 until secStruc.range.length) {
+                    if(secStruc.range.getResidue(i, map) == group.residueNumber) {
+                        group.atoms.forEach {
+                            if (it.name == "CA") {
+                                points.add(GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
+                            }
                         }
                     }
                 }
@@ -64,7 +65,7 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
     fun ribbonDiagram(): Node {
 
         val backBone = Node("BackBone")
-        val sections = dssp()
+        val sections = sections()
 
         //baseShapes
         /**
@@ -87,7 +88,7 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
         /**
          * This is the baseShape for the helices: a rectangle.
          */
-        fun helixBaseShape(): ArrayList<GLVector> {
+        fun rectangle(): ArrayList<GLVector> {
             val helix = ArrayList<GLVector>(4)
             helix.add(GLVector(0.05f, 0.5f, 0f))
             helix.add(GLVector(-0.05f, 0.5f, 0f))
@@ -96,10 +97,17 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
             return helix
         }
 
-        val spline = CatmullRomSpline(allPoints)
-        val geo = CurveGeometry(spline)
-        geo.drawSpline { octagon() }
-        backBone.addChild(geo)
+        //TODO BaseShape for beta strands
+
+        sections.forEach {(c, t) ->
+            val spline = CatmullRomSpline(c)
+            val geo = CurveGeometry(spline)
+            when {
+                t.isHelixType -> geo.drawSpline { rectangle() }
+                else -> geo.drawSpline{ octagon() }
+            }
+            backBone.addChild(geo)
+        }
 
         return backBone
     }
