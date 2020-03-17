@@ -4,7 +4,7 @@ import graphics.scenery.Protein
 import graphics.scenery.proteins.BackBoneSticks
 import org.junit.Test
 
-class SecondaryStructureDataStructureTest {
+class RibbonDiagramTest {
 
     @Test
     fun main() {

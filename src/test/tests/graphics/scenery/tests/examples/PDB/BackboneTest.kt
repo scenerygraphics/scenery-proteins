@@ -4,7 +4,7 @@ import cleargl.GLVector
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.SecondaryStructure
+import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
 class BackBoneTest: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight = 720) {
@@ -14,9 +14,9 @@ class BackBoneTest: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("3nir")
+        val protein = Protein.fromID("2zzm")
 
-        val back = SecondaryStructure(protein)
+        val back = RibbonDiagram(protein)
 
         scene.addChild(back.ribbonDiagram())
 

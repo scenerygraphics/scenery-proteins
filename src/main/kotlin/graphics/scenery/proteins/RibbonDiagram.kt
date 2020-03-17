@@ -5,9 +5,9 @@ import graphics.scenery.*
 import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.Chain
 import org.biojava.nbio.structure.secstruc.*
-import java.lang.Math.sqrt
+import org.lwjgl.opengl.GL
 
-class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
+class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
 
     private val struc = protein.structure
     private val chains: MutableList<Chain> = struc.chains
@@ -89,21 +89,30 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
          * This is the baseShape for the helices: a rectangle.
          */
         fun rectangle(): ArrayList<GLVector> {
-            val helix = ArrayList<GLVector>(4)
-            helix.add(GLVector(0.05f, 0.5f, 0f))
-            helix.add(GLVector(-0.05f, 0.5f, 0f))
-            helix.add(GLVector(-0.05f, -0.5f, 0f))
-            helix.add(GLVector(0.05f, -0.5f, 0f))
-            return helix
+            val rectangle = ArrayList<GLVector>(4)
+            rectangle.add(GLVector(0.5f, 0.05f, 0f))
+            rectangle.add(GLVector(-0.5f, 0.05f, 0f))
+            rectangle.add(GLVector(-0.5f, -0.05f, 0f))
+            rectangle.add(GLVector(0.5f, -0.05f, 0f))
+            return rectangle
         }
 
         //TODO BaseShape for beta strands
+        fun arrow(): ArrayList<GLVector> {
+            val arrow = ArrayList<GLVector>(4)
+            arrow.add(GLVector(0.05f, 0.5f, 0f))
+            arrow.add(GLVector(-0.05f, 0.5f, 0f))
+            arrow.add(GLVector(-0.05f, -0.5f, 0f))
+            arrow.add(GLVector(0.05f, -0.5f, 0f))
+            return arrow
+        }
 
         sections.forEach {(c, t) ->
             val spline = CatmullRomSpline(c)
             val geo = CurveGeometry(spline)
             when {
                 t.isHelixType -> geo.drawSpline { rectangle() }
+                t.isBetaStrand -> geo.drawSpline { arrow() }
                 else -> geo.drawSpline{ octagon() }
             }
             backBone.addChild(geo)

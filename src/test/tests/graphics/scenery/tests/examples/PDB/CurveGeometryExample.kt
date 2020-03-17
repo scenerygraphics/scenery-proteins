@@ -6,7 +6,6 @@ import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.CatmullRomSpline
 import graphics.scenery.proteins.CurveGeometry
-import graphics.scenery.proteins.SecondaryStructure
 import org.junit.Test
 
 /**
