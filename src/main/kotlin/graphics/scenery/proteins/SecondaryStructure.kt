@@ -5,6 +5,7 @@ import graphics.scenery.*
 import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.Chain
 import org.biojava.nbio.structure.secstruc.*
+import java.lang.Math.sqrt
 
 class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
 
@@ -25,11 +26,23 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
         val secStrucs = dssp()
         //This map is a necessary parameter for the range calculation
         val map = AtomPositionMap(struc)
-        val sections = ArrayList<Section>(secStrucs.size)
+        val sections = ArrayList<Section>(secStrucs.size + groups.size)
+
+        //first we add the whole backBone
+        val allPoints = ArrayList<GLVector>(groups.size)
+        groups.flatMap { it.atoms }.forEach {
+            if(it.name == "CA") {
+                allPoints.add(GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
+            }
+        }
+        sections.add(Section(allPoints, SecStrucType.coil))
+
+        //Then we add the secondary structures from the dssp
         secStrucs.forEach { secStruc ->
             val points = ArrayList<GLVector>(secStruc.range.length)
             val type = secStruc.type
-            groups.forEach { group ->
+            //The dssp is not exhaustive; therefore, we need to make sure every group is included
+            groups.forEachIndexed { index, group ->
                 val r = group.residueNumber
                 if(secStruc.range.contains(r, map)) {
                     group.atoms.forEach{
@@ -43,6 +56,7 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
         }
         return sections
     }
+
     /*
     TODO this function should draw a curve along the backbone wth a different baseShape for basic
     TODO backbone, alpha helix, and beta sheet.
@@ -50,30 +64,15 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
     fun ribbonDiagram(): Node {
 
         val backBone = Node("BackBone")
-        val chains = struc.chains
-        val points = ArrayList<GLVector>()
         val sections = dssp()
 
-        /*
-        chains.forEach{
-            val groups = it.atomGroups
-            while(groups.size > 1) {
-                val groupi = groups[0]
-                groupi.atoms.forEach{
-                    if(it.name == "CA") {
-                        val point = GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
-                        points.add(point)
-                    }
-                }
-                groups.removeAt(0)
-            }
-        }
-
-        val spline = CatmullRomSpline(points)
-        val geo = CurveGeometry(spline)
+        //baseShapes
+        /**
+         * This is the baseShape for the backbone: a simple octagon.
+         */
         fun octagon(): ArrayList<GLVector> {
             val octagon = ArrayList<GLVector>(8)
-            val sin45 = sqrt(2f)/40f
+            val sin45 = kotlin.math.sqrt(2f) /40f
             octagon.add(GLVector(0.05f, 0f, 0f))
             octagon.add(GLVector(sin45, sin45, 0f))
             octagon.add(GLVector(0f, 0.05f, 0f))
@@ -85,6 +84,9 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
             return octagon
         }
 
+        /**
+         * This is the baseShape for the helices: a rectangle.
+         */
         fun helixBaseShape(): ArrayList<GLVector> {
             val helix = ArrayList<GLVector>(4)
             helix.add(GLVector(0.05f, 0.5f, 0f))
@@ -94,10 +96,11 @@ class SecondaryStructure(val protein: Protein): Mesh("SecondaryStructure") {
             return helix
         }
 
+        val spline = CatmullRomSpline(allPoints)
+        val geo = CurveGeometry(spline)
         geo.drawSpline { octagon() }
         backBone.addChild(geo)
 
         return backBone
-         */
     }
 }
