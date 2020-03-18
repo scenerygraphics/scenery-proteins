@@ -7,12 +7,20 @@ import org.biojava.nbio.structure.Chain
 import org.biojava.nbio.structure.secstruc.*
 import org.lwjgl.opengl.GL
 
+/**
+ * This class is the Mesh class for the Ribbon Diagram, so it essentially draws a spline along the backbone of
+ * a loaded protein and visualizes sheets as arrows and helices with rectangles.
+ */
 class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
 
     private val struc = protein.structure
     private val chains: MutableList<Chain> = struc.chains
     private val groups = chains.flatMap { it.atomGroups }
 
+    /**
+     * Returns the secondary structures of a protein, calculated with the dssp algorithm. For additional
+     * information about the algorithm see https://swift.cmbi.umcn.nl/gv/dssp/
+     */
     private fun dssp(): List<SecStrucElement> {
         //see: https://github.com/biojava/biojava-tutorial/blob/master/structure/secstruc.md
         val ssc = SecStrucCalc()
@@ -20,8 +28,15 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
         return SecStrucTools.getSecStrucElements(struc)
     }
 
+    /**
+     * This class stores for each section of the protein the locations of its C-Alpha atoms and its
+     * type of secondary structure
+     */
     data class Section(val controlpoints: ArrayList<GLVector>, val Type: SecStrucType)
 
+    /**
+     * This function calculates the sections of the different secondary structures of the protein.
+     */
     private fun sections(): ArrayList<Section> {
         val secStrucs = dssp()
         //This map is a necessary parameter for the range calculation
