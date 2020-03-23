@@ -6,6 +6,7 @@ import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.Chain
 import org.biojava.nbio.structure.secstruc.*
 import org.lwjgl.opengl.GL
+import kotlin.math.absoluteValue
 
 /**
  * This class is the Mesh class for the Ribbon Diagram, so it essentially draws a spline along the backbone of
@@ -14,7 +15,7 @@ import org.lwjgl.opengl.GL
 class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
 
     private val struc = protein.structure
-    private val chains: MutableList<Chain> = struc.chains
+    private val chains = struc.chains
     private val groups = chains.flatMap { it.atomGroups }
 
     /**
@@ -50,7 +51,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
                 allPoints.add(GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
             }
         }
-        sections.add(Section(allPoints, SecStrucType.coil))
+        sections.add(Section(allPoints, SecStrucType.bend))
 
         //Then we add the secondary structures from the dssp
         secStrucs.forEach { secStruc ->
@@ -122,17 +123,21 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
             return arrow
         }
 
-        sections.forEach {(c, t) ->
+        sections.forEachIndexed { index, (c, t) ->
             val spline = CatmullRomSpline(c)
             val geo = CurveGeometry(spline)
             when {
                 t.isHelixType -> geo.drawSpline { rectangle() }
                 t.isBetaStrand -> geo.drawSpline { arrow() }
-                else -> geo.drawSpline{ octagon() }
+                else -> geo.drawSpline { octagon() }
             }
             backBone.addChild(geo)
         }
 
+        val spline = CatmullRomSpline(sections[0].controlpoints)
+        val geometry = CurveGeometry(spline)
+        geometry.drawSpline { octagon() }
+        backBone.addChild(geometry)
         return backBone
     }
 }

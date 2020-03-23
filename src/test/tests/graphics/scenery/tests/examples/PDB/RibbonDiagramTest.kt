@@ -7,20 +7,20 @@ import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
-class BackBoneTest: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight = 720) {
+class RibbonDiagramTestTest: SceneryBase("RibbonDiagramTest", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2zzm")
+        val protein = Protein.fromID("2zzt")
 
         val back = RibbonDiagram(protein)
 
         scene.addChild(back.ribbonDiagram())
 
-        val lightbox = Box(GLVector(50.0f, 50.0f, 50.0f), insideNormals = true)
+        val lightbox = Box(GLVector(100.0f, 100.0f, 100.0f), insideNormals = true)
         lightbox.name = "Lightbox"
         lightbox.material.diffuse = GLVector(0.1f, 0.1f, 0.1f)
         lightbox.material.roughness = 1.0f
@@ -28,7 +28,7 @@ class BackBoneTest: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight
         lightbox.material.cullingMode = Material.CullingMode.None
         scene.addChild(lightbox)
         val lights = (0 until 8).map {
-            val l = PointLight(radius = 20.0f)
+            val l = PointLight(radius = 80.0f)
             l.position = GLVector(
                     Random.randomFromRange(-rowSize/2.0f, rowSize/2.0f),
                     Random.randomFromRange(-rowSize/2.0f, rowSize/2.0f),
