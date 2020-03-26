@@ -14,7 +14,7 @@ class RibbonDiagramTestTest: SceneryBase("RibbonDiagramTest", windowWidth = 1280
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2zzt")
+        val protein = Protein.fromID("6jmd")
 
         val back = RibbonDiagram(protein)
 

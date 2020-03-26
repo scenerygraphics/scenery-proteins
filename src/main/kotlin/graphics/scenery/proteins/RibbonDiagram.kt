@@ -59,7 +59,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
             val type = secStruc.type
             //The dssp is not exhaustive; therefore, we need to make sure every group is included
             groups.forEach {group ->
-                for( i in 0 until secStruc.range.length) {
+                for( i in 0 .. secStruc.range.length) {
                     if(secStruc.range.getResidue(i, map) == group.residueNumber) {
                         group.atoms.forEach {
                             if (it.name == "CA") {
@@ -123,7 +123,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
             return arrow
         }
 
-        sections.forEachIndexed { index, (c, t) ->
+        sections.filter{it.Type  == SecStrucType.helix4}.forEachIndexed { index, (c, t) ->
             val spline = CatmullRomSpline(c)
             val geo = CurveGeometry(spline)
             when {
@@ -133,11 +133,12 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
             }
             backBone.addChild(geo)
         }
-
+        
         val spline = CatmullRomSpline(sections[0].controlpoints)
         val geometry = CurveGeometry(spline)
         geometry.drawSpline { octagon() }
         backBone.addChild(geometry)
+
         return backBone
     }
 }
