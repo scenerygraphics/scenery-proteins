@@ -119,7 +119,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
             arrow.add(GLVector(0.05f, -0.5f, 0f))
             return arrow
         }
-
+        /*
         sections.filter{it.Type  == SecStrucType.helix4}.forEachIndexed { index, (c, t) ->
             val spline = CatmullRomSpline(c)
             val geo = Curve(spline)
@@ -135,7 +135,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
         val geometry = Curve(spline)
         geometry.drawSpline { octagon() }
         backBone.addChild(geometry)
-
+        */
         return backBone
     }
 }
