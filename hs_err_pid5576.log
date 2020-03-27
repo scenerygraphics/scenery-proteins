@@ -18,10 +18,10 @@
 
 ---------------  S U M M A R Y ------------
 
-Command Line: -ea -Djacoco-agent.destfile=C:\Users\justi\OneDrive\Dokumente\Max Planck Projekt\scenery-proteins\target/jacoco.exec -Didea.test.cyclic.buffer.size=1048576 -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\lib\idea_rt.jar=62007:C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\bin -Dfile.encoding=UTF-8 com.intellij.rt.junit.JUnitStarter -ideVersion5 -junit4 graphics.scenery.tests.examples.PDB.BackBoneTest
+Command Line: -ea -Djacoco-agent.destfile=C:\Users\justi\OneDrive\Dokumente\Max Planck Projekt\scenery-proteins\target/jacoco.exec -Didea.test.cyclic.buffer.size=1048576 -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\lib\idea_rt.jar=62007:C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\bin -Dfile.encoding=UTF-8 com.intellij.rt.junit.JUnitStarter -ideVersion5 -junit4 graphics.scenery.tests.examples.sketches.BackBoneTest
 
 Host: AMD Ryzen 3 2200U with Radeon Vega Mobile Gfx  , 4 cores, 7G,  Windows 10 , 64 bit Build 18362 (10.0.18362.329)
-Time: Wed Mar 18 13:30:22 2020 Mitteleuropäische Zeit elapsed time: 24 seconds (0d 0h 0m 24s)
+Time: Wed Mar 18 13:30:22 2020 Mitteleuropï¿½ische Zeit elapsed time: 24 seconds (0d 0h 0m 24s)
 
 ---------------  T H R E A D  ---------------
 
@@ -54,7 +54,7 @@ j  kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Lkotlin/corouti
 j  kotlinx.coroutines.BuildersKt.runBlocking$default(Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Ljava/lang/Object;+4
 j  graphics.scenery.backends.vulkan.VulkanRenderer.render()V+15
 j  graphics.scenery.SceneryBase.main()V+560
-j  graphics.scenery.tests.examples.PDB.BackBoneTest.main()V+1
+j  graphics.scenery.tests.examples.sketches.BackBoneTest.main()V+1
 v  ~StubRoutines::call_stub
 j  jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0 java.base@11.0.5
 j  jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100 java.base@11.0.5
@@ -1218,7 +1218,7 @@ symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Pr
 
 VM Arguments:
 jvm_args: -ea -Djacoco-agent.destfile=C:\Users\justi\OneDrive\Dokumente\Max Planck Projekt\scenery-proteins\target/jacoco.exec -Didea.test.cyclic.buffer.size=1048576 -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\lib\idea_rt.jar=62007:C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\bin -Dfile.encoding=UTF-8 
-java_command: com.intellij.rt.junit.JUnitStarter -ideVersion5 -junit4 graphics.scenery.tests.examples.PDB.BackBoneTest
+java_command: com.intellij.rt.junit.JUnitStarter -ideVersion5 -junit4 graphics.scenery.tests.examples.sketches.BackBoneTest
 java_class_path (initial): C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\lib\idea_rt.jar;C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\plugins\junit\lib\junit5-rt.jar;C:\Program Files\JetBrains\IntelliJ IDEA 2019.2.3\plugins\junit\lib\junit-rt.jar;C:\Users\justi\OneDrive\Dokumente\Max Planck Projekt\scenery-proteins\target\test-classes;C:\Users\justi\OneDrive\Dokumente\Max Planck Projekt\scenery-proteins\target\classes;C:\Users\justi\.m2\repository\graphics\scenery\scenery\0.7.0-beta-7\scenery-0.7.0-beta-7.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2-natives-linux-amd64.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2-natives-linux-i586.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2-natives-macosx-universal.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2-natives-windows-amd64.jar;C:\Users\justi\.m2\repository\org\jogamp\jogl\jogl-all\2.3.2\jogl-all-2.3.2.jar;C:\Users\justi\.m2\repository\org\jogamp\jogl\jogl-all\2.3.2\jogl-all-2.3.2-natives-linux-amd64.jar;C:\Users\justi\.m2\repository\org\jogamp\jogl\jogl-all\2.3.2\jogl-all-2.3.2-natives-linux-i586.jar;C:\Users\justi\.m2\repository\org\jogamp\jogl\jogl-all\2.3.2\jogl-all-2.3.2-natives-macosx-universal.jar;C:\Users\justi\.m2\repository\org\jogamp\jogl\jogl-all\2.3.2\jogl-all-2.3.2-natives-windows-amd64.jar;C:\Users\justi\.m2\repository\org\slf4j\slf4j-api\1.7.25\slf4j-api-1.7.25.jar;C:\Users\justi\.m2\repository\net\clearvolume\cleargl\2.2.6\cleargl-2.2.6.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt-main\2.3.2\gluegen-rt-main-2.3.2.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2-natives-android-aarch64.jar;C:\Users\justi\.m2\repository\org\jogamp\gluegen\gluegen-rt\2.3.2\gluegen-rt-2.3.2-natives-android-armv
 Launcher Type: SUN_STANDARD
 

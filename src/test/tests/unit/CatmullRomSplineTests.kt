@@ -16,11 +16,11 @@ class CatmullRomSplineTests {
     private val logger by LazyLogger()
 
     /**
-     * Tests if the curve object has actually the number of points defined in the class.
+     * Tests if the Catmull Rom Spline object has actually the number of points defined in the class.
      */
     @Test
     fun testLength() {
-        logger.info("This is the test for the Length of the chain.")
+        logger.info("This is the test for the length of the chain.")
         val point1 = Random.randomVectorFromRange(3, -30f, -10f)
         val point2 = Random.randomVectorFromRange(3, -9f, 20f)
         val point3 = Random.randomVectorFromRange(3, 21f, 30f)
@@ -56,7 +56,6 @@ class CatmullRomSplineTests {
         val distance = chain[i].minus(chain[i+1]).length2()
         val distanceDifferences = chain.windowed(2, 1) {
             it[0].minus(it[1]).length2().minus(distance) }.toList()
-        println(distanceDifferences)
         assertTrue { distanceDifferences.filter { it < 0.1 } == distanceDifferences }
     }
 
