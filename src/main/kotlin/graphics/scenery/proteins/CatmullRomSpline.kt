@@ -12,7 +12,7 @@ import kotlin.math.pow
  * resulting curve for alpha = 0 is a standart Catmull Rom Spline, for alpha = 1 we get
  * a chordal Catmull Rom Spline.
  */
-class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5f) {
+class CatmullRomSpline(override val controlPoints: List<GLVector>, override val n: Int = 100, val alpha: Float = 0.5f): Spline(controlPoints, n) {
 
     /**
      * Calculates the parameter t; t is an intermediate product for the calculation of the spline
@@ -66,7 +66,7 @@ class CatmullRomSpline(val controlPoints: List<GLVector>, val alpha: Float = 0.5
      * Returns the actual curve with all the points.
      * [n] number of points the curve has
      */
-    fun catMullRomChain(n: Int = 100): ArrayList<GLVector> {
+    override fun splinePoints(): ArrayList<GLVector> {
         val chainPoints = ArrayList<GLVector>()
         controlPoints.dropLast(3).forEachIndexed {  index, _ ->
             val c = CatmulRomSpline(controlPoints[index], controlPoints[index+1],

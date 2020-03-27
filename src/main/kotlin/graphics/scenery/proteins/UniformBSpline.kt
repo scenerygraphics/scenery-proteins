@@ -14,7 +14,7 @@ import cleargl.GLVector
  * calculate the curve segment by segment with four points each. The maths of uniform B-Splines are described, for
  * example, in: "Computer Graphics: Principles and Practice, Third Edition" by James D. Foley et al.
  */
-class UniformBSpline(val controlPoints: ArrayList<GLVector>, val n: Int = controlPoints.size*100) {
+class UniformBSpline(override val controlPoints: ArrayList<GLVector>, override val n: Int = controlPoints.size*100): Spline(controlPoints, n) {
 
     /**
      * This is a list of the equidistant parameters at which the curve is calculated.
@@ -38,7 +38,8 @@ class UniformBSpline(val controlPoints: ArrayList<GLVector>, val n: Int = contro
     /**
      * Returns the [n]*(numberOf([controlPoints])-3)+1 curve points the B-Spline has.
      */
-    fun bSplineCurvePoints(): ArrayList<GLVector> {
+    override fun splinePoints(): ArrayList<GLVector> {
+        calculateT()
         val curvePoints = ArrayList<GLVector>((controlPoints.size-3)*n +1)
         controlPoints.dropLast(3).forEachIndexed{ index, _ ->
             val spline = partialSpline(controlPoints[index], controlPoints[index +1],

@@ -4,8 +4,6 @@ import cleargl.GLVector
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.CatmullRomSpline
-import graphics.scenery.proteins.CurveGeometry
 import graphics.scenery.proteins.UniformBSpline
 import org.junit.Test
 
@@ -28,7 +26,7 @@ class BSplineTest: SceneryBase("BSplineTest", windowWidth = 1280, windowHeight =
         points.add(GLVector(2f, 1f, 0f))
 
         val spline = UniformBSpline(points, 10)
-        val curve = spline.bSplineCurvePoints()
+        val curve = spline.splinePoints()
 
         val node = Node("TestCatmulSpline")
 

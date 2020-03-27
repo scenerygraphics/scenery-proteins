@@ -38,7 +38,7 @@ class CatmullRomSplineTest {
         val curve = CatmullRomSpline(controlPoints)
 
         assertNotNull(curve)
-        assertTrue(curve.catMullRomChain().size == 100)
+        assertTrue(curve.splinePoints().size == 100)
     }
 
 }

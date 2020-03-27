@@ -57,7 +57,7 @@ class CurveGeometryTest {
         }
 
 
-        assertEquals(curve.catMullRomChain(), geometry.getCurve())
+        assertEquals(curve.splinePoints(), geometry.getCurve())
         assertNotNull(frenetFrames.forEach { it.normal })
         assertNotNull(frenetFrames.forEach{ it.bitangent })
         assertEquals(frenetFrames.filter { it.bitangent?.length2()!! < 1.1f && it.bitangent?.length2()!! > 0.9f },

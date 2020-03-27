@@ -29,7 +29,7 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     override var texcoords: FloatBuffer = BufferUtils.allocateFloat(0)
     override var indices: IntBuffer = BufferUtils.allocateInt(0)
 
-    private val curve = curve.catMullRomChain()
+    private val curve = curve.splinePoints()
 
     /**
      * This function renders the spline.

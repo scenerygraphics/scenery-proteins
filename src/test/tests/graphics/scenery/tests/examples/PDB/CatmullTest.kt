@@ -22,7 +22,7 @@ class CatmullTest {
             }
         }
         val c = CatmullRomSpline(a)
-        val x = c.catMullRomChain()
+        val x = c.splinePoints()
         print(x)
     }
 }

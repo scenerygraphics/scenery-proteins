@@ -28,7 +28,7 @@ class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth
         points.add(GLVector(12f, 8f, -1f))
 
         val catmullRom = CatmullRomSpline(points)
-        val catmulChain = catmullRom.catMullRomChain(n = 4)
+        val catmulChain = catmullRom.splinePoints(n = 4)
         val geo = CurveGeometry(catmullRom, 4)
         val frenet = geo.computeFrenetFrames(geo.getCurve())
 
