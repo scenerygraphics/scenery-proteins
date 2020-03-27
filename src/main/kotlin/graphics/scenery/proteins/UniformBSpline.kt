@@ -9,43 +9,58 @@ import cleargl.GLVector
  * control points, use the Catmull Rom Spline instead. However, if this is not required and you prefer a
  * smoother curve over the exact one, this is the spline to draw.
  * The control points are represented by a List of Vectors ([controlPoints]) and the number of points the
- * curve shall contain is [n], which is the hundred times the number of controlpoints by default.
+ * curve shall contain is [n], which is the hundred times the number of controlPoints by default.
+ * The following code calculates firstly equidistant parameters for the curve calculation (the t in C(t)). Then we
+ * calculate the curve segment by segment with four points each. The maths of uniform B-Splines are described, for
+ * example, in: "Computer Graphics: Principles and Practice, Third Edition" by James D. Foley et al.
  */
 class UniformBSpline(val controlPoints: ArrayList<GLVector>, val n: Int = controlPoints.size*100) {
 
-    private val array = floatArrayOf(
-            0f, 0f, 0f, 1f,
-            1f, 3f, 3f, -3f,
-            4f, 0f, -6f, 3f,
-            1f, -3f, 3f, -1f)
-    private val basisMatrix = GLMatrix(array)
+    /**
+     * This is a list of the equidistant parameters at which the curve is calculated.
+     */
+    private val tList = ArrayList<GLVector>(n+1)
 
-    private fun partialSpline(p1: GLVector, p2: GLVector, p3: GLVector, p4: GLVector, j: Int): ArrayList<GLVector> {
+    /**
+     * Computes the actual tList.
+     */
+    private fun calculateT() {
+        for(i in 0..n) {
+            val t = i/n.toFloat()
+            val tVector = GLVector((1-t)*(1-t)*(1-t)/6,
+                    (3*t*t*t - 6*t*t +4)/6,
+                    (-3*t*t*t + 3*t*t + 3*t +1)/6,
+                    t*t*t/6)
+            tList.add(tVector)
+        }
+    }
+
+    /**
+     * Returns the [n]*(numberOf([controlPoints])-3)+1 curve points the B-Spline has.
+     */
+    fun bSplineCurvePoints(): ArrayList<GLVector> {
+        val curvePoints = ArrayList<GLVector>((controlPoints.size-3)*n +1)
+        controlPoints.dropLast(3).forEachIndexed{ index, _ ->
+            val spline = partialSpline(controlPoints[index], controlPoints[index +1],
+            controlPoints[index+2], controlPoints[index+3])
+            curvePoints.addAll(spline)
+        }
+        return curvePoints
+    }
+
+    /**
+     * Calculates the partial Spline of four consecutive points.
+     */
+    private fun partialSpline(p1: GLVector, p2: GLVector, p3: GLVector, p4: GLVector): ArrayList<GLVector> {
         val pointMatrix = GLMatrix(floatArrayOf(
                 p1.x(), p2.x(), p3.x(), p4.x(),
                 p1.y(), p2.y(), p3.y(), p4.y(),
                 p1.z(), p2.z(), p3.z(), p4.z(),
-                1f, 1f, 1f, 1f))
-        pointMatrix.mult(basisMatrix)
+                0f, 0f, 0f, 0f)).transpose()
         val partialSpline = ArrayList<GLVector>(n)
-
-        for(i in 1..n) {
-            val t = i/n.toFloat()
-            val tVector = GLVector(1f, t, t*t, t*t*t)
-            partialSpline.add(pointMatrix.mult(tVector).times(1/6f).xyz())
+        tList.forEach {
+            partialSpline.add(pointMatrix.mult(it).xyz())
         }
-
         return(partialSpline)
-    }
-
-    fun bSplineCurvePoints(): ArrayList<GLVector> {
-        val curvepoints = ArrayList<GLVector>((controlPoints.size-3)*n +1)
-        controlPoints.dropLast(3).forEachIndexed{ index, _ ->
-            val spline = partialSpline(controlPoints[index], controlPoints[index +1],
-            controlPoints[index+2], controlPoints[index+3])
-            curvepoints.addAll(spline)
-        }
-        println(curvepoints)
-        return curvepoints
     }
 }

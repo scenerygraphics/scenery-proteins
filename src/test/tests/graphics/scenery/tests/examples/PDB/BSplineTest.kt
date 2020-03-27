@@ -27,10 +27,28 @@ class BSplineTest: SceneryBase("BSplineTest", windowWidth = 1280, windowHeight =
         points.add(GLVector(0f, 0f, 0f))
         points.add(GLVector(2f, 1f, 0f))
 
-        val spline = UniformBSpline(points)
+        val spline = UniformBSpline(points, 10)
         val curve = spline.bSplineCurvePoints()
 
         val node = Node("TestCatmulSpline")
+
+
+        val sphere = Icosphere(0.5f, 2)
+        sphere.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
+        sphere.instancedProperties["ModelMatrix"] = {sphere.model}
+        sphere.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+        renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
+
+        val controlpoints = points.map {
+            val section = Mesh()
+            section.parent = node
+            section.position = it
+            section.instancedProperties["ModelMatrix1"] = { section.model }
+            section
+        }
+        sphere.instances.addAll(controlpoints)
+
+        node.addChild(sphere)
 
         val c = Icosphere(0.1f, 2)
         c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
