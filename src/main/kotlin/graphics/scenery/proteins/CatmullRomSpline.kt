@@ -30,7 +30,7 @@ class CatmullRomSpline(override val controlPoints: List<GLVector>, override val 
      */
     private fun CatmulRomSpline(p0: GLVector, p1: GLVector, p2: GLVector, p3: GLVector, n: Int = 100): List<GLVector> {
 
-        val curvePoints = ArrayList<GLVector>(controlPoints.size*n)
+        val curvePoints = ArrayList<GLVector>(n+1)
 
         val t0 = 0.toFloat()
         val t1 = getT(t0, p0, p1)
@@ -67,7 +67,7 @@ class CatmullRomSpline(override val controlPoints: List<GLVector>, override val 
      * [n] number of points the curve has
      */
     override fun splinePoints(): ArrayList<GLVector> {
-        val chainPoints = ArrayList<GLVector>()
+        val chainPoints = ArrayList<GLVector>(controlPoints.size*(n+1))
         controlPoints.dropLast(3).forEachIndexed {  index, _ ->
             val c = CatmulRomSpline(controlPoints[index], controlPoints[index+1],
                     controlPoints[index+2], controlPoints[index+3], n)

@@ -13,7 +13,7 @@ import graphics.scenery.numerics.Random
  *
  *@author Justin Bürger
  */
-class CatmullRomSplineTest {
+class CatmullRomSplineTests {
     private val logger by LazyLogger()
 
     @Test

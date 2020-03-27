@@ -3,10 +3,7 @@ package graphics.scenery.proteins
 import cleargl.GLVector
 import graphics.scenery.*
 import org.biojava.nbio.structure.AtomPositionMap
-import org.biojava.nbio.structure.Chain
 import org.biojava.nbio.structure.secstruc.*
-import org.lwjgl.opengl.GL
-import kotlin.math.absoluteValue
 
 /**
  * This class is the Mesh class for the Ribbon Diagram, so it essentially draws a spline along the backbone of
@@ -125,7 +122,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
 
         sections.filter{it.Type  == SecStrucType.helix4}.forEachIndexed { index, (c, t) ->
             val spline = CatmullRomSpline(c)
-            val geo = CurveGeometry(spline)
+            val geo = Curve(spline)
             when {
                 t.isHelixType -> geo.drawSpline { rectangle() }
                 t.isBetaStrand -> geo.drawSpline { arrow() }
@@ -135,7 +132,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
         }
         
         val spline = CatmullRomSpline(sections[0].controlpoints)
-        val geometry = CurveGeometry(spline)
+        val geometry = Curve(spline)
         geometry.drawSpline { octagon() }
         backBone.addChild(geometry)
 

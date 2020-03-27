@@ -5,7 +5,7 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.CatmullRomSpline
-import graphics.scenery.proteins.CurveGeometry
+import graphics.scenery.proteins.Curve
 import org.junit.Test
 
 class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth = 1280, windowHeight = 720) {
@@ -29,7 +29,7 @@ class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth
 
         val catmullRom = CatmullRomSpline(points)
         val catmulChain = catmullRom.splinePoints(n = 4)
-        val geo = CurveGeometry(catmullRom, 4)
+        val geo = Curve(catmullRom, 4)
         val frenet = geo.computeFrenetFrames(geo.getCurve())
 
 

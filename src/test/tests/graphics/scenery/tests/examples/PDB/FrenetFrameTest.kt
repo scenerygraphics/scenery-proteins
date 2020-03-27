@@ -1,9 +1,8 @@
 package graphics.scenery.tests.examples.PDB
 
 import cleargl.GLVector
-import graphics.scenery.Protein
 import graphics.scenery.proteins.CatmullRomSpline
-import graphics.scenery.proteins.CurveGeometry
+import graphics.scenery.proteins.Curve
 import org.junit.Test
 
 class FrenetFrameTest {
@@ -20,6 +19,6 @@ class FrenetFrameTest {
         points.add(GLVector(12f, 8f, -1f))
 
         val catmullRom = CatmullRomSpline(points)
-        val curve = CurveGeometry(catmullRom, 4)
+        val curve = Curve(catmullRom, 4)
     }
 }

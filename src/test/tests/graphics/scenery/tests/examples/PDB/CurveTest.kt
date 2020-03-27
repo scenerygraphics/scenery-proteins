@@ -5,10 +5,10 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.CatmullRomSpline
-import graphics.scenery.proteins.CurveGeometry
+import graphics.scenery.proteins.Curve
 import org.junit.Test
 
-class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, windowHeight = 720) {
+class CurveTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, windowHeight = 720) {
 
     override fun init() {
 
@@ -27,7 +27,7 @@ class CurveGeometryTest: SceneryBase("CurveGeometryTest", windowWidth = 1280, wi
         points.add(GLVector(12f, 8f, -1f))
 
         val catmullRom = CatmullRomSpline(points)
-        val geo = CurveGeometry(catmullRom, 4)
+        val geo = Curve(catmullRom, 4)
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
             list.add(GLVector(0.1f, 0.1f, 0f))

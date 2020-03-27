@@ -19,7 +19,7 @@ import kotlin.math.acos
  * The number n corresponds to the number of segments you wish to have between you control points.
  * @author  Justin Buerger <burger@mpi-cbg.de>
  */
-class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"), HasGeometry {
+class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeometry"), HasGeometry {
     override val vertexSize = 3
     override val texcoordSize = 2
     override var geometryType = GeometryType.TRIANGLES
@@ -29,7 +29,7 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
     override var texcoords: FloatBuffer = BufferUtils.allocateFloat(0)
     override var indices: IntBuffer = BufferUtils.allocateInt(0)
 
-    private val curve = curve.splinePoints()
+    private val chain = curve.splinePoints()
 
     /**
      * This function renders the spline.
@@ -39,9 +39,9 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      * a banister. Please not that the base shape needs an equal number of points in each segments but it
      * can very well vary in thickness.
      */
-    fun drawSpline(baseShape: (() -> List<GLVector>)) {
+    init {
         val bases = ArrayList<GLMatrix>()
-        computeFrenetFrames(curve).forEach { (t, n, b, tr) ->
+        computeFrenetFrames(chain).forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
                 val inverseMatrix = GLMatrix(floatArrayOf(
                         n.x(), b.x(), t.x(), 0f,
@@ -87,12 +87,12 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      * [i] index of the curve (not the geometry!)
      */
     private fun getTangent(i: Int): GLVector {
-        val s = curve.size
+        val s = chain.size
         return when(i) {
-            0 -> ((curve[i+1] - curve[i]).normalized)
-            (s-2) -> ((curve[i+1] - curve[i]).normalized)
-            (s-1) -> ((curve[i] - curve[i-1]).normalized)
-            else -> ((curve[i+1] - curve[i-1]).normalized)
+            0 -> ((chain[i+1] - chain[i]).normalized)
+            (s-2) -> ((chain[i+1] - chain[i]).normalized)
+            (s-1) -> ((chain[i] - chain[i-1]).normalized)
+            else -> ((chain[i+1] - chain[i-1]).normalized)
         }
     }
 
@@ -135,8 +135,9 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
             val b = firstFrame.tangent.cross(secondFrame.tangent).normalized
             //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
-            if (b.length2() < 0.00001f) {
+            if (b.length2() < 0.0001f) {
                 secondFrame.normal = firstFrame.normal
+                secondFrame.bitangent = firstFrame.bitangent
             } else {
                 val firstNormal = firstFrame.normal
 
@@ -158,10 +159,11 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
                 else {
                     throw IllegalStateException("Normals must not be null!")
                 }
+                secondFrame.bitangent = secondFrame.tangent.cross(secondFrame.normal).normalized
             }
-            secondFrame.bitangent = secondFrame.tangent.cross(secondFrame.normal).normalized
         }
-        return frenetFrameList
+        return frenetFrameList.filterNot { it.bitangent!!.toFloatArray().all { value -> value.isNaN() } &&
+                it.normal!!.toFloatArray().all{ value -> value.isNaN()}}
     }
 
     /**
@@ -206,6 +208,6 @@ class CurveGeometry(curve: CatmullRomSpline, n: Int = 100): Node("CurveGeometry"
      * Getter for the curve.
      */
     fun getCurve(): ArrayList<GLVector> {
-        return curve
+        return chain
     }
 }
