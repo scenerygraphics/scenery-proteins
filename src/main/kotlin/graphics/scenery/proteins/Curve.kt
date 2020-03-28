@@ -40,6 +40,9 @@ class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeo
      * can very well vary in thickness.
      */
     init {
+        if(chain.isEmpty()) {
+            println("The spline provided for the Curve is empty.")
+        }
         val bases = ArrayList<GLMatrix>()
         computeFrenetFrames(chain).forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
