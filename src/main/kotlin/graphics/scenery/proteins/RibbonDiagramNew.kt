@@ -42,6 +42,18 @@ import kotlin.random.Random
  * (KING (Kinemage, Next Generation): A versatile interactive molecular and scientific visualization program,
  * by Richardson et al.)
  */
+
+//TODO Besides, this function should do it. Then you need to find out, whether there are different chains
+//TODO in a protein, well of course there are but is it possible to have more than one c aplha trace?
+//TODO Afterwards, assign each Residue a secondary Structure (ss) if there are more than three in a row and
+//TODO the offset is bigger than 0, draw the ss with a Bspline with the control points from predecessor
+//TODO of the beginning of the ss to the successor of the end of ss. This should do it and the only
+//TODO open question remains: How to elegantly draw the different geometries?
+/*
+        val allAminoAcids = chains.filter{it.isProtein}.flatMap{ chain ->
+            chain.atomGroups.filter{it.isAminoAcid && it.hasAtom("CA") }}
+        val allAminoAcidsDistinct = distinctChains(allAminoAcids)
+         */
 class RibbonDiagramNew(val protein: Protein): Mesh("RibbonDiagram") {
 
     val structure = protein.structure
@@ -49,19 +61,19 @@ class RibbonDiagramNew(val protein: Protein): Mesh("RibbonDiagram") {
     val groups = chains.flatMap { it.atomGroups }
 
     data class GuidePoint(val finalPoint: GLVector, val cVec: GLVector, val dVec: GLVector,
-                          val offset: Float = 0f, val widthFactor: Float = 0f,
+                          val offset: Float = 0f, var widthFactor: Float = 0f,
                           val prevResidue: Group?, val nextResidue: Group?)
 
     fun calculateGuidePoints(aminoList: List<Group>): ArrayList<GuidePoint> {
         val aminoList = aminoList.filter { it.isAminoAcid && it.hasAtom("CA") && it.hasAtom("O")}
         val guidePoints = ArrayList<GuidePoint>(aminoList.size+4-1)
         val maxOffSet = 1.5f
-        aminoList.dropLast(2).forEachIndexed{ i, _ ->
+        aminoList.dropLast(1).forEachIndexed { i, _ ->
             val ca1 = aminoList[i].getAtom("CA")
-            val ca2 = aminoList[i+1].getAtom("CA")
-            val ca1ca2 = GLVector((ca1.x.toFloat()-ca2.x.toFloat()),
-                    (ca1.y.toFloat()-ca2.y.toFloat()),
-                    (ca1.z.toFloat()-ca2.z.toFloat()))
+            val ca2 = aminoList[i + 1].getAtom("CA")
+            val ca1ca2 = GLVector((ca1.x.toFloat() - ca2.x.toFloat()),
+                    (ca1.y.toFloat() - ca2.y.toFloat()),
+                    (ca1.z.toFloat() - ca2.z.toFloat()))
             val o = aminoList[i].getAtom("O")
             val oxygenVec = GLVector(o.x.toFloat(), o.y.toFloat(), o.z.toFloat())
 
@@ -71,85 +83,88 @@ class RibbonDiagramNew(val protein: Protein): Mesh("RibbonDiagram") {
             val dVec = cVec.cross(cVec).normalized
             val widthFactor: Float
             val offset: Float
-            /*
-             "Based on Ca(i-1) to Ca(i+2) distance, we may adjust ribbon width
-             and/or guidepoint position. Ribbon widens in areas of high OR low
-             curvature (alpha/beta, respectively). This is only a preliminary
-             estimate -- it's applied only for 3+ residues in a row. (checked below)
-
-             For high curvature ONLY (alpha), we offset the guidepoint
-             outwards to make the spline track the chain (esp. helix);
-             this is done for each and does not require 3+ in a row.
-             Offset vector goes from the midpoint of Ca(i-1) to Ca(i+2)
-             thru the current guide point
-             (which is the midpoint of Ca(i) and Ca(i+1)).
-
-             CA-CA DIST  WIDTH FACTOR    OFFSET FACTOR   NOTE
-                  ==========  ============    =============   ====
-                  5.0         1               1               ~limit for curled-up protein
-                  5.5         1               1               } linear interpolation
-                  7.0         0               0               } from 1.0 to 0.0
-                  9.0         0               0               } linear interpolation
-                  10.5        1               0               } from 1.0 to 0.0
-                  11.0        1               0               ~limit for extended protein",
-                  from: KiNG
-             */
-            if(i >= 1 && i < aminoList.size-3) {
-                val ca0 = aminoList[i-1].getAtom("CA")
-                val ca3 = aminoList[i+2].getAtom("CA")
-                val ca0Ca3 = GLVector((ca0.x.toFloat()- ca3.x.toFloat()),
-                        (ca0.y.toFloat()- ca3.y.toFloat()),
-                        (ca0.z.toFloat()- ca3.z.toFloat()))
-                val ca0Ca3Distance = ca0Ca3.length2()
-                when {
-                    (ca0Ca3Distance> 7f) -> {
-                        widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
-                        offset = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
-                        val ca0Ca3Midpoint = ca0Ca3.times(0.5f)
-                        val offsetVec = finalPoint.minus(ca0Ca3Midpoint).normalized.times(offset*maxOffSet)
-                        finalPoint.plus(offsetVec)
+            when {
+                (i >= 1 && i < aminoList.size - 3) -> {
+                    val ca0 = aminoList[i - 1].getAtom("CA")
+                    val ca3 = aminoList[i + 2].getAtom("CA")
+                    val ca0Ca3 = GLVector((ca0.x.toFloat() - ca3.x.toFloat()),
+                            (ca0.y.toFloat() - ca3.y.toFloat()),
+                            (ca0.z.toFloat() - ca3.z.toFloat()))
+                    val ca0Ca3Distance = ca0Ca3.length2()
+                    when {
+                        (ca0Ca3Distance > 7f) -> {
+                            widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
+                            offset = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
+                            val ca0Ca3Midpoint = ca0Ca3.times(0.5f)
+                            val offsetVec = finalPoint.minus(ca0Ca3Midpoint).normalized.times(offset * maxOffSet)
+                            finalPoint.plus(offsetVec)
+                        }
+                        (ca0Ca3Distance < 9f) -> {
+                            widthFactor = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
+                            offset = 0f
+                        }
+                        else -> {
+                            widthFactor = 0f
+                            offset = 0f
+                        }
                     }
-                    (ca0Ca3Distance < 9f) -> {
-                        widthFactor = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
-                        offset = 0f
-                    }
-                    else -> {
-                        widthFactor = 0f
-                        offset = 0f
+                    guidePoints.add(i + 2, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
+                            aminoList[i], aminoList[i+1]))
+                }
+                (i == 0) -> {
+                    widthFactor = if(guidePoints[i+3].widthFactor == guidePoints[i+4].widthFactor) {
+                        guidePoints[i+3].widthFactor} else { 0f }
+                    offset = if(guidePoints[i+3].offset > 0f && guidePoints[i+4].offset > 0) {
+                        guidePoints[i+3].offset } else { 0f }
+                    guidePoints.add(i + 2, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
+                            aminoList[i], aminoList[i+1]))
+                }
+                (i >= aminoList.size-3) -> {
+                    widthFactor = if(guidePoints[aminoList.size-4].widthFactor ==
+                            guidePoints[aminoList.size-5].widthFactor)
+                    { guidePoints[aminoList.size-4].widthFactor} else { 0f }
+
+                    offset = if(guidePoints[aminoList.size-4].offset > 0f &&
+                            guidePoints[aminoList.size-5].offset > 0f)
+                    { guidePoints[aminoList.size-4].offset } else  { 0f }
+                    guidePoints.add(i + 2, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
+                            aminoList[i], aminoList[i+1]))
+                }
+            }
+        }
+        //only assign widthFactor if there are three guidepoints with one in a row
+        guidePoints.drop(2).dropLast(4).forEachIndexed { j, _ ->
+                if(guidePoints[j].widthFactor != 0f) {
+                    if (guidePoints[j+1].widthFactor == 0f || guidePoints[j+2].widthFactor == 0f) {
+                        guidePoints[j].widthFactor = 0f
                     }
                 }
-                guidePoints.add(i+2, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
-                aminoList[i-1], aminoList[i+1]))
-            }
-            else {
-                widthFactor = 0f
-                offset = 0f
-                guidePoints.add(i+2, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
-                        null, null))
-            }
-
         }
-        //TODO see why they are using [i+2] for the guide point and [i+1] for its next residue,
-        //TODO this doesn't make much sense to me. Also they are making two dummy vectors at the
-        //TODO beginning and the end, which would only make sense if they want to assign the
-        //TODO correct width factor to each residue, but this comes with a price: the control points
-        //TODO of the first residue are not calculated exactly. But on a second thought this is probably
-        //TODO the way to go since it would be impossible to change the offset afterwards (the first
-        //TODO residue has no predecessor and the last one no successor). But the problem remains, why
-        //TODO they are using the direct predecessor of a residue and name it "nextRes". This is the puzzle
-        //TODO to solve.
-        //TODO Besides, this function should do it. Then you need to find out, whether there are different chains
-        //TODO in a protein, well of course there are but is it possible to have more than one c aplha trace?
-        //TODO Afterwards, assign each Residue a secondary Structure (ss) if there are more than three in a row and
-        //TODO the offset is bigger than 0, draw the ss with a Bspline with the control points from predecessor
-        //TODO of the beginning of the ss to the successor of the end of ss. This should do it and the only
-        //TODO open question remains: How to elegantly draw the different geometries?
+        //dummy points in the beginning and the end
+        val caBegin = aminoList[0].getAtom("CA")
+        val caBeginVec = GLVector(caBegin.x.toFloat(), caBegin.y.toFloat(), caBegin.z.toFloat())
+        guidePoints.add(1, GuidePoint(caBeginVec, guidePoints[2].cVec, guidePoints[2].dVec,
+                guidePoints[2].offset, guidePoints[2].widthFactor, aminoList[0], aminoList[0]))
+        val dummyVecBeg = GLVector(randomFromRange(caBeginVec.x()-0.1f, caBeginVec.x()+0.1f),
+                                randomFromRange(caBeginVec.y()-0.1f, caBeginVec.y()+0.1f),
+                                randomFromRange(caBeginVec.z()-0.1f, caBeginVec.z()+0.1f))
+        guidePoints.add(0, GuidePoint(dummyVecBeg, guidePoints[2].cVec, guidePoints[2].dVec,
+                guidePoints[2].offset, guidePoints[2].widthFactor, aminoList[0], aminoList[0]))
+
+        val caEnd = aminoList.last().getAtom("CA")
+        val caEndVec = GLVector(caEnd.x.toFloat(), caEnd.y.toFloat(), caEnd.z.toFloat())
+        guidePoints.add(guidePoints.size-2, GuidePoint(caEndVec,
+                guidePoints[guidePoints.size-3].cVec, guidePoints[guidePoints.size-3].dVec,
+                guidePoints[guidePoints.size-3].offset, guidePoints[guidePoints.size-3].widthFactor,
+                aminoList.last(), aminoList.last()))
+        val dummyVecEnd = GLVector(randomFromRange(caEndVec.x()-0.1f, caEndVec.x()+0.1f),
+                                randomFromRange((caEndVec.y()-0.1f), caEndVec.y()+0.1f),
+                                randomFromRange(caEndVec.z()-0.1f, caEndVec.z()+0.1f))
+        guidePoints.add(guidePoints.size-2, GuidePoint(dummyVecEnd,
+                guidePoints[guidePoints.size-3].cVec, guidePoints[guidePoints.size-3].dVec,
+                guidePoints[guidePoints.size-3].offset, guidePoints[guidePoints.size-3].widthFactor,
+                aminoList.last(), aminoList.last()))
         return guidePoints
-        /*
-        val allAminoAcids = chains.filter{it.isProtein}.flatMap{ chain ->
-            chain.atomGroups.filter{it.isAminoAcid && it.hasAtom("CA") }}
-        val allAminoAcidsDistinct = distinctChains(allAminoAcids)
-         */
     }
 
     private fun distinctChains(aminoAcids: List<Group>): ArrayList<ArrayList<Group>> {
