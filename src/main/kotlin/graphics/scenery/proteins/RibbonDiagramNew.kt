@@ -48,7 +48,7 @@ import kotlin.random.Random
 //TODO Afterwards, assign each Residue a secondary Structure (ss) if there are more than three in a row and
 //TODO the offset is bigger than 0, draw the ss with a Bspline with the control points from predecessor
 //TODO of the beginning of the ss to the successor of the end of ss. This should do it and the only
-//TODO open question remains: How to elegantly draw the different geometries?
+//TODO open question remains: How to elegantly draw the different geometries? 
 /*
         val allAminoAcids = chains.filter{it.isProtein}.flatMap{ chain ->
             chain.atomGroups.filter{it.isAminoAcid && it.hasAtom("CA") }}
@@ -59,7 +59,28 @@ class RibbonDiagramNew(val protein: Protein): Mesh("RibbonDiagram") {
     val structure = protein.structure
     val chains = structure.chains
     val groups = chains.flatMap { it.atomGroups }
+    val widthAlpha = 2.0f
+    val widthBeta = 2.2f
+    val widthCoil = 1.0f
 
+    fun flatRibbon(guidePoints: ArrayList<GuidePoint>): DummySpline {
+        val finalSpline = ArrayList<GLVector>(guidePoints.size)
+        val pts1 = ArrayList<GLVector>(guidePoints.size)
+        val pts2 = ArrayList<GLVector>(guidePoints.size)
+        guidePoints.forEach{
+            val ribWith = if(it.offset > 0f){widthAlpha} else {widthBeta}
+            val halfwidth = 0.5f*(widthCoil + it.widthFactor*(ribWith-widthCoil))
+            pts1.add(it.finalPoint.plus(it.dVec.times(halfwidth)))
+            pts2.add(it.finalPoint.plus(it.dVec.times(-halfwidth)))
+        }
+        val spline1 = UniformBSpline(pts1).splinePoints()
+        val spline2 = UniformBSpline(pts2).splinePoints()
+        spline1.forEachIndexed{ i, _ ->
+            finalSpline.add(spline1[i].minus(spline2[i]).times(0.5f))
+        }
+        return DummySpline(finalSpline)
+    }
+    
     data class GuidePoint(val finalPoint: GLVector, val cVec: GLVector, val dVec: GLVector,
                           val offset: Float = 0f, var widthFactor: Float = 0f,
                           val prevResidue: Group?, val nextResidue: Group?)
@@ -164,7 +185,8 @@ class RibbonDiagramNew(val protein: Protein): Mesh("RibbonDiagram") {
                 guidePoints[guidePoints.size-3].cVec, guidePoints[guidePoints.size-3].dVec,
                 guidePoints[guidePoints.size-3].offset, guidePoints[guidePoints.size-3].widthFactor,
                 aminoList.last(), aminoList.last()))
-        return guidePoints
+
+        return untwistRibbon(guidePoints)
     }
 
     private fun distinctChains(aminoAcids: List<Group>): ArrayList<ArrayList<Group>> {
@@ -184,6 +206,15 @@ class RibbonDiagramNew(val protein: Protein): Mesh("RibbonDiagram") {
         }
         chains.add(chain)
         return chains
+    }
+
+    private fun untwistRibbon(guidePoints: ArrayList<GuidePoint>): ArrayList<GuidePoint> {
+        guidePoints.drop(1).forEachIndexed{ i, _ ->
+            if(guidePoints[i].dVec.times(guidePoints[i-1].dVec) < 0f) {
+                        guidePoints[i].dVec.times(-1f)
+                    }
+        }
+        return guidePoints
     }
 
 }
