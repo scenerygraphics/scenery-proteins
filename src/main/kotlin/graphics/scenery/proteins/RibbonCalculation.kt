@@ -76,7 +76,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         val spline1 = UniformBSpline(pts1).splinePoints()
         val spline2 = UniformBSpline(pts2).splinePoints()
         spline1.forEachIndexed{ i, _ ->
-            finalSpline.add(spline1[i].minus(spline2[i]).times(0.5f))
+            finalSpline.add(spline1[i].plus(spline2[i]).times(0.5f))
         }
         return DummySpline(finalSpline)
     }
@@ -93,13 +93,13 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         aminoList.dropLast(1).forEachIndexed { i, _ ->
             val ca1 = aminoList[i].getAtom("CA")
             val ca2 = aminoList[i + 1].getAtom("CA")
-            val aVec = GLVector((ca1.x.toFloat() - ca2.x.toFloat()),
-                    (ca1.y.toFloat() - ca2.y.toFloat()),
-                    (ca1.z.toFloat() - ca2.z.toFloat()))
+            val ca1Vec = GLVector(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
+            val ca2Vec = GLVector(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
+            val aVec = ca1Vec.minus(ca2Vec)
             val o = aminoList[i].getAtom("O")
             val bVec = GLVector(o.x.toFloat(), o.y.toFloat(), o.z.toFloat())
 
-            val finalPoint = aVec.times(0.5f)
+            val finalPoint = ca1Vec.plus(ca2Vec).times(0.5f)
             //See Carlson et. al
             val cVec = aVec.cross(bVec).normalized
             val dVec = aVec.cross(cVec).normalized
@@ -109,9 +109,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                 (i >= 1 && i < aminoList.size - 3) -> {
                     val ca0 = aminoList[i - 1].getAtom("CA")
                     val ca3 = aminoList[i + 2].getAtom("CA")
-                    val ca0Ca3 = GLVector((ca0.x.toFloat() - ca3.x.toFloat()),
-                            (ca0.y.toFloat() - ca3.y.toFloat()),
-                            (ca0.z.toFloat() - ca3.z.toFloat()))
+                    val ca0Vec = GLVector(ca0.x.toFloat(), ca0.y.toFloat(), ca0.z.toFloat())
+                    val ca3Vec = GLVector(ca3.x.toFloat(), ca3.y.toFloat(), ca3.z.toFloat())
+                    val ca0Ca3 = ca0Vec.minus(ca3Vec)
                     val ca0Ca3Distance = ca0Ca3.length2()
                     when {
                         (ca0Ca3Distance > 7f) -> {
