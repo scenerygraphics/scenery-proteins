@@ -5,8 +5,7 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.Curve
-import graphics.scenery.proteins.RibbonDiagram
-import graphics.scenery.proteins.RibbonDiagramNew
+import graphics.scenery.proteins.RibbonCalculation
 import org.junit.Test
 
 class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
@@ -18,7 +17,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val protein = Protein.fromID("6jmd")
 
-        val diagram = RibbonDiagramNew(protein)
+        val diagram = RibbonCalculation(protein)
 
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
