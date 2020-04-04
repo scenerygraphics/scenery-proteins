@@ -55,13 +55,32 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
 
     private val structure = protein.structure
     private val chains = structure.chains
+    private val groups = chains.flatMap { it.atomGroups }
     private val widthAlpha = 2.0f
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
 
+
     fun flatRibbon(): DummySpline {
-        val aminoList =  chains.flatMap{ chain ->
-            chain.atomGroups }
+        val aminoList =  ArrayList<Group>(groups.size)
+        /*
+        TODO I assume, something is wrong with the getAtom() or hasAtom() functions in biojava because
+        TODO when I use for loops to iterate through the groups then I get a lot more cA atoms compared to
+        TODO the named functions. My idea would be now to make two lists of atom coordinates, one for the
+        TODO CA atoms and one for the O atoms. The open question there is: will the lists be off the same size?
+        TODO Otherwise the algorithm from Carlson et. al would not work. Then I'd need to check the distances
+        TODO between the CA atoms from one list and the O atoms from the other list and if the distance is below
+        TODO a certain threshold then assign them to each other. But this is not an ideal solution. Yet still, in
+        TODO a perfect world, not PDB would contain different numbers of CA and O atoms because each peptide bond
+        TODO contains exactly one of each.
+         */
+        chains.forEach{ chain ->
+            chain.atomGroups.forEach { group ->
+                if(group.atoms.filter { it.name == "CA" }.isNotEmpty()) {
+                    aminoList.add(group)
+                }
+            }
+        }
         val guidePoints = calculateGuidePoints(aminoList)
         val finalSpline = ArrayList<GLVector>(guidePoints.size*100)
         val pts1 = ArrayList<GLVector>(guidePoints.size)
@@ -85,7 +104,6 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                           val prevResidue: Group?, val nextResidue: Group?)
 
     private fun calculateGuidePoints(aminoList: List<Group>): ArrayList<GuidePoint> {
-        val aminoList = aminoList.filter { it.hasAtom("CA") && it.hasAtom("O")}
         val guidePointsWithoutDummy = ArrayList<GuidePoint>(aminoList.size-1)
         val guidePoints = ArrayList<GuidePoint>(aminoList.size + 4 -1)
         val maxOffSet = 1.5f
