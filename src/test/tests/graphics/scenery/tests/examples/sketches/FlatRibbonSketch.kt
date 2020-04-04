@@ -19,11 +19,44 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val diagram = RibbonCalculation(protein)
 
+        val node = Node("Spheres")
+
+        val chains = protein.structure.chains
+        val caCollection = ArrayList<GLVector>(100)
+        chains.forEach{ chain ->
+            chain.atomGroups.forEach {group ->
+                group.atoms.forEach {
+                    if(it.name == "CA") {
+                       val caVec = GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
+                        caCollection.add(caVec)
+                    }
+                }
+            }
+        }
+
+        val sphere = Icosphere(0.5f, 2)
+        sphere.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
+        sphere.instancedProperties["ModelMatrix"] = {sphere.model}
+        sphere.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+        renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
+
+        val caPoints = caCollection.map {
+            val section = Mesh()
+            section.parent = node
+            section.position = it
+            section.instancedProperties["ModelMatrix1"] = { section.model }
+            section
+        }
+        sphere.instances.addAll(caPoints)
+
+        node.addChild(sphere)
+        scene.addChild(node)
+
         fun triangle(): ArrayList<GLVector> {
             val list = ArrayList<GLVector>()
-            list.add(GLVector(0.3f, 0.3f, 0f))
-            list.add(GLVector(0.3f, -0.3f, 0f))
-            list.add(GLVector(-0.3f, -0.3f, 0f))
+            list.add(GLVector(0.03f, 0.03f, 0f))
+            list.add(GLVector(0.03f, -0.03f, 0f))
+            list.add(GLVector(-0.03f, -0.03f, 0f))
             return list
         }
         val curve = Curve(diagram.flatRibbon()) { triangle() }

@@ -53,16 +53,15 @@ import java.lang.Float.min
          */
 class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
 
-    val structure = protein.structure
-    val chains = structure.chains
-    val groups = chains.flatMap { it.atomGroups }
-    val widthAlpha = 2.0f
-    val widthBeta = 2.2f
-    val widthCoil = 1.0f
+    private val structure = protein.structure
+    private val chains = structure.chains
+    private val widthAlpha = 2.0f
+    private val widthBeta = 2.2f
+    private val widthCoil = 1.0f
 
     fun flatRibbon(): DummySpline {
-        val aminoList =  chains.filter{it.isProtein}.flatMap{ chain ->
-            chain.atomGroups.filter{it.isAminoAcid && it.hasAtom("CA") }}
+        val aminoList =  chains.flatMap{ chain ->
+            chain.atomGroups }
         val guidePoints = calculateGuidePoints(aminoList)
         val finalSpline = ArrayList<GLVector>(guidePoints.size*100)
         val pts1 = ArrayList<GLVector>(guidePoints.size)
@@ -86,7 +85,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                           val prevResidue: Group?, val nextResidue: Group?)
 
     private fun calculateGuidePoints(aminoList: List<Group>): ArrayList<GuidePoint> {
-        val aminoList = aminoList.filter { it.isAminoAcid && it.hasAtom("CA") && it.hasAtom("O")}
+        val aminoList = aminoList.filter { it.hasAtom("CA") && it.hasAtom("O")}
         val guidePointsWithoutDummy = ArrayList<GuidePoint>(aminoList.size-1)
         val guidePoints = ArrayList<GuidePoint>(aminoList.size + 4 -1)
         val maxOffSet = 1.5f
@@ -163,9 +162,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         //dummy points at the beginning
         val caBegin = aminoList[0].getAtom("CA")
         val caBeginVec = GLVector(caBegin.x.toFloat(), caBegin.y.toFloat(), caBegin.z.toFloat())
-        val dummyVecBeg = GLVector(randomFromRange(caBeginVec.x()-0.1f, caBeginVec.x()+0.1f),
-                                randomFromRange(caBeginVec.y()-0.1f, caBeginVec.y()+0.1f),
-                                randomFromRange(caBeginVec.z()-0.1f, caBeginVec.z()+0.1f))
+        val dummyVecBeg = GLVector(randomFromRange(caBeginVec.x()-1f, caBeginVec.x()+1f),
+                                randomFromRange(caBeginVec.y()-1f, caBeginVec.y()+1f),
+                                randomFromRange(caBeginVec.z()-1f, caBeginVec.z()+1f))
         guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
         guidePoints.add(GuidePoint(caBeginVec, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
@@ -179,10 +178,10 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
                 aminoList.last(), aminoList.last()))
-        val dummyVecEnd = GLVector(randomFromRange(caEndVec.x()-0.1f, caEndVec.x()+0.1f),
-                                randomFromRange((caEndVec.y()-0.1f), caEndVec.y()+0.1f),
-                                randomFromRange(caEndVec.z()-0.1f, caEndVec.z()+0.1f))
-        guidePointsWithoutDummy.add(GuidePoint(dummyVecEnd,
+        val dummyVecEnd = GLVector(randomFromRange(caEndVec.x()-1f, caEndVec.x()+1f),
+                                randomFromRange((caEndVec.y()-1f), caEndVec.y()+1f),
+                                randomFromRange(caEndVec.z()-1f, caEndVec.z()+1f))
+        guidePoints.add(GuidePoint(dummyVecEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
                 aminoList.last(), aminoList.last()))
@@ -198,9 +197,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             val maxCaCaDistance = 5.0f
             val ca1 = aminoAcids[i].getAtom("CA")
             val ca2 = aminoAcids[i+1].getAtom("CA")
-            val ca1ca2Distance = GLVector((ca1.x-ca2.x).toFloat(), (ca1.y-ca2.y).toFloat(),
-                    (ca1.z-ca2.z).toFloat()).length2()
-            if(ca1ca2Distance > maxCaCaDistance) {
+            val ca1Vec = GLVector(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
+            val ca2Vec = GLVector(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
+            if(ca1Vec.minus(ca2Vec).length2() > maxCaCaDistance) {
                 chains.addAll(distinctChains(aminoAcids.drop(i)))
                 return chains
             }
