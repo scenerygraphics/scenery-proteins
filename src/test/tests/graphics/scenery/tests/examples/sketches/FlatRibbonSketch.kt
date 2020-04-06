@@ -59,7 +59,8 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
             list.add(GLVector(-0.03f, -0.03f, 0f))
             return list
         }
-        val curve = Curve(diagram.flatRibbon()) { triangle() }
+        val flatRibbon = diagram.flatRibbon()
+        val curve = Curve(flatRibbon) { triangle() }
 
         scene.addChild(curve)
 

@@ -4,6 +4,7 @@ import cleargl.GLVector
 import graphics.scenery.Mesh
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
+import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
 import java.lang.Float.min
 
@@ -61,7 +62,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
     private val widthCoil = 1.0f
 
 
-    fun flatRibbon(): DummySpline {
+    fun flatRibbon(): Spline {
         val aminoList =  ArrayList<Group>(groups.size)
         /*
         TODO I assume, something is wrong with the getAtom() or hasAtom() functions in biojava because
@@ -74,14 +75,22 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         TODO a perfect world, not PDB would contain different numbers of CA and O atoms because each peptide bond
         TODO contains exactly one of each.
          */
+        val caList = ArrayList<Atom>(groups.size)
+        val oList = ArrayList<Atom>(groups.size)
         chains.forEach{ chain ->
             chain.atomGroups.forEach { group ->
                 if(group.atoms.filter { it.name == "CA" }.isNotEmpty()) {
                     aminoList.add(group)
                 }
+                group.atoms.forEach {atom ->
+                    when {
+                        (atom.name ==  "CA") -> caList.add(atom)
+                        (atom.name == "O") -> oList.add(atom)
+                    }
+                }
             }
         }
-        val guidePoints = calculateGuidePoints(aminoList)
+        val guidePoints = calculateGuidePoints(caList, oList)
         val finalSpline = ArrayList<GLVector>(guidePoints.size*100)
         val pts1 = ArrayList<GLVector>(guidePoints.size)
         val pts2 = ArrayList<GLVector>(guidePoints.size)
@@ -96,24 +105,24 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         spline1.forEachIndexed{ i, _ ->
             finalSpline.add(spline1[i].plus(spline2[i]).times(0.5f))
         }
-        return DummySpline(finalSpline)
+        return UniformBSpline(pts1)
     }
 
     data class GuidePoint(val finalPoint: GLVector, val cVec: GLVector, val dVec: GLVector,
                           val offset: Float = 0f, var widthFactor: Float = 0f,
-                          val prevResidue: Group?, val nextResidue: Group?)
+                          val prevCa: Atom, val nextCa: Atom)
 
-    private fun calculateGuidePoints(aminoList: List<Group>): ArrayList<GuidePoint> {
-        val guidePointsWithoutDummy = ArrayList<GuidePoint>(aminoList.size-1)
-        val guidePoints = ArrayList<GuidePoint>(aminoList.size + 4 -1)
+    private fun calculateGuidePoints(caList: ArrayList<Atom>, oList: ArrayList<Atom>): ArrayList<GuidePoint> {
+        val guidePointsWithoutDummy = ArrayList<GuidePoint>(caList.size-1)
+        val guidePoints = ArrayList<GuidePoint>(caList.size + 4 -1)
         val maxOffSet = 1.5f
-        aminoList.dropLast(1).forEachIndexed { i, _ ->
-            val ca1 = aminoList[i].getAtom("CA")
-            val ca2 = aminoList[i + 1].getAtom("CA")
+        caList.dropLast(1).forEachIndexed { i, _ ->
+            val ca1 = caList[i]
+            val ca2 = caList[i + 1]
             val ca1Vec = GLVector(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
             val ca2Vec = GLVector(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
             val aVec = ca1Vec.minus(ca2Vec)
-            val o = aminoList[i].getAtom("O")
+            val o = oList[i]
             val bVec = GLVector(o.x.toFloat(), o.y.toFloat(), o.z.toFloat())
 
             val finalPoint = ca1Vec.plus(ca2Vec).times(0.5f)
@@ -123,9 +132,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             val widthFactor: Float
             val offset: Float
             when {
-                (i >= 1 && i < aminoList.size - 3) -> {
-                    val ca0 = aminoList[i - 1].getAtom("CA")
-                    val ca3 = aminoList[i + 2].getAtom("CA")
+                (i >= 1 && i < caList.size - 3) -> {
+                    val ca0 = caList[i - 1]
+                    val ca3 = caList[i + 2]
                     val ca0Vec = GLVector(ca0.x.toFloat(), ca0.y.toFloat(), ca0.z.toFloat())
                     val ca3Vec = GLVector(ca3.x.toFloat(), ca3.y.toFloat(), ca3.z.toFloat())
                     val ca0Ca3 = ca0Vec.minus(ca3Vec)
@@ -154,7 +163,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                 }
             }
             guidePointsWithoutDummy.add(i, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
-                    aminoList[i], aminoList[i+1]))
+                    caList[i], caList[i+1]))
         }
 
         //only assign widthFactor if there are three guide points with one in a row
@@ -178,31 +187,31 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         }
 
         //dummy points at the beginning
-        val caBegin = aminoList[0].getAtom("CA")
+        val caBegin = caList[0]
         val caBeginVec = GLVector(caBegin.x.toFloat(), caBegin.y.toFloat(), caBegin.z.toFloat())
         val dummyVecBeg = GLVector(randomFromRange(caBeginVec.x()-1f, caBeginVec.x()+1f),
                                 randomFromRange(caBeginVec.y()-1f, caBeginVec.y()+1f),
                                 randomFromRange(caBeginVec.z()-1f, caBeginVec.z()+1f))
         guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
-                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
+                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, caList[0], caList[0]))
         guidePoints.add(GuidePoint(caBeginVec, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
-                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
+                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, caList[0], caList[0]))
         //add all guide points from the previous calculation
         guidePoints.addAll(guidePointsWithoutDummy)
         //add dummy points at the end
-        val caEnd = aminoList.last().getAtom("CA")
+        val caEnd = caList.last()
         val caEndVec = GLVector(caEnd.x.toFloat(), caEnd.y.toFloat(), caEnd.z.toFloat())
         guidePoints.add(GuidePoint(caEndVec,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last()))
+                caList.last(), caList.last()))
         val dummyVecEnd = GLVector(randomFromRange(caEndVec.x()-1f, caEndVec.x()+1f),
                                 randomFromRange((caEndVec.y()-1f), caEndVec.y()+1f),
                                 randomFromRange(caEndVec.z()-1f, caEndVec.z()+1f))
         guidePoints.add(GuidePoint(dummyVecEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last()))
+                caList.last(), caList.last()))
 
         return untwistRibbon(guidePoints)
     }
