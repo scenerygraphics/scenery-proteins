@@ -19,7 +19,7 @@ import kotlin.math.acos
  * The number n corresponds to the number of segments you wish to have between you control points.
  * @author  Justin Buerger <burger@mpi-cbg.de>
  */
-class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeometry"), HasGeometry {
+class Curve(curve: Spline, baseShape: (n: Int) -> ArrayList<ArrayList<GLVector>>): Node("CurveGeometry"), HasGeometry {
     override val vertexSize = 3
     override val texcoordSize = 2
     override var geometryType = GeometryType.TRIANGLES
@@ -43,8 +43,9 @@ class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeo
         if(chain.isEmpty()) {
             println("The spline provided for the Curve is empty.")
         }
-        val bases = ArrayList<GLMatrix>()
-        computeFrenetFrames(chain).forEach { (t, n, b, tr) ->
+        val bases = ArrayList<GLMatrix>(chain.size)
+        val frenetFrames = computeFrenetFrames(chain)
+        frenetFrames.forEach { (t, n, b, tr) ->
             if(n != null && b != null) {
                 val inverseMatrix = GLMatrix(floatArrayOf(
                         n.x(), b.x(), t.x(), 0f,
@@ -66,12 +67,14 @@ class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeo
             }
         }
 
-        val curveGeometry = bases.map { basis ->
-            baseShape.invoke().map { v ->
-                val vector4D = GLVector(v.x(), v.y(), v.z(), 1f)
-                val vector = basis.mult(vector4D)
-                vector.xyz()
+        val curveGeometry = ArrayList<ArrayList<GLVector>>(bases.size)
+        baseShape.invoke(chain.size).forEachIndexed { index, shape ->
+            val baseShape = ArrayList<GLVector>(shape.size)
+            shape.forEach {
+                val vec4D = GLVector(it.x(), it.y(), it.z(), 1f)
+                baseShape.add(bases[index].mult(vec4D))
             }
+            curveGeometry.add(baseShape)
         }
 
         val verticesVectors = calculateTriangles(curveGeometry)
@@ -136,7 +139,7 @@ class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeo
         frenetFrameList[0].bitangent = frenetFrameList[0].tangent.cross(normal).normalized
 
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
-            val b = firstFrame.tangent.cross(secondFrame.tangent).normalized
+            val b = firstFrame.tangent.cross(secondFrame.tangent)
             //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
             if (b.length2() < 0.0001f) {
                 secondFrame.normal = firstFrame.normal
@@ -180,30 +183,33 @@ class Curve(curve: Spline, baseShape: () -> ArrayList<GLVector>): Node("CurveGeo
             return verticesVectors
         }
         //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
-        if(curveGeometry.distinctBy{ it.size }.size == 1) {
-            curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
-                shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
+        curveGeometry.windowed(2, 1) { partialCurve ->
+            if(partialCurve[0].size == partialCurve[1].size) {
+               partialCurve[0].dropLast(1).forEachIndexed { vertexIndex, _ ->
 
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                        verticesVectors.add(partialCurve[0][vertexIndex])
+                        verticesVectors.add(partialCurve[0][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[1][vertexIndex])
 
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                        verticesVectors.add(partialCurve[0][vertexIndex + 1])
+                        verticesVectors.add(partialCurve[1][vertexIndex + 1])
+                        verticesVectors.add(partialCurve[1][vertexIndex])
+                    }
+                    verticesVectors.add(partialCurve[0][0])
+                    verticesVectors.add(partialCurve[1][0])
+                    verticesVectors.add(partialCurve[1][partialCurve[1].lastIndex])
+
+                    verticesVectors.add(partialCurve[1][partialCurve[1].lastIndex])
+                    verticesVectors.add(partialCurve[0][partialCurve[0].lastIndex])
+                    verticesVectors.add(partialCurve[0][0])
                 }
-                verticesVectors.add(curveGeometry[shapeIndex][0])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][0])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-
-                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-                verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
-                verticesVectors.add(curveGeometry[shapeIndex][0])
+            else {
+                if(partialCurve[0].size.rem(2) == partialCurve[1].size.rem(2)) {
+                    
+                }
             }
         }
-        else {
-            throw IllegalArgumentException("The baseShapes must not differ in size!")
-        }
+
         return verticesVectors
     }
 

@@ -2,7 +2,109 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d89d1219-8da5-4666-9f82-0fa142eeef3d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_1_3_31.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_1_3_61.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_common_1_3_31.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_common_1_3_61.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_jdk7_1_3_31.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_jdk7_1_3_61.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_jdk8_1_3_31.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_kotlin_kotlin_stdlib_jdk8_1_3_61.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/scenery-proteins.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/scenery-proteins.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Curve.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/Curve.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/RibbonCalculation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/graphics/scenery/proteins/RibbonCalculation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/sketches/FlatRibbonSketch.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/tests/graphics/scenery/tests/examples/sketches/FlatRibbonSketch.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/scenery-proteins.kotlin_module" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein$myProtein.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/Protein.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/AminoAcid.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/AminoList.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/BackBoneSticks$backBoneSticks$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/BackBoneSticks$backBoneSticks$cylinders$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/BackBoneSticks.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/CatmullRomSpline.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/Curve$FrenetFrame.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/Curve.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/DummySpline.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/PrimaryStructure$WhenMappings.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/PrimaryStructure$primaryStruc$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/PrimaryStructure$primaryStruc$2$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/PrimaryStructure$primaryStruc$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/PrimaryStructure$primaryStruc$cylinders$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/PrimaryStructure.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonCalculation$GuidePoint.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonCalculation.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonDiagram$Section.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonDiagram$ribbonDiagram$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonDiagram$ribbonDiagram$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonDiagram$ribbonDiagram$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/RibbonDiagram.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/Spline.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/graphics/scenery/proteins/UniformBSpline.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/META-INF/scenery-proteins.kotlin_module" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/examples/CurveCatmullRomExample$init$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/examples/CurveCatmullRomExample$init$geo$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/examples/CurveCatmullRomExample.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/examples/CurveUniformBSplineExample$init$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/examples/CurveUniformBSplineExample$init$geo$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/examples/CurveUniformBSplineExample.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/PDB/CatmulTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/PDB/CurveGeometryBaseShapeTest$init$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/PDB/CurveGeometryBaseShapeTest$init$spheres$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/PDB/CurveGeometryBaseShapeTest$init$spheres$2$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/AminoListTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BSplineTest$init$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BSplineTest$init$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BSplineTest$init$controlpoints$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BSplineTest$init$spheres$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BSplineTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BackBoneTestStick.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BasicVisualizationTest$WhenMappings.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BasicVisualizationTest$init$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BasicVisualizationTest$init$2$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BasicVisualizationTest$init$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BasicVisualizationTest$init$cylinders$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/BasicVisualizationTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/CatmulTestDetail$init$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/CatmulTestDetail$init$cylinders$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/CatmulTestDetail.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/CatmullTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/ChainTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FlatRibbonSketch$init$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FlatRibbonSketch$init$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FlatRibbonSketch$init$caPoints$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FlatRibbonSketch.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FrenetFrameVisuTest$init$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FrenetFrameVisuTest$init$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FrenetFrameVisuTest$init$geo$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FrenetFrameVisuTest$init$spheres$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/FrenetFrameVisuTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/PDBLoader.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/PrimaryStructureTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RandomConnectionTest$WhenMappings.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RandomConnectionTest$init$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RandomConnectionTest$init$2$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RandomConnectionTest$init$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RandomConnectionTest$init$cylinders$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RandomConnectionTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RibbonDiagramCalcTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RibbonDiagramTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/graphics/scenery/tests/examples/sketches/RibbonDiagramTestTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CatmullRomSplineTests$testChain$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CatmullRomSplineTests$testChain$distanceDifferences$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CatmullRomSplineTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testCurve$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testCurve$geometry$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testDrawSpline$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testDrawSpline$2$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testDrawSpline$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testEmptySpline$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests$testEmptySpline$curve$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/CurveTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/SplineTests$testCreation$MockSpline.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/SplineTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/UniformBSplineTests$invalidControlPoints$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/UniformBSplineTests$testChain$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/UniformBSplineTests$testChain$distanceDifferences$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/unit/UniformBSplineTests.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,22 +121,15 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="MavenImportPreferences">
-    <option name="importingSettings">
-      <MavenImportingSettings>
-        <option name="importAutomatically" value="true" />
-      </MavenImportingSettings>
-    </option>
-  </component>
   <component name="ProjectId" id="1VCaC0Z5Cby74bUkCGksvBUVKlG" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -96,18 +191,6 @@
       </list>
     </recent_temporary>
   </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView>
-          <treeState>
-            <expand />
-            <select />
-          </treeState>
-        </serviceView>
-      </list>
-    </option>
-  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -131,11 +214,13 @@
       <workItem from="1579603404252" duration="2302000" />
       <workItem from="1583502252333" duration="80000" />
       <workItem from="1583502356386" duration="441000" />
+      <workItem from="1586879639144" duration="2138000" />
+      <workItem from="1586944867965" duration="245000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
     <state x="321" y="69" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1583502284928">

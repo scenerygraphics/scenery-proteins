@@ -4,6 +4,7 @@ import cleargl.GLVector
 import graphics.scenery.Mesh
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
+import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
 import java.lang.Float.min
 
@@ -45,7 +46,7 @@ import java.lang.Float.min
 //TODO Afterwards, assign each Residue a secondary Structure (ss) if there are more than three in a row and
 //TODO the offset is bigger than 0, draw the ss with a Bspline with the control points from predecessor
 //TODO of the beginning of the ss to the successor of the end of ss. This should do it and the only
-//TODO open question remains: How to elegantly draw the different geometries? 
+//TODO open question remains: How to elegantly draw the different geometries?
 /*
         val allAminoAcids = chains.filter{it.isProtein}.flatMap{ chain ->
             chain.atomGroups.filter{it.isAminoAcid && it.hasAtom("CA") }}
@@ -60,19 +61,12 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
 
+    private fun Atom.getVector(): GLVector {
+        return GLVector(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
+    }
 
     fun flatRibbon(): Spline {
         val aminoList =  ArrayList<Group>(groups.size)
-        /*
-        TODO I assume, something is wrong with the getAtom() or hasAtom() functions in biojava because
-        TODO when I use for loops to iterate through the groups then I get a lot more cA atoms compared to
-        TODO the named functions. My idea would be now to make two lists of atom coordinates, one for the
-        TODO CA atoms and one for the O atoms. The open question there is: will the lists be off the same size?
-        TODO Otherwise the algorithm from Carlson et. al would not work. Then I'd need to check the distances
-        TODO between the CA atoms from one list and the O atoms from the other list and if the distance is below
-        TODO a certain threshold then assign them to each other. But this is not an ideal solution. Yet still, in
-        TODO a perfect world, not PDB would contain different numbers of CA and O atoms because a   
-         */
         chains.forEach{ chain ->
             chain.atomGroups.forEach { group ->
                 if(group.hasAminoAtoms()) {
@@ -109,25 +103,23 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         aminoList.dropLast(1).forEachIndexed { i, _ ->
             val ca1 = aminoList[i].getAtom("CA")
             val ca2 = aminoList[i + 1].getAtom("CA")
-            val ca1Vec = GLVector(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
-            val ca2Vec = GLVector(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
+            val ca1Vec = ca1.getVector()
+            val ca2Vec = ca2.getVector()
             val aVec = ca1Vec.minus(ca2Vec)
             val o = aminoList[i].getAtom("O")
-            val bVec = GLVector(o.x.toFloat(), o.y.toFloat(), o.z.toFloat())
+            val bVec = o.getVector()
 
             val finalPoint = ca1Vec.plus(ca2Vec).times(0.5f)
             //See Carlson et. al
             val cVec = aVec.cross(bVec).normalized
-            val dVec = aVec.cross(cVec).normalized
+            val dVec = cVec.cross(aVec).normalized
             val widthFactor: Float
             val offset: Float
             when {
                 (i >= 1 && i < aminoList.size - 3) -> {
-                    val ca0 = aminoList[i - 1].getAtom("CA")
-                    val ca3 = aminoList[i + 2].getAtom("CA")
-                    val ca0Vec = GLVector(ca0.x.toFloat(), ca0.y.toFloat(), ca0.z.toFloat())
-                    val ca3Vec = GLVector(ca3.x.toFloat(), ca3.y.toFloat(), ca3.z.toFloat())
-                    val ca0Ca3 = ca0Vec.minus(ca3Vec)
+                    val ca0 = aminoList[i - 1].getAtom("CA").getVector()
+                    val ca3 = aminoList[i + 2].getAtom("CA").getVector()
+                    val ca0Ca3 = ca0.minus(ca3)
                     val ca0Ca3Distance = ca0Ca3.length2()
                     when {
                         (ca0Ca3Distance > 7f) -> {
@@ -177,27 +169,25 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         }
 
         //dummy points at the beginning
-        val caBegin = aminoList[0].getAtom("CA")
-        val caBeginVec = GLVector(caBegin.x.toFloat(), caBegin.y.toFloat(), caBegin.z.toFloat())
-        val dummyVecBeg = GLVector(randomFromRange(caBeginVec.x()-1f, caBeginVec.x()+1f),
-                                randomFromRange(caBeginVec.y()-1f, caBeginVec.y()+1f),
-                                randomFromRange(caBeginVec.z()-1f, caBeginVec.z()+1f))
+        fun GLVector.randomFromVector(): GLVector {
+            return GLVector( randomFromRange(this.x()-1f, this.x()+1f),
+                        randomFromRange(this.y()-1f, this.y()+1f),
+                        randomFromRange(this.z()-1f, this.z()+1f)) }
+        val caBegin = aminoList[0].getAtom("CA").getVector()
+        val dummyVecBeg = caBegin.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
-        guidePoints.add(GuidePoint(caBeginVec, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
+        guidePoints.add(GuidePoint(caBegin, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
         //add all guide points from the previous calculation
         guidePoints.addAll(guidePointsWithoutDummy)
         //add dummy points at the end
-        val caEnd = aminoList.last().getAtom("CA")
-        val caEndVec = GLVector(caEnd.x.toFloat(), caEnd.y.toFloat(), caEnd.z.toFloat())
-        guidePoints.add(GuidePoint(caEndVec,
+        val caEnd = aminoList.last().getAtom("CA").getVector()
+        guidePoints.add(GuidePoint(caEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
                 aminoList.last(), aminoList.last()))
-        val dummyVecEnd = GLVector(randomFromRange(caEndVec.x()-1f, caEndVec.x()+1f),
-                                randomFromRange((caEndVec.y()-1f), caEndVec.y()+1f),
-                                randomFromRange(caEndVec.z()-1f, caEndVec.z()+1f))
+        val dummyVecEnd = caEnd.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,

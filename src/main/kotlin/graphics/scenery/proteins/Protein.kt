@@ -14,7 +14,7 @@ import java.nio.file.InvalidPathException
 
 class Protein(val structure: Structure): Mesh("Protein") {
 
-    companion object myProtein {
+    companion object MyProtein {
 
         fun fromID(id: String): Protein {
                 //print("Please enter the PDB-ID: ")
