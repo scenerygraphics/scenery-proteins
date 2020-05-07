@@ -52,6 +52,7 @@ class Curve(curve: Spline, baseShape: (n: Int) -> ArrayList<ArrayList<GLVector>>
                         n.y(), b.y(), t.y(), 0f,
                         n.z(), b.z(), t.z(), 0f,
                         0f, 0f, 0f, 1f)).inverse
+                print(inverseMatrix)
                 val nn = GLVector(inverseMatrix[0, 0], inverseMatrix[1, 0], inverseMatrix[2, 0]).normalized
                 val nb = GLVector(inverseMatrix[0, 1],inverseMatrix[1, 1], inverseMatrix[2, 1]).normalized
                 val nt = GLVector(inverseMatrix[0, 2], inverseMatrix[1, 2], inverseMatrix[2, 2]).normalized
@@ -203,11 +204,14 @@ class Curve(curve: Spline, baseShape: (n: Int) -> ArrayList<ArrayList<GLVector>>
                     verticesVectors.add(partialCurve[0][partialCurve[0].lastIndex])
                     verticesVectors.add(partialCurve[0][0])
                 }
+            /*
             else {
                 if(partialCurve[0].size.rem(2) == partialCurve[1].size.rem(2)) {
                     
                 }
             }
+
+             */
         }
 
         return verticesVectors
