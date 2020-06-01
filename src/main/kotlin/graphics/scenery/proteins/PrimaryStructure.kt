@@ -1,17 +1,19 @@
 package graphics.scenery.proteins
 
-import cleargl.GLVector
+import org.joml.*
 import graphics.scenery.*
 import org.biojava.nbio.structure.*
 
+
 class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
 
-    fun primaryStruc(): Node {
+    fun primaryStructure(): Node {
 
         val atoms: Array<Atom> = StructureTools.getAllAtomArray(structure)
 
         val atomMasters = HashMap<Element, Node>()
-        Element.values().forEach {
+
+        enumValues<Element>().forEach {
             val s = Icosphere(0.05f, 2)
             s.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
             s.instancedProperties["ModelMatrix"] = { s.world }
@@ -20,24 +22,24 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
 
         atoms.forEach {
             val s = Node()
-            s.position = (GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
+            s.position = (Vector3f(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
             s.instancedProperties["ModelMatrix"] = { s.world }
 
             when (it.element) {
                 Element.H -> {
-                    s.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+                    s.material.diffuse = Vector3f(1.0f, 1.0f, 1.0f)
                 }
                 Element.C -> {
-                    s.material.diffuse = GLVector(0.0f, 0.0f, 0.0f)
+                    s.material.diffuse = Vector3f(0.0f, 0.0f, 0.0f)
                 }
                 Element.N -> {
-                    s.material.diffuse = GLVector(0.0f, 0.0f, 1.0f)
+                    s.material.diffuse = Vector3f(0.0f, 0.0f, 1.0f)
                 }
                 Element.O -> {
-                    s.material.diffuse = GLVector(1.0f, 0.0f, 0.0f)
+                    s.material.diffuse = Vector3f(1.0f, 0.0f, 0.0f)
                 }
                 else -> {
-                    s.material.diffuse = GLVector(1.0f, 0.2f, 0.8f)
+                    s.material.diffuse = Vector3f(1.0f, 0.2f, 0.8f)
                 }
             }
 
@@ -52,7 +54,7 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
         val c = Cylinder(0.025f, 1.0f, 10)
         c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
         c.instancedProperties["ModelMatrix1"] = { c.model }
-        c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+        c.material.diffuse = Vector3f(1.0f, 1.0f, 1.0f)
 
         val bonds: MutableList<Bond> = atoms.filter { it.bonds != null }.flatMap { it.bonds }.toMutableList()
 
@@ -108,8 +110,8 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
             bond.parent = primaryStruc
             val atomA = it.atomA
             val atomB = it.atomB
-            bond.orientBetweenPoints(GLVector(atomA.x.toFloat(), atomA.y.toFloat(), atomA.z.toFloat()),
-                    GLVector(atomB.x.toFloat(), atomB.y.toFloat(), atomB.z.toFloat()), true, true)
+            bond.orientBetweenPoints(Vector3f(atomA.x.toFloat(), atomA.y.toFloat(), atomA.z.toFloat()),
+                    Vector3f(atomB.x.toFloat(), atomB.y.toFloat(), atomB.z.toFloat()), true, true)
             bond.instancedProperties["ModelMatrix1"] = { bond.model }
             bond
         }

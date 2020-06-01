@@ -1,6 +1,6 @@
 package graphics.scenery.proteins
 
-import cleargl.GLVector
+import org.joml.*
 import graphics.scenery.Mesh
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
@@ -61,8 +61,8 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
 
-    private fun Atom.getVector(): GLVector {
-        return GLVector(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
+    private fun Atom.getVector(): Vector3f {
+        return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
     }
 
     fun flatRibbon(): Spline {
@@ -75,24 +75,30 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             }
         }
         val guidePoints = calculateGuidePoints(aminoList)
-        val finalSpline = ArrayList<GLVector>(guidePoints.size*100)
-        val pts1 = ArrayList<GLVector>(guidePoints.size)
-        val pts2 = ArrayList<GLVector>(guidePoints.size)
+        val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
+        val pts1 = ArrayList<Vector3f>(guidePoints.size)
+        val pts2 = ArrayList<Vector3f>(guidePoints.size)
         guidePoints.forEach{
             val ribWith = if(it.offset > 0f){widthAlpha} else {widthBeta}
             val halfwidth = 0.5f*(widthCoil + it.widthFactor*(ribWith-widthCoil))
-            pts1.add(it.finalPoint.plus(it.dVec.times(halfwidth)))
-            pts2.add(it.finalPoint.plus(it.dVec.times(-halfwidth)))
+            val dVecPlus = it.dVec.mul(halfwidth)
+            val dVecMinus = it.dVec.mul(-halfwidth)
+            val finalPlus = it.finalPoint.add(dVecPlus)
+            val finalMinus = it.finalPoint.add(dVecMinus)
+            pts1.add(finalPlus)
+            pts2.add(finalMinus)
         }
         val spline1 = UniformBSpline(pts1).splinePoints()
         val spline2 = UniformBSpline(pts2).splinePoints()
         spline1.forEachIndexed{ i, _ ->
-            finalSpline.add(spline1[i].plus(spline2[i]).times(0.5f))
+            val auxVector = spline1[i].add(spline2[i])
+            val splinePoint = auxVector.mul(0.5f)
+            finalSpline.add(splinePoint)
         }
         return DummySpline(finalSpline)
     }
 
-    data class GuidePoint(val finalPoint: GLVector, val cVec: GLVector, val dVec: GLVector,
+    data class GuidePoint(val finalPoint: Vector3f, val cVec: Vector3f, val dVec: Vector3f,
                           val offset: Float = 0f, var widthFactor: Float = 0f,
                           val prevResidue: Group?, val nextResidue: Group?)
 
@@ -105,29 +111,30 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             val ca2 = aminoList[i + 1].getAtom("CA")
             val ca1Vec = ca1.getVector()
             val ca2Vec = ca2.getVector()
-            val aVec = ca1Vec.minus(ca2Vec)
+            val aVec = ca1Vec.sub(ca2Vec)
             val o = aminoList[i].getAtom("O")
             val bVec = o.getVector()
 
-            val finalPoint = ca1Vec.plus(ca2Vec).times(0.5f)
+            val auxPoint = ca1Vec.sub(ca2Vec)
+            val finalPoint = auxPoint.mul(0.5f)
             //See Carlson et. al
-            val cVec = aVec.cross(bVec).normalized
-            val dVec = cVec.cross(aVec).normalized
+            val cVec = aVec.cross(bVec).normalize()
+            val dVec = cVec.cross(aVec).normalize()
             val widthFactor: Float
             val offset: Float
             when {
                 (i >= 1 && i < aminoList.size - 3) -> {
                     val ca0 = aminoList[i - 1].getAtom("CA").getVector()
                     val ca3 = aminoList[i + 2].getAtom("CA").getVector()
-                    val ca0Ca3 = ca0.minus(ca3)
-                    val ca0Ca3Distance = ca0Ca3.length2()
+                    val ca0Ca3 = ca0.sub(ca3)
+                    val ca0Ca3Distance = ca0.distance(ca3)
                     when {
                         (ca0Ca3Distance > 7f) -> {
                             widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
                             offset = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
-                            val ca0Ca3Midpoint = ca0Ca3.times(0.5f)
-                            val offsetVec = finalPoint.minus(ca0Ca3Midpoint).normalized.times(offset * maxOffSet)
-                            finalPoint.plus(offsetVec)
+                            val ca0Ca3Midpoint = ca0Ca3.mul(0.5f)
+                            val offsetVec = finalPoint.sub(ca0Ca3Midpoint).normalize().mul(offset * maxOffSet)
+                            finalPoint.add(offsetVec)
                         }
                         (ca0Ca3Distance < 9f) -> {
                             widthFactor = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
@@ -169,8 +176,8 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         }
 
         //dummy points at the beginning
-        fun GLVector.randomFromVector(): GLVector {
-            return GLVector( randomFromRange(this.x()-1f, this.x()+1f),
+        fun Vector3f.randomFromVector(): Vector3f {
+            return Vector3f( randomFromRange(this.x()-1f, this.x()+1f),
                         randomFromRange(this.y()-1f, this.y()+1f),
                         randomFromRange(this.z()-1f, this.z()+1f)) }
         val caBegin = aminoList[0].getAtom("CA").getVector()
@@ -204,9 +211,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             val maxCaCaDistance = 5.0f
             val ca1 = aminoAcids[i].getAtom("CA")
             val ca2 = aminoAcids[i+1].getAtom("CA")
-            val ca1Vec = GLVector(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
-            val ca2Vec = GLVector(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
-            if(ca1Vec.minus(ca2Vec).length2() > maxCaCaDistance) {
+            val ca1Vec = Vector3f(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
+            val ca2Vec = Vector3f(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
+            if(ca1Vec.distance(ca2Vec) > maxCaCaDistance) {
                 chains.addAll(distinctChains(aminoAcids.drop(i)))
                 return chains
             }
@@ -218,8 +225,8 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
     private fun untwistRibbon(guidePoints: ArrayList<GuidePoint>): ArrayList<GuidePoint> {
         guidePoints.forEachIndexed{ i, _ ->
             if(i > 0) {
-                if (guidePoints[i].dVec.times(guidePoints[i - 1].dVec) < 0f) {
-                    guidePoints[i].dVec.times(-1f)
+                if (guidePoints[i].dVec.dot(guidePoints[i - 1].dVec) < 0f) {
+                    guidePoints[i].dVec.mul(-1f)
                 }
             }
         }

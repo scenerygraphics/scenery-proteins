@@ -1,6 +1,6 @@
 package graphics.scenery.proteins
 
-import cleargl.GLVector
+import org.joml.*
 import graphics.scenery.*
 import org.biojava.nbio.structure.Bond
 import org.biojava.nbio.structure.BondImpl
@@ -40,7 +40,7 @@ class BackBoneSticks(val protein: Protein): Mesh("SecondaryStructureSticks") {
         val c = Cylinder(0.025f, 1.0f, 10)
         c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
         c.instancedProperties["ModelMatrix"] = {c.model}
-        c.material.diffuse = GLVector(1.0f, 1.0f, 1.0f)
+        c.material.diffuse = Vector3f(1.0f, 1.0f, 1.0f)
 
         val chains = struc.chains
         val groups = chains.flatMap { it.atomGroups }
@@ -86,8 +86,8 @@ class BackBoneSticks(val protein: Protein): Mesh("SecondaryStructureSticks") {
             bond.parent = backBone
             val atomA = it.atomA
             val atomB = it.atomB
-            bond.orientBetweenPoints(GLVector(atomA.x.toFloat(), atomA.y.toFloat(), atomA.z.toFloat()),
-                    GLVector(atomB.x.toFloat(), atomB.y.toFloat(), atomB.z.toFloat()), true, true)
+            bond.orientBetweenPoints(Vector3f(atomA.x.toFloat(), atomA.y.toFloat(), atomA.z.toFloat()),
+                    Vector3f(atomB.x.toFloat(), atomB.y.toFloat(), atomB.z.toFloat()), true, true)
             bond.instancedProperties["ModelMatrix1"] = { bond.model }
             bond
         }

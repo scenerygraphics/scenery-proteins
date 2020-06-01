@@ -1,6 +1,6 @@
 package graphics.scenery.proteins
 
-import cleargl.GLVector
+import org.joml.*
 
 /**
  * This class is a dummy spline in case one has all the points of a spline and wants to use them in
@@ -8,12 +8,16 @@ import cleargl.GLVector
  *
  * @author Justin Bürger
  */
-class DummySpline(override val controlPoints: ArrayList<GLVector>): Spline(controlPoints, n = 100) {
+class DummySpline(protected val controlPoints: ArrayList<Vector3f>): Spline {
 
     /**
      * Simply returns the control points as the spline points.
      */
-    override fun splinePoints(): ArrayList<GLVector> {
+    override fun splinePoints(): ArrayList<Vector3f> {
+        return controlPoints
+    }
+
+    override fun controlPoints(): List<Vector3f> {
         return controlPoints
     }
 }

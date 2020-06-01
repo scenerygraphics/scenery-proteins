@@ -1,6 +1,6 @@
 package unit
 
-import cleargl.GLVector
+import org.joml.*
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.CatmullRomSpline
 import graphics.scenery.proteins.Curve
@@ -26,34 +26,38 @@ class CurveTests {
     @Test
     fun testCurve() {
         logger.info("This is the test for the Curve.")
-        val point1 = Random.randomVectorFromRange(3, -30f, -10f)
-        val point2 = Random.randomVectorFromRange(3, -9f, 20f)
-        val point3 = Random.randomVectorFromRange(3, 21f, 30f)
-        val point4 = Random.randomVectorFromRange(3, 31f, 100f)
+        val point1 = Random.random3DVectorFromRange( -30f, -10f)
+        val point2 = Random.random3DVectorFromRange( -9f, 20f)
+        val point3 = Random.random3DVectorFromRange( 21f, 30f)
+        val point4 = Random.random3DVectorFromRange( 31f, 100f)
 
         val controlPoints = arrayListOf(point1, point2, point3, point4)
 
         val curve = CatmullRomSpline(controlPoints)
 
-        fun triangle(): ArrayList<GLVector> {
-            val list = ArrayList<GLVector>()
-            list.add(GLVector(0.3f, 0.3f, 0f))
-            list.add(GLVector(0.3f, -0.3f, 0f))
-            list.add(GLVector(-0.3f, -0.3f, 0f))
-            return list
+        fun triangle(splineVerticesCount: Int): ArrayList<ArrayList<Vector3f>> {
+            val shapeList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
+            for (i in 0 until splineVerticesCount) {
+                val list = ArrayList<Vector3f>()
+                list.add(Vector3f(0.3f, 0.3f, 0f))
+                list.add(Vector3f(0.3f, -0.3f, 0f))
+                list.add(Vector3f(-0.3f, -0.3f, 0f))
+                shapeList.add(list)
+            }
+            return shapeList
         }
 
-        val geometry = Curve(curve) { triangle() }
+        val geometry = Curve(curve) { triangle(curve.splinePoints().size) }
         val frenetFrames = geometry.computeFrenetFrames(geometry.getCurve())
 
         assertEquals(curve.splinePoints(), geometry.getCurve())
         assertNotNull(frenetFrames.forEach { it.normal })
         assertNotNull(frenetFrames.forEach{ it.bitangent })
-        assertEquals(frenetFrames.filter { it.bitangent?.length2()!! < 1.001f && it.bitangent?.length2()!! > 0.999f },
+        assertEquals(frenetFrames.filter { it.bitangent?.length()!! < 1.001f && it.bitangent?.length()!! > 0.999f },
                 frenetFrames)
-        assertEquals(frenetFrames.filter { it.normal?.length2()!! < 1.001f && it.normal?.length2()!! > 0.999f },
+        assertEquals(frenetFrames.filter { it.normal?.length()!! < 1.001f && it.normal?.length()!! > 0.999f },
                 frenetFrames)
-        assertEquals(frenetFrames.filter { it.tangent.length2() < 1.001f && it.tangent.length2() > 0.999f },
+        assertEquals(frenetFrames.filter { it.tangent.length() < 1.001f && it.tangent.length() > 0.999f },
                 frenetFrames)
     }
 
@@ -63,36 +67,19 @@ class CurveTests {
     @Test
     fun testDrawSpline() {
         logger.info("This is the test for the CurveGeometry.")
-        val point1 = Random.randomVectorFromRange(3, -30f, -10f)
-        val point2 = Random.randomVectorFromRange(3, -9f, 20f)
-        val point3 = Random.randomVectorFromRange(3, 21f, 30f)
-        val point4 = Random.randomVectorFromRange(3, 31f, 100f)
+        val point1 = Random.random3DVectorFromRange( -30f, -10f)
+        val point2 = Random.random3DVectorFromRange( -9f, 20f)
+        val point3 = Random.random3DVectorFromRange( 21f, 30f)
+        val point4 = Random.random3DVectorFromRange( 31f, 100f)
 
         val controlPoints = arrayListOf(point1, point2, point3, point4)
 
         val curve = CatmullRomSpline(controlPoints)
 
         /*
-        For this baseShape function the number of points may differ each time
-        the baseShape function is invoked. However, the algorithm for calculating
-        the triangles only works if the number of points of the baseShape is constant
-        over the curve: the function should throw an error.
+      TODO write a test which verifies, that the at least two consecutive baseShapes are required to draw the curve
          */
-        fun triangleFalse(): ArrayList<GLVector> {
-            val i = Random.randomFromRange(0.99f, 1.1f)
-            val list = ArrayList<GLVector>()
-            list.add(GLVector(0.3f, 0.3f, 0f))
-            list.add(GLVector(0.3f, -0.3f, 0f))
-            list.add(GLVector(-0.3f, -0.3f, 0f))
-            return if(i >= 1 ) {
-                list
-            } else {
-                list.add(GLVector(0f, 0f, 0f))
-                list
-            }
-        }
 
-        assertFails {  Curve(curve) { triangleFalse() } }
     }
 
     /**
@@ -101,17 +88,21 @@ class CurveTests {
     @Test
     fun testEmptySpline() {
         logger.info("Tests the curve with an empty spline")
-        val emptyList = ArrayList<GLVector>()
+        val emptyList = ArrayList<Vector3f>()
         val spline = UniformBSpline(emptyList)
-        fun triangle(): ArrayList<GLVector> {
-            val list = ArrayList<GLVector>()
-            list.add(GLVector(0.3f, 0.3f, 0f))
-            list.add(GLVector(0.3f, -0.3f, 0f))
-            list.add(GLVector(-0.3f, -0.3f, 0f))
-            return list
+        fun triangle(splineVerticesCount: Int): ArrayList<ArrayList<Vector3f>> {
+            val shapeList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
+            for (i in 0 until splineVerticesCount) {
+                val list = ArrayList<Vector3f>()
+                list.add(Vector3f(0.3f, 0.3f, 0f))
+                list.add(Vector3f(0.3f, -0.3f, 0f))
+                list.add(Vector3f(-0.3f, -0.3f, 0f))
+                shapeList.add(list)
+            }
+            return shapeList
         }
         val emptyFloatBuffer = BufferUtils.createFloatBuffer(0)
-        val curve = Curve(spline) { triangle() }
+        val curve = Curve(spline) { triangle(spline.controlPoints().size) }
         assertEquals(curve.vertices, emptyFloatBuffer)
     }
 }

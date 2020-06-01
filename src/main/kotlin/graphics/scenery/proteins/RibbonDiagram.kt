@@ -1,6 +1,6 @@
 package graphics.scenery.proteins
 
-import cleargl.GLVector
+import org.joml.*
 import graphics.scenery.*
 import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.secstruc.*
@@ -30,7 +30,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
      * This class stores for each section of the protein the locations of its C-Alpha atoms and its
      * type of secondary structure
      */
-    data class Section(val controlpoints: ArrayList<GLVector>, val Type: SecStrucType)
+    data class Section(val controlpoints: ArrayList<Vector3f>, val Type: SecStrucType)
 
     /**
      * This function calculates the sections of the different secondary structures of the protein.
@@ -42,17 +42,17 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
         val sections = ArrayList<Section>(secStrucs.size + groups.size)
 
         //first we add the whole backBone
-        val allPoints = ArrayList<GLVector>(groups.size)
+        val allPoints = ArrayList<Vector3f>(groups.size)
         groups.flatMap { it.atoms }.forEach {
             if(it.name == "CA") {
-                allPoints.add(GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
+                allPoints.add(Vector3f(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
             }
         }
         sections.add(Section(allPoints, SecStrucType.bend))
 
         //Then we add the secondary structures from the dssp
         secStrucs.forEach { secStruc ->
-            val points = ArrayList<GLVector>(secStruc.range.length)
+            val points = ArrayList<Vector3f>(secStruc.range.length)
             val type = secStruc.type
             //The dssp is not exhaustive; therefore, we need to make sure every group is included
             groups.forEach {group ->
@@ -60,7 +60,7 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
                     if(secStruc.range.getResidue(i, map) == group.residueNumber) {
                         group.atoms.forEach {
                             if (it.name == "CA") {
-                                points.add(GLVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
+                                points.add(Vector3f(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()))
                             }
                         }
                     }
@@ -84,39 +84,39 @@ class RibbonDiagram(val protein: Protein): Mesh("SecondaryStructure") {
         /**
          * This is the baseShape for the backbone: a simple octagon.
          */
-        fun octagon(): ArrayList<GLVector> {
-            val octagon = ArrayList<GLVector>(8)
+        fun octagon(): ArrayList<Vector3f> {
+            val octagon = ArrayList<Vector3f>(8)
             val sin45 = kotlin.math.sqrt(2f) /40f
-            octagon.add(GLVector(0.05f, 0f, 0f))
-            octagon.add(GLVector(sin45, sin45, 0f))
-            octagon.add(GLVector(0f, 0.05f, 0f))
-            octagon.add(GLVector(-sin45, sin45, 0f))
-            octagon.add(GLVector(-0.05f, 0f, 0f))
-            octagon.add(GLVector(-sin45, -sin45, 0f))
-            octagon.add(GLVector(0f, -0.05f, 0f))
-            octagon.add(GLVector(sin45, -sin45, 0f))
+            octagon.add(Vector3f(0.05f, 0f, 0f))
+            octagon.add(Vector3f(sin45, sin45, 0f))
+            octagon.add(Vector3f(0f, 0.05f, 0f))
+            octagon.add(Vector3f(-sin45, sin45, 0f))
+            octagon.add(Vector3f(-0.05f, 0f, 0f))
+            octagon.add(Vector3f(-sin45, -sin45, 0f))
+            octagon.add(Vector3f(0f, -0.05f, 0f))
+            octagon.add(Vector3f(sin45, -sin45, 0f))
             return octagon
         }
 
         /**
          * This is the baseShape for the helices: a rectangle.
          */
-        fun rectangle(): ArrayList<GLVector> {
-            val rectangle = ArrayList<GLVector>(4)
-            rectangle.add(GLVector(0.5f, 0.05f, 0f))
-            rectangle.add(GLVector(-0.5f, 0.05f, 0f))
-            rectangle.add(GLVector(-0.5f, -0.05f, 0f))
-            rectangle.add(GLVector(0.5f, -0.05f, 0f))
+        fun rectangle(): ArrayList<Vector3f> {
+            val rectangle = ArrayList<Vector3f>(4)
+            rectangle.add(Vector3f(0.5f, 0.05f, 0f))
+            rectangle.add(Vector3f(-0.5f, 0.05f, 0f))
+            rectangle.add(Vector3f(-0.5f, -0.05f, 0f))
+            rectangle.add(Vector3f(0.5f, -0.05f, 0f))
             return rectangle
         }
 
         //TODO BaseShape for beta strands
-        fun arrow(): ArrayList<GLVector> {
-            val arrow = ArrayList<GLVector>(4)
-            arrow.add(GLVector(0.05f, 0.5f, 0f))
-            arrow.add(GLVector(-0.05f, 0.5f, 0f))
-            arrow.add(GLVector(-0.05f, -0.5f, 0f))
-            arrow.add(GLVector(0.05f, -0.5f, 0f))
+        fun arrow(): ArrayList<Vector3f> {
+            val arrow = ArrayList<Vector3f>(4)
+            arrow.add(Vector3f(0.05f, 0.5f, 0f))
+            arrow.add(Vector3f(-0.05f, 0.5f, 0f))
+            arrow.add(Vector3f(-0.05f, -0.5f, 0f))
+            arrow.add(Vector3f(0.05f, -0.5f, 0f))
             return arrow
         }
         /*
