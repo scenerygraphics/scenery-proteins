@@ -157,27 +157,49 @@ class Curve(curve: Spline, baseShape: (baseShapeVertexCount: Int) -> ArrayList<A
         if (curveGeometry.isEmpty()) {
             return verticesVectors
         }
-        curveGeometry.groupBy { it.size }.forEach {
+        /*
+        The initial capacity is not correct if the curveGeometry has multiple parts with
+        the same number of vertices in the shape. However, this is the best I can can yet come
+        up with
+        */
+        val subgeometries = ArrayList<List<List<Vector3f>>>(curveGeometry.groupBy { it.size }.size)
+        var i = 0
+        while( i < curveGeometry.lastIndex) {
+            val partialCurve = ArrayList<List<Vector3f>>()
+            partialCurve.add(curveGeometry[i])
+            while (curveGeometry[i].size == curveGeometry[i + 1].size) {
+                partialCurve.add(curveGeometry[i+1])
+                if(i < curveGeometry.lastIndex-1) {
+                    i++
+                }
+                else  { break }
+            }
+            i++
+            //TODO Safety in case last shape is different in size!
+            subgeometries.add(partialCurve)
+        }
+
+        subgeometries.forEachIndexed { subIndex, subgeometry ->
             //if one baseShape is different from both it's predecessor and successor, it will get ignored
-            if (it.value.size != 1) {
-                it.value.dropLast(1).forEachIndexed { shapeIndex, shape ->
+            if (subgeometry.size != 1) {
+                subgeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
                     shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
 
-                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
-                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                        verticesVectors.add(subgeometries[subIndex][shapeIndex][vertexIndex])
+                        verticesVectors.add(subgeometries[subIndex][shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][vertexIndex])
 
-                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
-                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                        verticesVectors.add(subgeometries[subIndex][shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][vertexIndex + 1])
+                        verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][vertexIndex])
                     }
-                    verticesVectors.add(curveGeometry[shapeIndex][0])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][0])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+                    verticesVectors.add(subgeometries[subIndex][shapeIndex][0])
+                    verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][0])
+                    verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][shape.lastIndex])
 
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][0])
+                    verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][shape.lastIndex])
+                    verticesVectors.add(subgeometries[subIndex][shapeIndex][shape.lastIndex])
+                    verticesVectors.add(subgeometries[subIndex][shapeIndex][0])
                 }
             }
         }
