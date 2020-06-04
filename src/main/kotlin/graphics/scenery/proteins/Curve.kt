@@ -12,11 +12,12 @@ import kotlin.math.acos
 /**
  * Constructs a geometry along the calculates points of a Spline (in this case a Catmull Rom Spline).
  * This class inherits from Node and HasGeometry
- * The number n corresponds to the number of segments you wish to have between you control points.
+ * The number n corresponds to the number of segments you wish to have between your control points.
  *
  * @author  Justin Buerger <burger@mpi-cbg.de>
  */
-class Curve(curve: Spline, baseShape: (baseShapeVertexCount: Int) -> ArrayList<ArrayList<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
+class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
+    // TODO: Check if lambda parameter is actually used or necessary
     private val chain = curve.splinePoints()
 
     /**
@@ -51,13 +52,14 @@ class Curve(curve: Spline, baseShape: (baseShapeVertexCount: Int) -> ArrayList<A
             }
         }
         val curveGeometry = ArrayList<ArrayList<Vector3f>>(bases.size)
-        baseShape.invoke(chain.size).forEachIndexed { index, shape ->
-            val baseShape = ArrayList<Vector3f>(shape.size)
+        baseShape.invoke().forEachIndexed { index, shape ->
+            // TODO : Change name because of shadowing
+            val shapeVertexList = ArrayList<Vector3f>(shape.size)
             shape.forEach {
                 val vec = Vector3f(it.x(), it.y(), it.z())
-                baseShape.add(bases[index].transformPosition(vec))
+                shapeVertexList.add(bases[index].transformPosition(vec))
             }
-            curveGeometry.add(baseShape)
+            curveGeometry.add(shapeVertexList)
         }
 
         val verticesVectors = calculateTriangles(curveGeometry)
