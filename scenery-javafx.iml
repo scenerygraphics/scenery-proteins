@@ -72,8 +72,6 @@
     <orderEntry type="library" name="Maven: org.joml:joml:1.9.22" level="project" />
     <orderEntry type="library" name="Maven: com.github.scenerygraphics:vector:958f2e6" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2:5.8.0" level="project" />
-    <orderEntry type="library" name="Maven: net.clearcontrol:coremem:0.4.7" level="project" />
-    <orderEntry type="library" name="Maven: com.nativelibs4java:bridj:0.7.0" level="project" />
     <orderEntry type="library" name="Maven: net.java.jinput:jinput:2.0.9" level="project" />
     <orderEntry type="library" name="Maven: net.java.jinput:jinput:natives-all:2.0.9" level="project" />
     <orderEntry type="library" name="Maven: org.scijava:script-editor:0.5.0" level="project" />
@@ -98,6 +96,10 @@
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.5" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.24" level="project" />
     <orderEntry type="library" name="Maven: net.sf.trove4j:trove4j:3.0.3" level="project" />
+    <orderEntry type="library" name="Maven: org.scijava:scripting-jython:0.4.2" level="project" />
+    <orderEntry type="library" name="Maven: org.scijava:jython-shaded:2.7.1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.jnr:jffi:1.2.17" level="project" />
+    <orderEntry type="library" name="Maven: com.github.jnr:jffi:native:1.2.17" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna:4.5.2" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna-platform:4.5.2" level="project" />
     <orderEntry type="library" name="Maven: org.jocl:jocl:2.0.1" level="project" />
@@ -147,7 +149,7 @@
     <orderEntry type="library" name="Maven: org.reflections:reflections:0.9.11" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.25.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: com.github.skalarproduktraum:jogl-minimal:992c9ad" level="project" />
+    <orderEntry type="library" name="Maven: sc.fiji:bigvolumeviewer:0.1.8" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-algorithm:0.11.1" level="project" />
     <orderEntry type="library" name="Maven: gov.nist.math:jama:1.0.3" level="project" />
@@ -174,19 +176,19 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.18" level="project" />
     <orderEntry type="library" name="Maven: org.janelia.saalfeldlab:n5-imglib2:3.4.1" level="project" />
     <orderEntry type="library" name="Maven: net.imglib2:imglib2-label-multisets:0.8.1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4-M1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.4-M1" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4-M2" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.4-M2" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4-M1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.4-M1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5-1.4-M1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-common:1.4-M1" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4-M2" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.4-M2" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7-1.4-M2" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-common:1.4-M2" level="project" />
     <orderEntry type="library" name="Maven: org.scijava:scijava-common:2.82.0" level="project" />
     <orderEntry type="library" name="Maven: org.scijava:parsington:1.0.4" level="project" />
     <orderEntry type="library" name="Maven: org.bushe:eventbus:1.4" level="project" />
     <orderEntry type="library" name="Maven: org.scijava:scripting-javascript:0.4.4" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-junit:1.4-M1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-annotations-common:1.4-M1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-junit:1.4-M2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-annotations-common:1.4-M2" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-simple:1.7.25" level="project" />
@@ -212,7 +214,7 @@
     <orderEntry type="library" name="Maven: org.biojava:biojava-modfinder:5.3.0" level="project" />
     <orderEntry type="library" name="Maven: graphics.scenery:spirvcrossj:0.6.0-1.1.106.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: graphics.scenery:spirvcrossj:natives-windows:0.6.0-1.1.106.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test:1.3.72" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-common:1.3.72" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test:1.4-M2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-common:1.4-M2" level="project" />
   </component>
 </module>

@@ -17,7 +17,6 @@ import kotlin.math.acos
  * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
-    // TODO: Check if lambda parameter is actually used or necessary
     private val chain = curve.splinePoints()
 
     /**
@@ -53,7 +52,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         }
         val curveGeometry = ArrayList<ArrayList<Vector3f>>(bases.size)
         baseShape.invoke().forEachIndexed { index, shape ->
-            // TODO : Change name because of shadowing
             val shapeVertexList = ArrayList<Vector3f>(shape.size)
             shape.forEach {
                 val vec = Vector3f(it.x(), it.y(), it.z())
@@ -126,7 +124,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
             val b = Vector3f(firstFrame.tangent).cross(secondFrame.tangent)
             //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
-            if (b.length() < 0.0001f) {
+            if (b.length() < 0.001f) {
                 secondFrame.normal = firstFrame.normal
                 secondFrame.bitangent = firstFrame.bitangent
             } else {

@@ -13,7 +13,7 @@ import java.nio.file.InvalidPathException
  */
 
 
-class PDBLoader() {
+class PDBLoader {
 
     val reader = PDBFileReader()
 

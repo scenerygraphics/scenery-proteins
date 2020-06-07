@@ -41,8 +41,7 @@ import java.lang.Float.min
  * by Richardson et al.)
  */
 
-//TODO Besides, this function should do it. Then you need to find out, whether there are different chains
-//TODO in a protein, well of course there are but is it possible to have more than one c aplha trace?
+
 //TODO Afterwards, assign each Residue a secondary Structure (ss) if there are more than three in a row and
 //TODO the offset is bigger than 0, draw the ss with a Bspline with the control points from predecessor
 //TODO of the beginning of the ss to the successor of the end of ss. This should do it and the only
@@ -75,24 +74,30 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             }
         }
         val guidePoints = calculateGuidePoints(aminoList)
+        aminoList.forEachIndexed { index, it ->
+            val ca = it.getAtom("CA").getVector()
+            println("$ca and ${guidePoints[index+2]}")
+        }
+
         val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
         val pts1 = ArrayList<Vector3f>(guidePoints.size)
         val pts2 = ArrayList<Vector3f>(guidePoints.size)
         guidePoints.forEach{
             val ribWith = if(it.offset > 0f){widthAlpha} else {widthBeta}
             val halfwidth = 0.5f*(widthCoil + it.widthFactor*(ribWith-widthCoil))
-            val dVecPlus = it.dVec.mul(halfwidth)
-            val dVecMinus = it.dVec.mul(-halfwidth)
-            val finalPlus = it.finalPoint.add(dVecPlus)
-            val finalMinus = it.finalPoint.add(dVecMinus)
-            pts1.add(finalPlus)
-            pts2.add(finalMinus)
+            val dVecPlus = Vector3f()
+            it.finalPoint.add(it.dVec.mul(halfwidth, dVecPlus), dVecPlus)
+            val dVecMinus = Vector3f()
+            it.finalPoint.add(it.dVec.mul(-halfwidth, dVecMinus), dVecMinus)
+            pts1.add(dVecPlus)
+            pts2.add(dVecMinus)
         }
         val spline1 = UniformBSpline(pts1).splinePoints()
         val spline2 = UniformBSpline(pts2).splinePoints()
         spline1.forEachIndexed{ i, _ ->
-            val auxVector = spline1[i].add(spline2[i])
-            val splinePoint = auxVector.mul(0.5f)
+            val splinePoint = Vector3f()
+            spline1[i].add(spline2[i], splinePoint)
+            splinePoint.mul(0.5f)
             finalSpline.add(splinePoint)
         }
         return DummySpline(finalSpline)
@@ -106,34 +111,45 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         val guidePointsWithoutDummy = ArrayList<GuidePoint>(aminoList.size-1)
         val guidePoints = ArrayList<GuidePoint>(aminoList.size + 4 -1)
         val maxOffSet = 1.5f
+        //TODO make it windowed
         aminoList.dropLast(1).forEachIndexed { i, _ ->
             val ca1 = aminoList[i].getAtom("CA")
             val ca2 = aminoList[i + 1].getAtom("CA")
             val ca1Vec = ca1.getVector()
             val ca2Vec = ca2.getVector()
-            val aVec = ca1Vec.sub(ca2Vec)
+            val aVec = Vector3f()
+            ca1Vec.sub(ca2Vec, aVec)
             val o = aminoList[i].getAtom("O")
             val bVec = o.getVector()
 
-            val auxPoint = ca1Vec.sub(ca2Vec)
-            val finalPoint = auxPoint.mul(0.5f)
+            val finalPoint = Vector3f()
+            ca1Vec.add(ca2Vec, finalPoint)
+            finalPoint.mul(0.5f)
             //See Carlson et. al
-            val cVec = aVec.cross(bVec).normalize()
-            val dVec = cVec.cross(aVec).normalize()
+            val cVec = Vector3f()
+            aVec.cross(bVec, cVec)
+            cVec.normalize()
+            val dVec = Vector3f()
+            cVec.cross(aVec, dVec)
+            cVec.normalize()
             val widthFactor: Float
             val offset: Float
             when {
                 (i >= 1 && i < aminoList.size - 3) -> {
                     val ca0 = aminoList[i - 1].getAtom("CA").getVector()
                     val ca3 = aminoList[i + 2].getAtom("CA").getVector()
-                    val ca0Ca3 = ca0.sub(ca3)
+                    val ca0Ca3 = Vector3f()
+                    ca0.sub(ca3, ca0Ca3)
                     val ca0Ca3Distance = ca0.distance(ca3)
                     when {
                         (ca0Ca3Distance > 7f) -> {
                             widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
                             offset = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
-                            val ca0Ca3Midpoint = ca0Ca3.mul(0.5f)
-                            val offsetVec = finalPoint.sub(ca0Ca3Midpoint).normalize().mul(offset * maxOffSet)
+                            val ca0Ca3Midpoint = Vector3f()
+                            ca0Ca3.mul(0.5f, ca0Ca3Midpoint)
+                            val offsetVec = Vector3f()
+                            finalPoint.sub(ca0Ca3Midpoint, offsetVec)
+                            offsetVec.normalize().mul(offset * maxOffSet)
                             finalPoint.add(offsetVec)
                         }
                         (ca0Ca3Distance < 9f) -> {
