@@ -34,7 +34,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
             }
         }
 
-
+        /*
         val sphere = Icosphere(0.5f, 2)
         sphere.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
         sphere.instancedProperties["ModelMatrix"] = {sphere.model}
@@ -52,20 +52,9 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         node.addChild(sphere)
         scene.addChild(node)
+        */
 
-
-        fun triangle(splineVerticesCount: Int): ArrayList<ArrayList<Vector3f>> {
-            val shapeList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
-            for (i in 0 until splineVerticesCount) {
-                val list = ArrayList<Vector3f>(3)
-                list.add(Vector3f(0.3f, 0.3f, 0f))
-                list.add(Vector3f(0.3f, -0.3f, 0f))
-                list.add(Vector3f(-0.3f, -0.3f, 0f))
-                shapeList.add(list)
-            }
-            return shapeList
-        }
-        val curve = Curve(diagram.flatRibbon()) { triangle(diagram.flatRibbon().splinePoints().size) }
+        val curve = diagram.ribbonCurve()
 
         scene.addChild(curve)
 

@@ -124,7 +124,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
             val b = Vector3f(firstFrame.tangent).cross(secondFrame.tangent)
             //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
-            if (b.length() < 0.001f) {
+            if (b.length() < 0.01f) {
                 secondFrame.normal = firstFrame.normal
                 secondFrame.bitangent = firstFrame.bitangent
             } else {

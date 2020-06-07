@@ -6,6 +6,7 @@ import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
 import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
+import org.biojava.nbio.structure.secstruc.SecStrucType
 import java.lang.Float.min
 
 /**
@@ -41,17 +42,7 @@ import java.lang.Float.min
  * by Richardson et al.)
  */
 
-
-//TODO Afterwards, assign each Residue a secondary Structure (ss) if there are more than three in a row and
-//TODO the offset is bigger than 0, draw the ss with a Bspline with the control points from predecessor
-//TODO of the beginning of the ss to the successor of the end of ss. This should do it and the only
-//TODO open question remains: How to elegantly draw the different geometries?
-/*
-        val allAminoAcids = chains.filter{it.isProtein}.flatMap{ chain ->
-            chain.atomGroups.filter{it.isAminoAcid && it.hasAtom("CA") }}
-        val allAminoAcidsDistinct = distinctChains(allAminoAcids)
-         */
-class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
+class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
 
     private val structure = protein.structure
     private val chains = structure.chains
@@ -59,13 +50,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
     private val widthAlpha = 2.0f
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
+    private val aminoList =  ArrayList<Group>(groups.size)
 
-    private fun Atom.getVector(): Vector3f {
-        return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
-    }
-
-    fun flatRibbon(): Spline {
-        val aminoList =  ArrayList<Group>(groups.size)
+    fun ribbonCurve(): Curve {
         chains.forEach{ chain ->
             chain.atomGroups.forEach { group ->
                 if(group.hasAminoAtoms()) {
@@ -73,13 +60,105 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                 }
             }
         }
-        val guidePoints = calculateGuidePoints(aminoList)
-        aminoList.forEachIndexed { index, it ->
-            val ca = it.getAtom("CA").getVector()
-            println("$ca and ${guidePoints[index+2]}")
+        val guidePointList = calculateGuidePoints(aminoList)
+        val spline = ribbonSpline(guidePointList)
+        val skeleton = splineSkeleton(guidePointList)
+        val controlPointList = ArrayList<Vector3f>(guidePointList.size)
+        skeleton.splineSkeleton1.forEachIndexed{ i, _ ->
+            val splinePoint = Vector3f()
+            skeleton.splineSkeleton1[i].add(skeleton.splineSkeleton2[i], splinePoint)
+            splinePoint.mul(0.5f)
+            controlPointList.add(splinePoint)
         }
+        data class PointToType(val point: Vector3f, val type: SecStrucType)
+        val pointToTypeArray = ArrayList<PointToType>(guidePointList.size)
+        controlPointList.forEachIndexed{ index, point ->
+            val pointToType = PointToType(point, guidePointList[index].type)
+            pointToTypeArray.add(pointToType)
+        }
+        fun baseShape(): List<List<Vector3f>> {
+            val baseShapeList = ArrayList<List<Vector3f>>(spline.splinePoints().size)
+            val splinePoints = spline.splinePoints()
+            var verticesIndex = 0
+            pointToTypeArray.drop(1).dropLast(1).windowed(2, 1) { pointToTypeWindow ->
+                when {
+                    (pointToTypeWindow[0].type.isHelixType) -> {
+                        var helixIndex = 0
+                        splinePoints.drop(verticesIndex).takeWhile {
+                            verticesIndex++
+                            helixIndex++
+                            val rectangle = ArrayList<Vector3f>(4)
+                            rectangle.add(Vector3f(0.5f, 0.05f, 0f))
+                            rectangle.add(Vector3f(-0.5f, 0.05f, 0f))
+                            rectangle.add(Vector3f(-0.5f, -0.05f, 0f))
+                            rectangle.add(Vector3f(0.5f, -0.05f, 0f))
+                            baseShapeList.add(rectangle)
+                            (helixIndex <= 101 && verticesIndex < splinePoints.size)
+                        }
+                    }
+                    (pointToTypeWindow[0].type.isBetaStrand) -> {
+                        var i = 0
+                        var sheetIndex = 0
+                        splinePoints.drop(verticesIndex).takeWhile {
+                            sheetIndex++
+                            verticesIndex++
+                            i++
+                            (sheetIndex <= 101 && verticesIndex < splinePoints.size)
+                        }
+                        val seventyeightPercent = (i*0.78).toInt()
+                        for (i in 0 until seventyeightPercent) {
+                            val list = ArrayList<Vector3f>()
+                            list.add(Vector3f(0.1f, 0.5f, 0f))
+                            list.add(Vector3f(-0.1f, 0.5f, 0f))
+                            list.add(Vector3f(-0.1f, -0.5f, 0f))
+                            list.add(Vector3f(0.1f, -0.5f, 0f))
+                            baseShapeList.add(list)
+                        }
+                        val twentytwoPercent = i-seventyeightPercent
+                        for(i in twentytwoPercent downTo 1) {
+                            val y = 0.8f*i/twentytwoPercent
+                            val x = 0.1f
+                            val arrowHeadList = ArrayList<Vector3f>(twentytwoPercent)
+                            arrowHeadList.add(Vector3f(x, y, 0f))
+                            arrowHeadList.add(Vector3f(-x, y, 0f))
+                            arrowHeadList.add(Vector3f(-x, -y, 0f))
+                            arrowHeadList.add(Vector3f(x, -y, 0f))
+                            baseShapeList.add(arrowHeadList)
+                        }
+                    }
+                    else -> {
+                        var coilIndex = 0
+                        splinePoints.drop(verticesIndex).takeWhile {
+                            coilIndex++
+                            verticesIndex++
+                            val octagon = ArrayList<Vector3f>(8)
+                            val sin45 = kotlin.math.sqrt(2f) / 40f
+                            octagon.add(Vector3f(0.05f, 0f, 0f))
+                            octagon.add(Vector3f(sin45, sin45, 0f))
+                            octagon.add(Vector3f(0f, 0.05f, 0f))
+                            octagon.add(Vector3f(-sin45, sin45, 0f))
+                            octagon.add(Vector3f(-0.05f, 0f, 0f))
+                            octagon.add(Vector3f(-sin45, -sin45, 0f))
+                            octagon.add(Vector3f(0f, -0.05f, 0f))
+                            octagon.add(Vector3f(sin45, -sin45, 0f))
+                            baseShapeList.add(octagon)
+                            (coilIndex <= 101 && verticesIndex < splinePoints.size)
+                        }
+                    }
 
-        val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
+                }
+            }
+            return baseShapeList
+        }
+        return Curve(spline) { baseShape() }
+    }
+    private fun Atom.getVector(): Vector3f {
+        return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
+    }
+
+    data class SplineSkeleton(val splineSkeleton1: ArrayList<Vector3f>,
+                              val splineSkeleton2: ArrayList<Vector3f>)
+    private fun splineSkeleton(guidePoints: ArrayList<GuidePoint>): SplineSkeleton {
         val pts1 = ArrayList<Vector3f>(guidePoints.size)
         val pts2 = ArrayList<Vector3f>(guidePoints.size)
         guidePoints.forEach{
@@ -92,8 +171,15 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             pts1.add(dVecPlus)
             pts2.add(dVecMinus)
         }
-        val spline1 = UniformBSpline(pts1).splinePoints()
-        val spline2 = UniformBSpline(pts2).splinePoints()
+        return SplineSkeleton(pts1, pts2)
+    }
+
+    fun ribbonSpline(guidePoints: ArrayList<GuidePoint>): Spline {
+
+        val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
+        val skeleton = splineSkeleton(guidePoints)
+        val spline1 = UniformBSpline(skeleton.splineSkeleton1).splinePoints()
+        val spline2 = UniformBSpline(skeleton.splineSkeleton2).splinePoints()
         spline1.forEachIndexed{ i, _ ->
             val splinePoint = Vector3f()
             spline1[i].add(spline2[i], splinePoint)
@@ -105,7 +191,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
 
     data class GuidePoint(val finalPoint: Vector3f, val cVec: Vector3f, val dVec: Vector3f,
                           val offset: Float = 0f, var widthFactor: Float = 0f,
-                          val prevResidue: Group?, val nextResidue: Group?)
+                          val prevResidue: Group?, val nextResidue: Group?, var type: SecStrucType)
 
     private fun calculateGuidePoints(aminoList: List<Group>): ArrayList<GuidePoint> {
         val guidePointsWithoutDummy = ArrayList<GuidePoint>(aminoList.size-1)
@@ -134,6 +220,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             cVec.normalize()
             val widthFactor: Float
             val offset: Float
+            val type: SecStrucType
             when {
                 (i >= 1 && i < aminoList.size - 3) -> {
                     val ca0 = aminoList[i - 1].getAtom("CA").getVector()
@@ -142,7 +229,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                     ca0.sub(ca3, ca0Ca3)
                     val ca0Ca3Distance = ca0.distance(ca3)
                     when {
-                        (ca0Ca3Distance > 7f) -> {
+                        (ca0Ca3Distance < 7f) -> {
                             widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
                             offset = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
                             val ca0Ca3Midpoint = Vector3f()
@@ -151,24 +238,28 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
                             finalPoint.sub(ca0Ca3Midpoint, offsetVec)
                             offsetVec.normalize().mul(offset * maxOffSet)
                             finalPoint.add(offsetVec)
+                            type = SecStrucType.helix4
                         }
-                        (ca0Ca3Distance < 9f) -> {
+                        (ca0Ca3Distance > 9f) -> {
                             widthFactor = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
                             offset = 0f
+                            type = SecStrucType.extended
                         }
                         else -> {
                             widthFactor = 0f
                             offset = 0f
+                            type = SecStrucType.bend
                         }
                     }
                 }
                 else -> {
                     widthFactor = 0f
                     offset = 0f
+                    type = SecStrucType.bend
                 }
             }
             guidePointsWithoutDummy.add(i, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
-                    aminoList[i], aminoList[i+1]))
+                    aminoList[i], aminoList[i+1], type))
         }
 
         //only assign widthFactor if there are three guide points with one in a row
@@ -176,6 +267,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
             if(guidePointsWithoutDummy[j].widthFactor != 0f) {
                 if (guidePointsWithoutDummy[j+1].widthFactor == 0f || guidePointsWithoutDummy[j+2].widthFactor == 0f) {
                     guidePointsWithoutDummy[j].widthFactor = 0f
+                    guidePointsWithoutDummy[j].type = SecStrucType.bend
                 }
             }
         }
@@ -183,6 +275,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         if(guidePointsWithoutDummy[1].widthFactor != 0f && guidePointsWithoutDummy[2].widthFactor != 0f &&
                 guidePointsWithoutDummy[3].widthFactor != 0f) {
             guidePointsWithoutDummy[0].widthFactor = guidePointsWithoutDummy[1].widthFactor
+            guidePointsWithoutDummy[0].type = guidePointsWithoutDummy[0].type
         }
         //if there is a width factor is still assigned at the and, also assign it to the last point
         if(guidePointsWithoutDummy.dropLast(1).last().widthFactor != 0f &&
@@ -199,9 +292,11 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         val caBegin = aminoList[0].getAtom("CA").getVector()
         val dummyVecBeg = caBegin.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
-                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
+                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0],
+                guidePointsWithoutDummy[0].type))
         guidePoints.add(GuidePoint(caBegin, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
-                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0]))
+                guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0],
+                guidePointsWithoutDummy[0].type))
         //add all guide points from the previous calculation
         guidePoints.addAll(guidePointsWithoutDummy)
         //add dummy points at the end
@@ -209,12 +304,12 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         guidePoints.add(GuidePoint(caEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last()))
+                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type))
         val dummyVecEnd = caEnd.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last()))
+                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type))
 
         return untwistRibbon(guidePoints)
     }
@@ -248,5 +343,4 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonDiagram") {
         }
         return guidePoints
     }
-
 }
