@@ -55,7 +55,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
     private val aminoList =  ArrayList<Group>(groups.size)
-    private val sectionVerticesCount = 25
+    private val sectionVerticesCount = 10
 
     fun ribbonCurve(): Curve {
         chains.forEach{ chain ->
@@ -78,34 +78,34 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                 when {
                     (pointToTypeWindow[0].type == SecStrucType.helix4) -> {
                         var helixIndex = 0
-                        val helixList = ArrayList<Vector3f>(sectionVerticesCount +1)
+                        val helixList = ArrayList<Vector3f>(sectionVerticesCount)
                         splinePoints.drop(verticesIndex).takeWhile {
                             verticesIndex++
                             helixIndex++
                             helixList.add(it)
-                            (helixIndex <= sectionVerticesCount + 1 && verticesIndex < splinePoints.size)
+                            (helixIndex <= sectionVerticesCount && verticesIndex < splinePoints.size)
                         }
                         sectionList.add(Section(pointToTypeWindow[0].type, helixList))
                     }
                     (pointToTypeWindow[0].type.isBetaStrand) -> {
                         var sheetIndex = 0
-                        val sheetList = ArrayList<Vector3f>(sectionVerticesCount +1)
+                        val sheetList = ArrayList<Vector3f>(sectionVerticesCount)
                         splinePoints.drop(verticesIndex).takeWhile {
                             sheetIndex++
                             verticesIndex++
                             sheetList.add(it)
-                            (sheetIndex <= sectionVerticesCount + 1 && verticesIndex < splinePoints.size)
+                            (sheetIndex <= sectionVerticesCount && verticesIndex < splinePoints.size)
                         }
                         sectionList.add(Section(pointToTypeWindow[0].type, sheetList))
                     }
                     else -> {
                         var coilIndex = 0
-                        val bendList = ArrayList<Vector3f>(sectionVerticesCount +1)
+                        val bendList = ArrayList<Vector3f>(sectionVerticesCount)
                         splinePoints.drop(verticesIndex).takeWhile {
                             coilIndex++
                             verticesIndex++
                             bendList.add(it)
-                            (coilIndex <= sectionVerticesCount +1 && verticesIndex < splinePoints.size)
+                            (coilIndex <= sectionVerticesCount && verticesIndex < splinePoints.size)
                         }
                         sectionList.add(Section(pointToTypeWindow[0].type, bendList))
                     }
@@ -141,10 +141,10 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                     (it.type == SecStrucType.helix4) -> {
                         it.pointsOfSection.forEach {
                             val rectangle = ArrayList<Vector3f>(4)
-                            rectangle.add(Vector3f(1f, 0.1f, 0f))
-                            rectangle.add(Vector3f(-1f, 0.1f, 0f))
-                            rectangle.add(Vector3f(-1f, -0.1f, 0f))
-                            rectangle.add(Vector3f(1f, -0.1f, 0f))
+                            rectangle.add(Vector3f(0.1f, 1f, 0f))
+                            rectangle.add(Vector3f(-0.1f, 1f, 0f))
+                            rectangle.add(Vector3f(-0.1f, -1f, 0f))
+                            rectangle.add(Vector3f(0.1f, -1f, 0f))
                             baseShapeList.add(rectangle)
                         }
                     }
@@ -153,10 +153,10 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                         val seventyeightPercent = (sheetSize*0.78).toInt()
                         for (j in 0 until seventyeightPercent) {
                             val list = ArrayList<Vector3f>(4)
-                            list.add(Vector3f(0.1f, 1f, 0f))
-                            list.add(Vector3f(-0.1f, 1f, 0f))
-                            list.add(Vector3f(-0.1f, -1f, 0f))
-                            list.add(Vector3f(0.1f, -1f, 0f))
+                            list.add(Vector3f(1f, 0.1f, 0f))
+                            list.add(Vector3f(-1f, 0.1f, 0f))
+                            list.add(Vector3f(-1f, -0.1f, 0f))
+                            list.add(Vector3f(1f, -0.1f, 0f))
                             baseShapeList.add(list)
                         }
                         val twentytwoPercent = sheetSize-seventyeightPercent

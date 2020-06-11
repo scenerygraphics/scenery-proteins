@@ -104,30 +104,34 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             val frenetFrame = FrenetFrame(getTangent(index), Vector3f(), Vector3f(), curve[index])
             frenetFrameList.add(frenetFrame)
         }
-
-        //initial normal vector perpendicular to first tangent vector
-        val vec = if(abs(frenetFrameList[0].tangent.x()) >= 0.9f || abs(frenetFrameList[0].tangent.z()) >= 0.9f) {
-            Vector3f(0f, 1f, 0f)
+        var min = MIN_VALUE
+        val vec = Vector3f()
+        val normal = Vector3f()
+        if(frenetFrameList[0].tangent.x() <= min) {
+            min = frenetFrameList[0].tangent.x()
+            normal.set(1f, 0f, 0f)
         }
-        else {
-            Vector3f(1f, 0f, 0f)
+        if(frenetFrameList[0].tangent.y() <= min) {
+            min = frenetFrameList[0].tangent.y()
+            normal.set(0f, 1f, 0f)
         }
-
-        val normal = Vector3f(frenetFrameList[0].tangent).cross(vec).normalize()
-
-        frenetFrameList[0].normal = normal
-        frenetFrameList[0].binormal = Vector3f(frenetFrameList[0].tangent).cross(normal).normalize()
+        if(frenetFrameList[0].tangent.z() <= min) {
+            normal.set(0f, 0f, 1f)
+        }
+        frenetFrameList[0].tangent.cross(normal, vec).normalize()
+        frenetFrameList[0].tangent.cross(vec, frenetFrameList[0].normal).normalize()
+        frenetFrameList[0].tangent.cross(frenetFrameList[0].normal, frenetFrameList[0].binormal).normalize()
 
         frenetFrameList.windowed(2,1).forEach { (firstFrame, secondFrame) ->
             val b = Vector3f(firstFrame.tangent).cross(secondFrame.tangent)
-            secondFrame.normal = firstFrame.normal
+            secondFrame.normal = firstFrame.normal.normalize()
             //if there is no substantial difference between two tangent vectors, the frenet frame need not to change
             if (b.length() > MIN_VALUE) {
+                val firstNormal = firstFrame.normal
                 b.normalize()
-                var theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(-1f, 1f))
-                val rotationMatrix = Matrix4f().rotate(AxisAngle4f(theta, b))
-                val normal4D = Vector4f(firstFrame.normal.x(), firstFrame.normal.y(), firstFrame.normal.z(), 1f)
-                secondFrame.normal = rotationMatrix.transform(normal4D).xyz().normalize()
+                val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(-1f, 1f))
+                val q = Quaternionf(AxisAngle4f(theta, b))
+                secondFrame.normal = q.transform(Vector3f(firstNormal)).normalize()
             }
             secondFrame.tangent.cross(secondFrame.normal, secondFrame.binormal).normalize()
         }
