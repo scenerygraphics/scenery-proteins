@@ -5,7 +5,11 @@ import graphics.scenery.Mesh
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
 import org.biojava.nbio.structure.Atom
+import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.Group
+import org.biojava.nbio.structure.secstruc.SecStrucCalc
+import org.biojava.nbio.structure.secstruc.SecStrucElement
+import org.biojava.nbio.structure.secstruc.SecStrucTools
 import org.biojava.nbio.structure.secstruc.SecStrucType
 import java.lang.Float.min
 
@@ -51,6 +55,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
     private val aminoList =  ArrayList<Group>(groups.size)
+    private val sectionVerticesCount = 25
 
     fun ribbonCurve(): Curve {
         chains.forEach{ chain ->
@@ -62,63 +67,103 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         }
         val guidePointList = calculateGuidePoints(aminoList)
         val spline = ribbonSpline(guidePointList)
-        val skeleton = splineSkeleton(guidePointList)
-        val controlPointList = ArrayList<Vector3f>(guidePointList.size)
-        skeleton.splineSkeleton1.forEachIndexed{ i, _ ->
-            val splinePoint = Vector3f()
-            skeleton.splineSkeleton1[i].add(skeleton.splineSkeleton2[i], splinePoint)
-            splinePoint.mul(0.5f)
-            controlPointList.add(splinePoint)
-        }
-        data class PointToType(val point: Vector3f, val type: SecStrucType)
-        val pointToTypeArray = ArrayList<PointToType>(guidePointList.size)
-        controlPointList.forEachIndexed{ index, point ->
-            val pointToType = PointToType(point, guidePointList[index].type)
-            pointToTypeArray.add(pointToType)
-        }
+
         fun baseShape(): List<List<Vector3f>> {
             val baseShapeList = ArrayList<List<Vector3f>>(spline.splinePoints().size)
             val splinePoints = spline.splinePoints()
             var verticesIndex = 0
-            pointToTypeArray.drop(1).dropLast(1).windowed(2, 1) { pointToTypeWindow ->
+            data class Section(val type: SecStrucType, val pointsOfSection: ArrayList<Vector3f>)
+            val sectionList = ArrayList<Section>(guidePointList.size)
+            guidePointList.drop(1).dropLast(1).windowed(2, 1) { pointToTypeWindow ->
                 when {
-                    (pointToTypeWindow[0].type.isHelixType) -> {
+                    (pointToTypeWindow[0].type == SecStrucType.helix4) -> {
                         var helixIndex = 0
+                        val helixList = ArrayList<Vector3f>(sectionVerticesCount +1)
                         splinePoints.drop(verticesIndex).takeWhile {
                             verticesIndex++
                             helixIndex++
-                            val rectangle = ArrayList<Vector3f>(4)
-                            rectangle.add(Vector3f(0.5f, 0.05f, 0f))
-                            rectangle.add(Vector3f(-0.5f, 0.05f, 0f))
-                            rectangle.add(Vector3f(-0.5f, -0.05f, 0f))
-                            rectangle.add(Vector3f(0.5f, -0.05f, 0f))
-                            baseShapeList.add(rectangle)
-                            (helixIndex <= 101 && verticesIndex < splinePoints.size)
+                            helixList.add(it)
+                            (helixIndex <= sectionVerticesCount + 1 && verticesIndex < splinePoints.size)
                         }
+                        sectionList.add(Section(pointToTypeWindow[0].type, helixList))
                     }
                     (pointToTypeWindow[0].type.isBetaStrand) -> {
-                        var i = 0
                         var sheetIndex = 0
+                        val sheetList = ArrayList<Vector3f>(sectionVerticesCount +1)
                         splinePoints.drop(verticesIndex).takeWhile {
                             sheetIndex++
                             verticesIndex++
-                            i++
-                            (sheetIndex <= 101 && verticesIndex < splinePoints.size)
+                            sheetList.add(it)
+                            (sheetIndex <= sectionVerticesCount + 1 && verticesIndex < splinePoints.size)
                         }
-                        val seventyeightPercent = (i*0.78).toInt()
-                        for (i in 0 until seventyeightPercent) {
-                            val list = ArrayList<Vector3f>()
-                            list.add(Vector3f(0.1f, 0.5f, 0f))
-                            list.add(Vector3f(-0.1f, 0.5f, 0f))
-                            list.add(Vector3f(-0.1f, -0.5f, 0f))
-                            list.add(Vector3f(0.1f, -0.5f, 0f))
+                        sectionList.add(Section(pointToTypeWindow[0].type, sheetList))
+                    }
+                    else -> {
+                        var coilIndex = 0
+                        val bendList = ArrayList<Vector3f>(sectionVerticesCount +1)
+                        splinePoints.drop(verticesIndex).takeWhile {
+                            coilIndex++
+                            verticesIndex++
+                            bendList.add(it)
+                            (coilIndex <= sectionVerticesCount +1 && verticesIndex < splinePoints.size)
+                        }
+                        sectionList.add(Section(pointToTypeWindow[0].type, bendList))
+                    }
+                }
+            }
+            val finalSectionList = ArrayList<Section>(sectionList.size)
+            var i = 0
+            while(i != sectionList.lastIndex) {
+                val helpList = ArrayList<Vector3f>(sectionVerticesCount*8)
+                sectionList.drop(i).takeWhile {
+                    helpList.addAll(it.pointsOfSection)
+                    if(i < sectionList.lastIndex) {
+                        i++
+                        if(it.type != sectionList[i].type) {
+                            val summarizedSectionList = ArrayList<Vector3f>(helpList.size)
+                            summarizedSectionList.addAll(helpList)
+                            finalSectionList.add(Section(it.type, summarizedSectionList))
+                            helpList.clear()
+                            true
+                        }
+                        else { true }
+                    }
+                    else {
+                        //edge case of the last point having a different type than its predecessor
+                        if(it.type != sectionList.dropLast(1).last().type) {
+                            finalSectionList.add(it)
+                        }
+                        false }
+                }
+            }
+            finalSectionList.forEach {
+                when {
+                    (it.type == SecStrucType.helix4) -> {
+                        it.pointsOfSection.forEach {
+                            val rectangle = ArrayList<Vector3f>(4)
+                            rectangle.add(Vector3f(1f, 0.1f, 0f))
+                            rectangle.add(Vector3f(-1f, 0.1f, 0f))
+                            rectangle.add(Vector3f(-1f, -0.1f, 0f))
+                            rectangle.add(Vector3f(1f, -0.1f, 0f))
+                            baseShapeList.add(rectangle)
+                        }
+                    }
+                    (it.type.isBetaStrand) -> {
+                        val sheetSize = it.pointsOfSection.size
+                        val seventyeightPercent = (sheetSize*0.78).toInt()
+                        for (j in 0 until seventyeightPercent) {
+                            val list = ArrayList<Vector3f>(4)
+                            list.add(Vector3f(0.1f, 1f, 0f))
+                            list.add(Vector3f(-0.1f, 1f, 0f))
+                            list.add(Vector3f(-0.1f, -1f, 0f))
+                            list.add(Vector3f(0.1f, -1f, 0f))
                             baseShapeList.add(list)
                         }
-                        val twentytwoPercent = i-seventyeightPercent
-                        for(i in twentytwoPercent downTo 1) {
-                            val y = 0.8f*i/twentytwoPercent
+                        val twentytwoPercent = sheetSize-seventyeightPercent
+                        for(j in twentytwoPercent downTo 1) {
+                            val y = 1.5f*j/twentytwoPercent
                             val x = 0.1f
-                            val arrowHeadList = ArrayList<Vector3f>(twentytwoPercent)
+                            val arrowHeadList = ArrayList<Vector3f>(4)
                             arrowHeadList.add(Vector3f(x, y, 0f))
                             arrowHeadList.add(Vector3f(-x, y, 0f))
                             arrowHeadList.add(Vector3f(-x, -y, 0f))
@@ -127,10 +172,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                         }
                     }
                     else -> {
-                        var coilIndex = 0
-                        splinePoints.drop(verticesIndex).takeWhile {
-                            coilIndex++
-                            verticesIndex++
+                        it.pointsOfSection.forEach {
                             val octagon = ArrayList<Vector3f>(8)
                             val sin45 = kotlin.math.sqrt(2f) / 40f
                             octagon.add(Vector3f(0.05f, 0f, 0f))
@@ -142,18 +184,28 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                             octagon.add(Vector3f(0f, -0.05f, 0f))
                             octagon.add(Vector3f(sin45, -sin45, 0f))
                             baseShapeList.add(octagon)
-                            (coilIndex <= 101 && verticesIndex < splinePoints.size)
                         }
                     }
-
                 }
             }
             return baseShapeList
+
         }
         return Curve(spline) { baseShape() }
     }
     private fun Atom.getVector(): Vector3f {
         return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
+    }
+
+    /**
+     * Returns the secondary structures of a protein, calculated with the dssp algorithm. For additional
+     * information about the algorithm see https://swift.cmbi.umcn.nl/gv/dssp/
+     */
+    private fun dssp(): List<SecStrucElement> {
+        //see: https://github.com/biojava/biojava-tutorial/blob/master/structure/secstruc.md
+        val ssc = SecStrucCalc()
+        ssc.calculate(structure, true)
+        return SecStrucTools.getSecStrucElements(structure)
     }
 
     data class SplineSkeleton(val splineSkeleton1: ArrayList<Vector3f>,
@@ -178,8 +230,8 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
 
         val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
         val skeleton = splineSkeleton(guidePoints)
-        val spline1 = UniformBSpline(skeleton.splineSkeleton1).splinePoints()
-        val spline2 = UniformBSpline(skeleton.splineSkeleton2).splinePoints()
+        val spline1 = UniformBSpline(skeleton.splineSkeleton1, sectionVerticesCount).splinePoints()
+        val spline2 = UniformBSpline(skeleton.splineSkeleton2, sectionVerticesCount).splinePoints()
         spline1.forEachIndexed{ i, _ ->
             val splinePoint = Vector3f()
             spline1[i].add(spline2[i], splinePoint)
@@ -220,7 +272,6 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
             cVec.normalize()
             val widthFactor: Float
             val offset: Float
-            val type: SecStrucType
             when {
                 (i >= 1 && i < aminoList.size - 3) -> {
                     val ca0 = aminoList[i - 1].getAtom("CA").getVector()
@@ -231,45 +282,71 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                     when {
                         (ca0Ca3Distance < 7f) -> {
                             widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
-                            offset = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
+                            offset = widthFactor
                             val ca0Ca3Midpoint = Vector3f()
                             ca0Ca3.mul(0.5f, ca0Ca3Midpoint)
                             val offsetVec = Vector3f()
                             finalPoint.sub(ca0Ca3Midpoint, offsetVec)
                             offsetVec.normalize().mul(offset * maxOffSet)
                             finalPoint.add(offsetVec)
-                            type = SecStrucType.helix4
                         }
                         (ca0Ca3Distance > 9f) -> {
                             widthFactor = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
                             offset = 0f
-                            type = SecStrucType.extended
                         }
                         else -> {
                             widthFactor = 0f
                             offset = 0f
-                            type = SecStrucType.bend
                         }
                     }
                 }
                 else -> {
                     widthFactor = 0f
                     offset = 0f
-                    type = SecStrucType.bend
                 }
             }
             guidePointsWithoutDummy.add(i, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
-                    aminoList[i], aminoList[i+1], type))
+                    aminoList[i], aminoList[i+1], SecStrucType.bend))
+        }
+
+        val secStrucs = dssp()
+        //This map is a necessary parameter for the range calculation
+        val map = AtomPositionMap(structure)
+
+        //Then we add the secondary structures from the dssp
+        secStrucs.forEach { secStruc ->
+            guidePointsWithoutDummy.forEach {guide ->
+                for( i in 0 .. secStruc.range.length) {
+                    if(secStruc.range.getResidue(i, map) == guide.nextResidue!!.residueNumber) {
+                        guide.type = secStruc.type
+                    }
+                }
+            }
         }
 
         //only assign widthFactor if there are three guide points with one in a row
-        guidePointsWithoutDummy.dropLast(2).forEachIndexed { j, _ ->
-            if(guidePointsWithoutDummy[j].widthFactor != 0f) {
-                if (guidePointsWithoutDummy[j+1].widthFactor == 0f || guidePointsWithoutDummy[j+2].widthFactor == 0f) {
-                    guidePointsWithoutDummy[j].widthFactor = 0f
-                    guidePointsWithoutDummy[j].type = SecStrucType.bend
+        guidePointsWithoutDummy.windowed(5, 1) { window ->
+            when {
+                (window[0].widthFactor == 0f && window[4].widthFactor == 0f) -> {
+                    if (window[1].widthFactor == 0f || window[2].widthFactor == 0f || window[3].widthFactor == 0f) {
+                        window[1].widthFactor = 0f
+                        window[2].widthFactor = 0f
+                        window[3].widthFactor = 0f
+                    }
+                }
+                (!window[0].type.isHelixType && !window[0].type.isBetaStrand
+                        && !window[4].type.isHelixType && !window[4].type.isBetaStrand) -> {
+                    for(i in 1..3) {
+                        if(!window[i].type.isHelixType || !window[i].type.isBetaStrand) {
+                            window[1].type = SecStrucType.bend
+                            window[2].type = SecStrucType.bend
+                            window[3].type = SecStrucType.bend
+                        }
+                    }
                 }
             }
+
+
         }
         //if there is a width factor is still assigned at the beginning, also assign it to the first point
         if(guidePointsWithoutDummy[1].widthFactor != 0f && guidePointsWithoutDummy[2].widthFactor != 0f &&

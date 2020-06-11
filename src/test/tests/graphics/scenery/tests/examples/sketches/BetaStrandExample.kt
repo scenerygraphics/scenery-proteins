@@ -53,7 +53,7 @@ class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, wi
             return shapeList
         }
 
-        val catmullRom = CatmullRomSpline(points)
+        val catmullRom = CatmullRomSpline(points, 30)
         val splineSize = catmullRom.splinePoints().size
         val geo = Curve(catmullRom) { betaStrand(splineSize) }
 

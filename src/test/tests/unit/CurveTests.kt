@@ -9,7 +9,6 @@ import graphics.scenery.utils.LazyLogger
 import org.junit.Test
 import org.lwjgl.BufferUtils
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 
 /**
@@ -52,8 +51,8 @@ class CurveTests {
 
         assertEquals(curve.splinePoints(), geometry.getCurve())
         assertNotNull(frenetFrames.forEach { it.normal })
-        assertNotNull(frenetFrames.forEach{ it.bitangent })
-        assertEquals(frenetFrames.filter { it.bitangent?.length()!! < 1.001f && it.bitangent?.length()!! > 0.999f },
+        assertNotNull(frenetFrames.forEach{ it.binormal })
+        assertEquals(frenetFrames.filter { it.binormal?.length()!! < 1.001f && it.binormal?.length()!! > 0.999f },
                 frenetFrames)
         assertEquals(frenetFrames.filter { it.normal?.length()!! < 1.001f && it.normal?.length()!! > 0.999f },
                 frenetFrames)

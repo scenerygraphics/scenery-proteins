@@ -45,7 +45,7 @@ class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth
         for(i in 0 until catmulChain.size) {
             val arrow1 = Arrow(frenet[i].tangent)
             val arrow2 = frenet[i].normal?.let { Arrow(it) }
-            val arrow3 = frenet[i].bitangent?.let { Arrow(it) }
+            val arrow3 = frenet[i].binormal?.let { Arrow(it) }
             val p = catmulChain[i]
             val e = 0.005f
             if( arrow2 != null && arrow3 != null) {
