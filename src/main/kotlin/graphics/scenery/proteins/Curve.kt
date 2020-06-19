@@ -17,6 +17,8 @@ import kotlin.math.acos
  * The number n corresponds to the number of segments you wish to have between your control points.
  *
  * @author  Justin Buerger <burger@mpi-cbg.de>
+ * @param [curve] the spline along which the geometry will be rendered
+ * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
 class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
     private val chain = curve.splinePoints()
@@ -69,7 +71,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
     }
 
     /**
-     * This function calculates the tangent at a given index in the catmull rom curve.
+     * This function calculates the tangent at a given index.
      * [i] index of the curve (not the geometry!)
      */
     private fun getTangent(i: Int): Vector3f {
@@ -156,18 +158,20 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         */
         val subgeometries = ArrayList<List<List<Vector3f>>>(curveGeometry.groupBy { it.size }.size)
         var i = 0
-        while( i < curveGeometry.lastIndex) {
+        while(i <= curveGeometry.lastIndex) {
+            //TODO allocation
             val partialCurve = ArrayList<List<Vector3f>>()
-            partialCurve.add(curveGeometry[i])
-            while (curveGeometry[i].size == curveGeometry[i + 1].size) {
-                partialCurve.add(curveGeometry[i+1])
-                if(i < curveGeometry.lastIndex-1) {
-                    i++
+            curveGeometry.drop(i).takeWhile { firstShape ->
+                i++
+                val index = curveGeometry.indexOf(firstShape)
+                partialCurve.add(firstShape)
+                if (index < curveGeometry.lastIndex) {
+                    firstShape.size == curveGeometry[index + 1].size
                 }
-                else  { break }
+                else {
+                    false
+                }
             }
-            i++
-            //TODO Safety in case last shape is different in size!
             subgeometries.add(partialCurve)
         }
 
