@@ -147,7 +147,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
      * along the curve.
      */
     private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
-        val verticesVectors = ArrayList<Vector3f>()
+        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatMap { it }.size*3)
         if (curveGeometry.isEmpty()) {
             return verticesVectors
         }
@@ -159,8 +159,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         val subgeometries = ArrayList<List<List<Vector3f>>>(curveGeometry.groupBy { it.size }.size)
         var i = 0
         while(i <= curveGeometry.lastIndex) {
-            //TODO allocation
-            val partialCurve = ArrayList<List<Vector3f>>()
+            val partialCurve = ArrayList<List<Vector3f>>(curveGeometry.size/curveGeometry.groupBy { it.size }.size)
             curveGeometry.drop(i).takeWhile { firstShape ->
                 i++
                 val index = curveGeometry.indexOf(firstShape)

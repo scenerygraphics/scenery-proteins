@@ -98,6 +98,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
             val splinePoints = spline.splinePoints()
             var verticesIndex = 0
             //The different groups are summarized into sections
+            //TODO only summarize beta strands!
             data class Section(val type: SecStrucType, val pointsOfSection: ArrayList<Vector3f>)
             val sectionList = ArrayList<Section>(guidePointList.size)
             guidePointList.drop(1).dropLast(1).windowed(2, 1) { pointToTypeWindow ->
@@ -270,7 +271,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
      * (a spline which list of controlPoints is equal to its guidePoints)
      */
     private fun ribbonSpline(guidePoints: ArrayList<GuidePoint>): Spline {
-        val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
+        val finalSpline = ArrayList<Vector3f>(guidePoints.size*sectionVerticesCount)
         val skeleton = splineSkeleton(guidePoints)
         val spline1 = UniformBSpline(skeleton.splineSkeleton1, sectionVerticesCount).splinePoints()
         val spline2 = UniformBSpline(skeleton.splineSkeleton2, sectionVerticesCount).splinePoints()
