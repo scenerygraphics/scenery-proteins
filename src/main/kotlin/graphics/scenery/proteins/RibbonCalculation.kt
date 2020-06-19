@@ -44,10 +44,28 @@ import java.lang.Float.min
  * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2788294/
  * (KING (Kinemage, Next Generation): A versatile interactive molecular and scientific visualization program,
  * by Richardson et al.)
+ *
+ * @author Justin Buerger <burger@mpi-cbg.de>
+ * @param [protein] the polypeptide you wish to visualize, stored in the class Protein
  */
 
 class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
 
+    /**
+     *@param [structure] the structure of the protein stored in the class Structure of BioJava
+     *@param [chains] all the chains of the protein (C-alpha trace and sidechains)
+     *@param [groups] atomGroups within the chains
+     *@param [widthAlpha] specifies how wide outside the C-alpha trace the controlpoints
+     * of the alpha helices will be
+     *@param [widthBeta] specifies how wide outside the C-alpha trace the controlpoints
+     * of the beta sheets will be
+     *@param [widthCoil] specifies how wide outside the C-alpha trace the controlpoints
+     * of the coil will be - 1 means they are going to be approximately on the trace
+     *@param [aminoList] List of all the amino acids in the protein
+     *@param [sectionVerticesCount] Specifies how fine grained the geometry along the backbone
+     * will be. Please note that the calculation could take much longer if this parameter is too
+     * big, especially for large proteins.
+     */
     private val structure = protein.structure
     private val chains = structure.chains
     private val groups = chains.flatMap { it.atomGroups }
@@ -57,6 +75,9 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
     private val aminoList =  ArrayList<Group>(groups.size)
     private val sectionVerticesCount = 10
 
+    /**
+     * Returns the final Ribbon Diagram
+     */
     fun ribbonCurve(): Curve {
         chains.forEach{ chain ->
             chain.atomGroups.forEach { group ->
@@ -68,10 +89,15 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         val guidePointList = calculateGuidePoints(aminoList)
         val spline = ribbonSpline(guidePointList)
 
+        /**
+         * The baseShape for the Spline, the coil is represented with an octagon,
+         * the helices with rectangles, and the sheets with arrows.
+         */
         fun baseShape(): List<List<Vector3f>> {
             val baseShapeList = ArrayList<List<Vector3f>>(spline.splinePoints().size)
             val splinePoints = spline.splinePoints()
             var verticesIndex = 0
+            //The different groups are summarized into sections
             data class Section(val type: SecStrucType, val pointsOfSection: ArrayList<Vector3f>)
             val sectionList = ArrayList<Section>(guidePointList.size)
             guidePointList.drop(1).dropLast(1).windowed(2, 1) { pointToTypeWindow ->
@@ -141,10 +167,10 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                     (it.type == SecStrucType.helix4) -> {
                         it.pointsOfSection.forEach {
                             val rectangle = ArrayList<Vector3f>(4)
-                            rectangle.add(Vector3f(0.1f, 1f, 0f))
-                            rectangle.add(Vector3f(-0.1f, 1f, 0f))
-                            rectangle.add(Vector3f(-0.1f, -1f, 0f))
-                            rectangle.add(Vector3f(0.1f, -1f, 0f))
+                            rectangle.add(Vector3f(1f, 0.1f, 0f))
+                            rectangle.add(Vector3f(-1f, 0.1f, 0f))
+                            rectangle.add(Vector3f(-1f, -0.1f, 0f))
+                            rectangle.add(Vector3f(1f, -0.1f, 0f))
                             baseShapeList.add(rectangle)
                         }
                     }
@@ -153,10 +179,10 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                         val seventyeightPercent = (sheetSize*0.78).toInt()
                         for (j in 0 until seventyeightPercent) {
                             val list = ArrayList<Vector3f>(4)
-                            list.add(Vector3f(1f, 0.1f, 0f))
-                            list.add(Vector3f(-1f, 0.1f, 0f))
-                            list.add(Vector3f(-1f, -0.1f, 0f))
-                            list.add(Vector3f(1f, -0.1f, 0f))
+                            list.add(Vector3f(0.1f, 1f, 0f))
+                            list.add(Vector3f(-0.1f, 1f, 0f))
+                            list.add(Vector3f(-0.1f, -1f, 0f))
+                            list.add(Vector3f(0.1f, -1f, 0f))
                             baseShapeList.add(list)
                         }
                         val twentytwoPercent = sheetSize-seventyeightPercent
@@ -193,6 +219,11 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         }
         return Curve(spline) { baseShape() }
     }
+
+    /**
+     * Inline function to make a Vector out of an atom position, as for now we do not
+     * need any information about an atom besides its name and its position
+     */
     private fun Atom.getVector(): Vector3f {
         return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
     }
@@ -208,8 +239,16 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         return SecStrucTools.getSecStrucElements(structure)
     }
 
-    data class SplineSkeleton(val splineSkeleton1: ArrayList<Vector3f>,
-                              val splineSkeleton2: ArrayList<Vector3f>)
+    /**
+     * data class containing two different B-Splines, which later will be
+     * melted into one.
+     */
+    data class SplineSkeleton(
+            val splineSkeleton1: ArrayList<Vector3f>,
+            val splineSkeleton2: ArrayList<Vector3f>)
+    /**
+     * Calculates the splineSkeleton out of the GuidePoints
+     */
     private fun splineSkeleton(guidePoints: ArrayList<GuidePoint>): SplineSkeleton {
         val pts1 = ArrayList<Vector3f>(guidePoints.size)
         val pts2 = ArrayList<Vector3f>(guidePoints.size)
@@ -226,8 +265,11 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         return SplineSkeleton(pts1, pts2)
     }
 
-    fun ribbonSpline(guidePoints: ArrayList<GuidePoint>): Spline {
-
+    /**
+     * Melts the two B-Splines of the SplineSkeleton into one Dummy-Spline
+     * (a spline which list of controlPoints is equal to its guidePoints)
+     */
+    private fun ribbonSpline(guidePoints: ArrayList<GuidePoint>): Spline {
         val finalSpline = ArrayList<Vector3f>(guidePoints.size*100)
         val skeleton = splineSkeleton(guidePoints)
         val spline1 = UniformBSpline(skeleton.splineSkeleton1, sectionVerticesCount).splinePoints()
@@ -241,15 +283,22 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         return DummySpline(finalSpline)
     }
 
+    /**
+     * data class for the GuidePoints
+     */
     data class GuidePoint(val finalPoint: Vector3f, val cVec: Vector3f, val dVec: Vector3f,
                           val offset: Float = 0f, var widthFactor: Float = 0f,
                           val prevResidue: Group?, val nextResidue: Group?, var type: SecStrucType)
 
+    /**
+     * Calculates the GuidePoints from the list of amino acids.
+     */
     private fun calculateGuidePoints(aminoList: List<Group>): ArrayList<GuidePoint> {
+        //To include all points in the visualization, dummy points need to be made.
+        //First, a list without these dummy points is calculated.
         val guidePointsWithoutDummy = ArrayList<GuidePoint>(aminoList.size-1)
         val guidePoints = ArrayList<GuidePoint>(aminoList.size + 4 -1)
         val maxOffSet = 1.5f
-        //TODO make it windowed
         aminoList.dropLast(1).forEachIndexed { i, _ ->
             val ca1 = aminoList[i].getAtom("CA")
             val ca2 = aminoList[i + 1].getAtom("CA")
@@ -272,6 +321,22 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
             cVec.normalize()
             val widthFactor: Float
             val offset: Float
+            /*
+             Ribbons widen in areas of high curvature, respectively helices, and
+             low curvature, respectively beta sheets. The factors are listed in
+             the table* below:
+
+             CA-CA DIST  WIDTH FACTOR    OFFSET FACTOR   NOTE
+             ==========  ============    =============   ====
+               5.0         1               1               ~limit for curled-up protein
+               5.5         1               1               } linear interpolation
+               7.0         0               0               } from 1.0 to 0.0
+               9.0         0               0               } linear interpolation
+               10.5        1               0               } from 1.0 to 0.0
+               11.0        1               0               ~limit for extended protein
+
+               *Copyright (C) 2002-2007 Ian W. Davis & Vincent B. Chen. All rights reserved
+             */
             when {
                 (i >= 1 && i < aminoList.size - 3) -> {
                     val ca0 = aminoList[i - 1].getAtom("CA").getVector()
@@ -279,6 +344,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                     val ca0Ca3 = Vector3f()
                     ca0.sub(ca3, ca0Ca3)
                     val ca0Ca3Distance = ca0.distance(ca3)
+                    //the
                     when {
                         (ca0Ca3Distance < 7f) -> {
                             widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
@@ -317,6 +383,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         secStrucs.forEach { secStruc ->
             guidePointsWithoutDummy.forEach {guide ->
                 for( i in 0 .. secStruc.range.length) {
+                    //BioJava uses residueNumber as an identifier for each residue
                     if(secStruc.range.getResidue(i, map) == guide.nextResidue!!.residueNumber) {
                         guide.type = secStruc.type
                     }
@@ -391,25 +458,10 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
         return untwistRibbon(guidePoints)
     }
 
-    private fun distinctChains(aminoAcids: List<Group>): ArrayList<ArrayList<Group>> {
-        val chains = ArrayList<ArrayList<Group>>(10)
-        val chain = ArrayList<Group>(aminoAcids.size)
-        aminoAcids.dropLast(1).forEachIndexed { i, aminoAcid ->
-            chain.add(aminoAcid)
-            val maxCaCaDistance = 5.0f
-            val ca1 = aminoAcids[i].getAtom("CA")
-            val ca2 = aminoAcids[i+1].getAtom("CA")
-            val ca1Vec = Vector3f(ca1.x.toFloat(), ca1.y.toFloat(), ca1.z.toFloat())
-            val ca2Vec = Vector3f(ca2.x.toFloat(), ca2.y.toFloat(), ca2.z.toFloat())
-            if(ca1Vec.distance(ca2Vec) > maxCaCaDistance) {
-                chains.addAll(distinctChains(aminoAcids.drop(i)))
-                return chains
-            }
-        }
-        chains.add(chain)
-        return chains
-    }
-
+    /**
+     * The calculation of the helices results in twists of the curve. This function
+     * takes a list of GuidePoints and untwists them.
+     */
     private fun untwistRibbon(guidePoints: ArrayList<GuidePoint>): ArrayList<GuidePoint> {
         guidePoints.forEachIndexed{ i, _ ->
             if(i > 0) {
