@@ -49,7 +49,7 @@ import java.lang.Float.min
  * @param [protein] the polypeptide you wish to visualize, stored in the class Protein
  */
 
-class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
+class RibbonCalculation(val protein: Protein) {
 
     /**
      *@param [structure] the structure of the protein stored in the class Structure of BioJava
@@ -60,7 +60,8 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
      *@param [widthBeta] specifies how wide outside the C-alpha trace the controlpoints
      * of the beta sheets will be
      *@param [widthCoil] specifies how wide outside the C-alpha trace the controlpoints
-     * of the coil will be - 1 means they are going to be approximately on the trace
+     * of the coil will be. The value 1 corresponds to the point laying approximately on
+     * the trace.
      *@param [aminoList] List of all the amino acids in the protein
      *@param [sectionVerticesCount] Specifies how fine grained the geometry along the backbone
      * will be. Please note that the calculation could take much longer if this parameter is too
@@ -140,7 +141,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
             }
             val finalSectionList = ArrayList<Section>(sectionList.size)
             var i = 0
-            while(i != sectionList.lastIndex) {
+            while(i < sectionList.lastIndex) {
                 val helpList = ArrayList<Vector3f>(sectionVerticesCount*8)
                 sectionList.drop(i).takeWhile {
                     helpList.addAll(it.pointsOfSection)
@@ -345,7 +346,6 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                     val ca0Ca3 = Vector3f()
                     ca0.sub(ca3, ca0Ca3)
                     val ca0Ca3Distance = ca0.distance(ca3)
-                    //the
                     when {
                         (ca0Ca3Distance < 7f) -> {
                             widthFactor = min(1.5f, 7f - ca0Ca3Distance) / 1.5f
@@ -402,6 +402,7 @@ class RibbonCalculation(val protein: Protein): Mesh("RibbonVisualization") {
                         window[3].widthFactor = 0f
                     }
                 }
+                //TODO make it more finegrained so that there is not one section bends in a secondary struc
                 (!window[0].type.isHelixType && !window[0].type.isBetaStrand
                         && !window[4].type.isHelixType && !window[4].type.isBetaStrand) -> {
                     for(i in 1..3) {

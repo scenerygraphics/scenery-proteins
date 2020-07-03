@@ -4,7 +4,6 @@ import org.joml.*
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.Curve
 import graphics.scenery.proteins.RibbonCalculation
 import org.junit.Test
 
@@ -15,44 +14,9 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("6jmd")
+        val protein = Protein.fromID("2w49")
 
         val diagram = RibbonCalculation(protein)
-
-        val node = Node("Spheres")
-
-        val chains = protein.structure.chains
-        val caCollection = ArrayList<Vector3f>(100)
-        chains.forEach{ chain ->
-            chain.atomGroups.forEach {group ->
-                group.atoms.forEach {
-                    if(it.name == "CA") {
-                       val caVec = Vector3f(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
-                        caCollection.add(caVec)
-                    }
-                }
-            }
-        }
-
-        /*
-        val sphere = Icosphere(0.5f, 2)
-        sphere.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
-        sphere.instancedProperties["ModelMatrix"] = {sphere.model}
-        sphere.material.diffuse = Vector3f(1.0f, 1.0f, 1.0f)
-        renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
-
-        val caPoints = caCollection.map {
-            val section = Mesh()
-            section.parent = node
-            section.position = it
-            section.instancedProperties["ModelMatrix1"] = { section.model }
-            section
-        }
-        sphere.instances.addAll(caPoints)
-
-        node.addChild(sphere)
-        scene.addChild(node)
-        */
 
         val curve = diagram.ribbonCurve()
 
