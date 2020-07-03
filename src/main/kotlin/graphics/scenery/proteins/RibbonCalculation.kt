@@ -1,11 +1,9 @@
 package graphics.scenery.proteins
 
 import org.joml.*
-import graphics.scenery.Mesh
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
 import org.biojava.nbio.structure.Atom
-import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucElement
@@ -75,11 +73,13 @@ class RibbonCalculation(val protein: Protein) {
     private val widthCoil = 1.0f
     private val aminoList =  ArrayList<Group>(groups.size)
     private val sectionVerticesCount = 10
+    private val secStrucs = dssp()
 
     /**
      * Returns the final Ribbon Diagram
      */
     fun ribbonCurve(): Curve {
+
         chains.forEach{ chain ->
             chain.atomGroups.forEach { group ->
                 if(group.hasAminoAtoms()) {
@@ -87,6 +87,7 @@ class RibbonCalculation(val protein: Protein) {
                 }
             }
         }
+
         val guidePointList = calculateGuidePoints(aminoList)
         val spline = ribbonSpline(guidePointList)
 
@@ -97,82 +98,48 @@ class RibbonCalculation(val protein: Protein) {
         fun baseShape(): List<List<Vector3f>> {
             val baseShapeList = ArrayList<List<Vector3f>>(spline.splinePoints().size)
             val splinePoints = spline.splinePoints()
-            var verticesIndex = 0
             //The different groups are summarized into sections
-            //TODO only summarize beta strands!
             data class Section(val type: SecStrucType, val pointsOfSection: ArrayList<Vector3f>)
-            val sectionList = ArrayList<Section>(guidePointList.size)
-            guidePointList.drop(1).dropLast(1).windowed(2, 1) { pointToTypeWindow ->
-                when {
-                    (pointToTypeWindow[0].type == SecStrucType.helix4) -> {
-                        var helixIndex = 0
-                        val helixList = ArrayList<Vector3f>(sectionVerticesCount)
-                        splinePoints.drop(verticesIndex).takeWhile {
-                            verticesIndex++
-                            helixIndex++
-                            helixList.add(it)
-                            (helixIndex <= sectionVerticesCount && verticesIndex < splinePoints.size)
-                        }
-                        sectionList.add(Section(pointToTypeWindow[0].type, helixList))
-                    }
-                    (pointToTypeWindow[0].type.isBetaStrand) -> {
-                        var sheetIndex = 0
-                        val sheetList = ArrayList<Vector3f>(sectionVerticesCount)
-                        splinePoints.drop(verticesIndex).takeWhile {
-                            sheetIndex++
-                            verticesIndex++
-                            sheetList.add(it)
-                            (sheetIndex <= sectionVerticesCount && verticesIndex < splinePoints.size)
-                        }
-                        sectionList.add(Section(pointToTypeWindow[0].type, sheetList))
-                    }
-                    else -> {
-                        var coilIndex = 0
-                        val bendList = ArrayList<Vector3f>(sectionVerticesCount)
-                        splinePoints.drop(verticesIndex).takeWhile {
-                            coilIndex++
-                            verticesIndex++
-                            bendList.add(it)
-                            (coilIndex <= sectionVerticesCount && verticesIndex < splinePoints.size)
-                        }
-                        sectionList.add(Section(pointToTypeWindow[0].type, bendList))
-                    }
+            val sectionListFinal = ArrayList<Section>(secStrucs.size)
+            secStrucs.forEach { secondaryStructure ->
+                val length = secondaryStructure.length
+                val sectionList = ArrayList<Vector3f>(length*sectionVerticesCount)
+                val offset = sectionListFinal.flatMap { it.pointsOfSection }.size
+                val splineFromOffset = splinePoints.drop(offset)
+                for(i in 0 until length*sectionVerticesCount) {
+                    sectionList.add(splineFromOffset[i])
                 }
+                val section = Section(secondaryStructure.type, sectionList)
+                sectionListFinal.add(section)
             }
-            val finalSectionList = ArrayList<Section>(sectionList.size)
-            var i = 0
-            while(i < sectionList.lastIndex) {
-                val helpList = ArrayList<Vector3f>(sectionVerticesCount*8)
-                sectionList.drop(i).takeWhile {
-                    helpList.addAll(it.pointsOfSection)
-                    if(i < sectionList.lastIndex) {
-                        i++
-                        if(it.type != sectionList[i].type) {
-                            val summarizedSectionList = ArrayList<Vector3f>(helpList.size)
-                            summarizedSectionList.addAll(helpList)
-                            finalSectionList.add(Section(it.type, summarizedSectionList))
-                            helpList.clear()
-                            true
-                        }
-                        else { true }
-                    }
-                    else {
-                        //edge case of the last point having a different type than its predecessor
-                        if(it.type != sectionList.dropLast(1).last().type) {
-                            finalSectionList.add(it)
-                        }
-                        false }
-                }
-            }
-            finalSectionList.forEach {
+
+            val rectangle = ArrayList<Vector3f>(4)
+            rectangle.add(Vector3f(1f, 0.1f, 0f))
+            rectangle.add(Vector3f(-1f, 0.1f, 0f))
+            rectangle.add(Vector3f(-1f, -0.1f, 0f))
+            rectangle.add(Vector3f(1f, -0.1f, 0f))
+
+            val octagon = ArrayList<Vector3f>(8)
+            val sin45 = kotlin.math.sqrt(2f) / 40f
+            octagon.add(Vector3f(0.05f, 0f, 0f))
+            octagon.add(Vector3f(sin45, sin45, 0f))
+            octagon.add(Vector3f(0f, 0.05f, 0f))
+            octagon.add(Vector3f(-sin45, sin45, 0f))
+            octagon.add(Vector3f(-0.05f, 0f, 0f))
+            octagon.add(Vector3f(-sin45, -sin45, 0f))
+            octagon.add(Vector3f(0f, -0.05f, 0f))
+            octagon.add(Vector3f(sin45, -sin45, 0f))
+
+            val reversedRectangle = ArrayList<Vector3f>(4)
+            reversedRectangle.add(Vector3f(0.1f, 1f, 0f))
+            reversedRectangle.add(Vector3f(-0.1f, 1f, 0f))
+            reversedRectangle.add(Vector3f(-0.1f, -1f, 0f))
+            reversedRectangle.add(Vector3f(0.1f, -1f, 0f))
+
+            sectionListFinal.forEach {
                 when {
                     (it.type == SecStrucType.helix4) -> {
                         it.pointsOfSection.forEach {
-                            val rectangle = ArrayList<Vector3f>(4)
-                            rectangle.add(Vector3f(1f, 0.1f, 0f))
-                            rectangle.add(Vector3f(-1f, 0.1f, 0f))
-                            rectangle.add(Vector3f(-1f, -0.1f, 0f))
-                            rectangle.add(Vector3f(1f, -0.1f, 0f))
                             baseShapeList.add(rectangle)
                         }
                     }
@@ -180,12 +147,7 @@ class RibbonCalculation(val protein: Protein) {
                         val sheetSize = it.pointsOfSection.size
                         val seventyeightPercent = (sheetSize*0.78).toInt()
                         for (j in 0 until seventyeightPercent) {
-                            val list = ArrayList<Vector3f>(4)
-                            list.add(Vector3f(0.1f, 1f, 0f))
-                            list.add(Vector3f(-0.1f, 1f, 0f))
-                            list.add(Vector3f(-0.1f, -1f, 0f))
-                            list.add(Vector3f(0.1f, -1f, 0f))
-                            baseShapeList.add(list)
+                            baseShapeList.add(reversedRectangle)
                         }
                         val twentytwoPercent = sheetSize-seventyeightPercent
                         for(j in twentytwoPercent downTo 1) {
@@ -201,16 +163,6 @@ class RibbonCalculation(val protein: Protein) {
                     }
                     else -> {
                         it.pointsOfSection.forEach {
-                            val octagon = ArrayList<Vector3f>(8)
-                            val sin45 = kotlin.math.sqrt(2f) / 40f
-                            octagon.add(Vector3f(0.05f, 0f, 0f))
-                            octagon.add(Vector3f(sin45, sin45, 0f))
-                            octagon.add(Vector3f(0f, 0.05f, 0f))
-                            octagon.add(Vector3f(-sin45, sin45, 0f))
-                            octagon.add(Vector3f(-0.05f, 0f, 0f))
-                            octagon.add(Vector3f(-sin45, -sin45, 0f))
-                            octagon.add(Vector3f(0f, -0.05f, 0f))
-                            octagon.add(Vector3f(sin45, -sin45, 0f))
                             baseShapeList.add(octagon)
                         }
                     }
@@ -375,18 +327,18 @@ class RibbonCalculation(val protein: Protein) {
             guidePointsWithoutDummy.add(i, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
                     aminoList[i], aminoList[i+1], SecStrucType.bend))
         }
-
-        val secStrucs = dssp()
-        //This map is a necessary parameter for the range calculation
-        val map = AtomPositionMap(structure)
-
+        var guidePointVar = 0
+        var secStrucVar = 0
         //Then we add the secondary structures from the dssp
-        secStrucs.forEach { secStruc ->
-            guidePointsWithoutDummy.forEach {guide ->
-                for( i in 0 .. secStruc.range.length) {
-                    //BioJava uses residueNumber as an identifier for each residue
-                    if(secStruc.range.getResidue(i, map) == guide.nextResidue!!.residueNumber) {
-                        guide.type = secStruc.type
+        guidePointsWithoutDummy.drop(guidePointVar).forEach { guide ->
+            secStrucs.drop(secStrucVar).forEach { secStruc ->
+                //BioJava uses residueNumber as an identifier for each residue
+                if(secStruc.range.start == guide.nextResidue!!.residueNumber) {
+                    secStrucVar++
+                    val offset = guidePointVar
+                    for(i in 0 until secStruc.range.length){
+                        guidePointsWithoutDummy[offset+i].type = secStruc.type
+                        guidePointVar++
                     }
                 }
             }
