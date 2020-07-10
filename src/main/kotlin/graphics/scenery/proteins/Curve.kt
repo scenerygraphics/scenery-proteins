@@ -10,6 +10,9 @@ import org.joml.*
 import kotlin.Float.Companion.MIN_VALUE
 import kotlin.math.abs
 import kotlin.math.acos
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
 
 /**
  * Constructs a geometry along the calculates points of a Spline (in this case a Catmull Rom Spline).
@@ -20,6 +23,7 @@ import kotlin.math.acos
  * @param [curve] the spline along which the geometry will be rendered
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
+@OptIn(ExperimentalTime::class)
 class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
     private val chain = curve.splinePoints()
 
@@ -59,7 +63,11 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             curveGeometry.add(shapeVertexList)
         }
 
-        val verticesVectors = calculateTriangles(curveGeometry)
+        val verticesVectors: ArrayList<Vector3f>
+        val duration = measureTime {
+            verticesVectors = calculateTriangles(curveGeometry)
+        }
+        logger.info("Calculating triangles took ${duration.inMilliseconds}")
 
         vertices = BufferUtils.allocateFloat(verticesVectors.size*3)
         verticesVectors.forEach{
@@ -147,7 +155,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
      * along the curve.
      */
     private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
-        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatMap { it }.size*3)
+        val verticesVectors = ArrayList<Vector3f>(10000)
         if (curveGeometry.isEmpty()) {
             return verticesVectors
         }
@@ -156,13 +164,15 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         the same number of vertices in the shape. However, this is the best I can can yet come
         up with
         */
-        val subgeometries = ArrayList<List<List<Vector3f>>>(curveGeometry.groupBy { it.size }.size)
+        val subgeometries = ArrayList<List<List<Vector3f>>>(10000)
         var i = 0
         while(i <= curveGeometry.lastIndex) {
-            val partialCurve = ArrayList<List<Vector3f>>(curveGeometry.size/curveGeometry.groupBy { it.size }.size)
+            val partialCurve = ArrayList<List<Vector3f>>(10000)
+            var j = 0
             curveGeometry.drop(i).takeWhile { firstShape ->
                 i++
-                val index = curveGeometry.indexOf(firstShape)
+                j++
+                val index = i+j-2
                 partialCurve.add(firstShape)
                 if (index < curveGeometry.lastIndex) {
                     firstShape.size == curveGeometry[index + 1].size
