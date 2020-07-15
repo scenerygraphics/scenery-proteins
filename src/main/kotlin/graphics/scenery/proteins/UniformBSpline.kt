@@ -52,7 +52,7 @@ class UniformBSpline(protected val controlPoints: ArrayList<Vector3f>, val n: In
             ArrayList()
         }
         else {
-            val curvePoints = ArrayList<Vector3f>((controlPoints.size - 3) * n + 1)
+            val curvePoints = ArrayList<Vector3f>((controlPoints.size - 3) * (n + 1))
             controlPoints.dropLast(3).forEachIndexed { index, _ ->
                 val spline = partialSpline(controlPoints[index], controlPoints[index + 1],
                         controlPoints[index + 2], controlPoints[index + 3])

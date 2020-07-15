@@ -23,7 +23,6 @@ class RibbonCalculationTests {
         val ribbon = RibbonCalculation(prion)
         val curve = ribbon.ribbonCurve()
         assertNotNull(curve)
-        assertEquals(curve.getCurve().size, (395*10+395))
     }
 
 }

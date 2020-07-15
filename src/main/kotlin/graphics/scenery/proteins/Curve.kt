@@ -23,7 +23,6 @@ import kotlin.time.measureTimedValue
  * @param [curve] the spline along which the geometry will be rendered
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
-@OptIn(ExperimentalTime::class)
 class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
     private val chain = curve.splinePoints()
 
@@ -64,10 +63,8 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         }
 
         val verticesVectors: ArrayList<Vector3f>
-        val duration = measureTime {
-            verticesVectors = calculateTriangles(curveGeometry)
-        }
-        logger.info("Calculating triangles took ${duration.inMilliseconds}")
+        verticesVectors = calculateTriangles(curveGeometry)
+
 
         vertices = BufferUtils.allocateFloat(verticesVectors.size*3)
         verticesVectors.forEach{
@@ -128,6 +125,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         if(frenetFrameList[0].tangent.z() <= min) {
             normal.set(0f, 0f, 1f)
         }
+        else { normal.set(1f, 0f, 0f) }
         frenetFrameList[0].tangent.cross(normal, vec).normalize()
         frenetFrameList[0].tangent.cross(vec, frenetFrameList[0].normal).normalize()
         frenetFrameList[0].tangent.cross(frenetFrameList[0].normal, frenetFrameList[0].binormal).normalize()

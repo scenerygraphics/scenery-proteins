@@ -1,5 +1,6 @@
 package graphics.scenery.proteins
 
+import graphics.scenery.Mesh
 import org.joml.*
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
@@ -71,108 +72,110 @@ class RibbonCalculation(val protein: Protein) {
     private val widthAlpha = 2.0f
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
-    private val aminoList =  ArrayList<Group>(groups.size)
+    private val chainList =  ArrayList<List<Group>>(groups.size)
     private val sectionVerticesCount = 10
     private val secStrucs = dssp()
 
     /**
      * Returns the final Ribbon Diagram
      */
-    fun ribbonCurve(): Curve {
-
+    fun ribbonCurve(): Mesh {
+        val ribbon = Mesh("Mesh of the Ribbon")
         chains.forEach{ chain ->
-            chain.atomGroups.forEach { group ->
-                if(group.hasAminoAtoms()) {
-                    aminoList.add(group)
+            if(chain.isProtein) {
+                val aminoList = ArrayList<Group>(chain.atomGroups.size)
+                chain.atomGroups.forEach { group ->
+                    if (group.hasAminoAtoms()) {
+                        aminoList.add(group)
+                    }
                 }
+                chainList.add(aminoList)
             }
         }
+        chainList.forEach { aminoList ->
+            val guidePointList = calculateGuidePoints(aminoList)
+            val spline = ribbonSpline(guidePointList)
+            val chainCurve = Curve(spline) { baseShape(guidePointList, spline.splinePoints().size) }
+            ribbon.addChild(chainCurve)
+        }
+        return ribbon
+    }
 
-        val guidePointList = calculateGuidePoints(aminoList)
-        val spline = ribbonSpline(guidePointList)
+    /**
+     * The baseShape for the Spline, the coil is represented with an octagon,
+     * the helices with rectangles, and the sheets with arrows.
+     */
+    fun baseShape(guidePointList: ArrayList<GuidePoint>, size: Int): List<List<Vector3f>> {
 
-        /**
-         * The baseShape for the Spline, the coil is represented with an octagon,
-         * the helices with rectangles, and the sheets with arrows.
-         */
-        fun baseShape(): List<List<Vector3f>> {
-            val baseShapeList = ArrayList<List<Vector3f>>(spline.splinePoints().size)
-            val splinePoints = spline.splinePoints()
-            //The different groups are summarized into sections
-            data class Section(val type: SecStrucType, val pointsOfSection: ArrayList<Vector3f>)
-            val sectionListFinal = ArrayList<Section>(secStrucs.size)
-            secStrucs.forEach { secondaryStructure ->
-                val length = secondaryStructure.length
-                val sectionList = ArrayList<Vector3f>(length*sectionVerticesCount)
-                val offset = sectionListFinal.flatMap { it.pointsOfSection }.size
-                val splineFromOffset = splinePoints.drop(offset)
-                for(i in 0 until length*sectionVerticesCount) {
-                    sectionList.add(splineFromOffset[i])
-                }
-                val section = Section(secondaryStructure.type, sectionList)
-                sectionListFinal.add(section)
-            }
+        val baseShapeList = ArrayList<ArrayList<Vector3f>>(size)
+        val rectangle = ArrayList<Vector3f>(4)
+        rectangle.add(Vector3f(1f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1f, -0.1f, 0f))
+        rectangle.add(Vector3f(1f, -0.1f, 0f))
 
-            val rectangle = ArrayList<Vector3f>(4)
-            rectangle.add(Vector3f(1f, 0.1f, 0f))
-            rectangle.add(Vector3f(-1f, 0.1f, 0f))
-            rectangle.add(Vector3f(-1f, -0.1f, 0f))
-            rectangle.add(Vector3f(1f, -0.1f, 0f))
+        val octagon = ArrayList<Vector3f>(8)
+        val sin45 = kotlin.math.sqrt(2f) / 40f
+        octagon.add(Vector3f(0.05f, 0f, 0f))
+        octagon.add(Vector3f(sin45, sin45, 0f))
+        octagon.add(Vector3f(0f, 0.05f, 0f))
+        octagon.add(Vector3f(-sin45, sin45, 0f))
+        octagon.add(Vector3f(-0.05f, 0f, 0f))
+        octagon.add(Vector3f(-sin45, -sin45, 0f))
+        octagon.add(Vector3f(0f, -0.05f, 0f))
+        octagon.add(Vector3f(sin45, -sin45, 0f))
 
-            val octagon = ArrayList<Vector3f>(8)
-            val sin45 = kotlin.math.sqrt(2f) / 40f
-            octagon.add(Vector3f(0.05f, 0f, 0f))
-            octagon.add(Vector3f(sin45, sin45, 0f))
-            octagon.add(Vector3f(0f, 0.05f, 0f))
-            octagon.add(Vector3f(-sin45, sin45, 0f))
-            octagon.add(Vector3f(-0.05f, 0f, 0f))
-            octagon.add(Vector3f(-sin45, -sin45, 0f))
-            octagon.add(Vector3f(0f, -0.05f, 0f))
-            octagon.add(Vector3f(sin45, -sin45, 0f))
-
-            val reversedRectangle = ArrayList<Vector3f>(4)
-            reversedRectangle.add(Vector3f(0.1f, 1f, 0f))
-            reversedRectangle.add(Vector3f(-0.1f, 1f, 0f))
-            reversedRectangle.add(Vector3f(-0.1f, -1f, 0f))
-            reversedRectangle.add(Vector3f(0.1f, -1f, 0f))
-
-            sectionListFinal.forEach {
-                when {
-                    (it.type == SecStrucType.helix4) -> {
-                        it.pointsOfSection.forEach {
+        val reversedRectangle = ArrayList<Vector3f>(4)
+        reversedRectangle.add(Vector3f(0.1f, 1f, 0f))
+        reversedRectangle.add(Vector3f(-0.1f, 1f, 0f))
+        reversedRectangle.add(Vector3f(-0.1f, -1f, 0f))
+        reversedRectangle.add(Vector3f(0.1f, -1f, 0f))
+        var guidePointsOffset = 1
+        while(guidePointsOffset < guidePointList.lastIndex-1) {
+            val guide = guidePointList[guidePointsOffset]
+            val count = guide.count
+            guidePointsOffset++
+            when {
+                (guide.type == SecStrucType.helix4) -> {
+                    guidePointsOffset += count
+                    for (j in 0 .. count) {
+                        for (i in 0 .. sectionVerticesCount) {
                             baseShapeList.add(rectangle)
                         }
                     }
-                    (it.type.isBetaStrand) -> {
-                        val sheetSize = it.pointsOfSection.size
-                        val seventyeightPercent = (sheetSize*0.78).toInt()
-                        for (j in 0 until seventyeightPercent) {
-                            baseShapeList.add(reversedRectangle)
-                        }
-                        val twentytwoPercent = sheetSize-seventyeightPercent
-                        for(j in twentytwoPercent downTo 1) {
-                            val y = 1.5f*j/twentytwoPercent
-                            val x = 0.1f
-                            val arrowHeadList = ArrayList<Vector3f>(4)
-                            arrowHeadList.add(Vector3f(x, y, 0f))
-                            arrowHeadList.add(Vector3f(-x, y, 0f))
-                            arrowHeadList.add(Vector3f(-x, -y, 0f))
-                            arrowHeadList.add(Vector3f(x, -y, 0f))
-                            baseShapeList.add(arrowHeadList)
-                        }
+                }
+                (guide.type.isBetaStrand) -> {
+                    val sheetSize = (count+1)*(sectionVerticesCount+1)
+                    guidePointsOffset += count
+                    val seventyeightPercent = (sheetSize*0.78).toInt()
+                    for (j in 0 until seventyeightPercent) {
+                        baseShapeList.add(reversedRectangle)
                     }
-                    else -> {
-                        it.pointsOfSection.forEach {
+                    val twentytwoPercent = sheetSize-seventyeightPercent
+                    for(j in twentytwoPercent downTo 1) {
+                        val y = 1.5f*j/twentytwoPercent
+                        val x = 0.1f
+                        val arrowHeadList = ArrayList<Vector3f>(4)
+                        arrowHeadList.add(Vector3f(x, y, 0f))
+                        arrowHeadList.add(Vector3f(-x, y, 0f))
+                        arrowHeadList.add(Vector3f(-x, -y, 0f))
+                        arrowHeadList.add(Vector3f(x, -y, 0f))
+                        baseShapeList.add(arrowHeadList)
+                    }
+                }
+                else -> {
+                    guidePointsOffset += count
+                    for (j in 0 .. count) {
+                        for (i in 0 .. sectionVerticesCount) {
                             baseShapeList.add(octagon)
                         }
                     }
                 }
             }
-            return baseShapeList
-
         }
-        return Curve(spline) { baseShape() }
+        return baseShapeList
     }
+
 
     /**
      * Inline function to make a Vector out of an atom position, as for now we do not
@@ -238,11 +241,12 @@ class RibbonCalculation(val protein: Protein) {
     }
 
     /**
-     * data class for the GuidePoints
+     * data class for the GuidePoints. Count stands for the numbers of following residues which are elements of the
+     * same secondary structure (counting down to 1).
      */
     data class GuidePoint(val finalPoint: Vector3f, val cVec: Vector3f, val dVec: Vector3f,
                           val offset: Float = 0f, var widthFactor: Float = 0f,
-                          val prevResidue: Group?, val nextResidue: Group?, var type: SecStrucType)
+                          val prevResidue: Group?, val nextResidue: Group?, var type: SecStrucType, var count: Int)
 
     /**
      * Calculates the GuidePoints from the list of amino acids.
@@ -325,7 +329,7 @@ class RibbonCalculation(val protein: Protein) {
                 }
             }
             guidePointsWithoutDummy.add(i, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
-                    aminoList[i], aminoList[i+1], SecStrucType.bend))
+                    aminoList[i], aminoList[i+1], SecStrucType.bend, 0))
         }
         var guidePointVar = 0
         var secStrucVar = 0
@@ -337,7 +341,11 @@ class RibbonCalculation(val protein: Protein) {
                     secStrucVar++
                     val offset = guidePointVar
                     for(i in 0 until secStruc.range.length){
+                        if(i == guidePointsWithoutDummy.lastIndex) {
+                            break
+                        }
                         guidePointsWithoutDummy[offset+i].type = secStruc.type
+                        guidePointsWithoutDummy[offset+i].count = secStruc.range.length-1
                         guidePointVar++
                     }
                 }
@@ -388,26 +396,39 @@ class RibbonCalculation(val protein: Protein) {
                         randomFromRange(this.y()-1f, this.y()+1f),
                         randomFromRange(this.z()-1f, this.z()+1f)) }
         val caBegin = aminoList[0].getAtom("CA").getVector()
+        //increase the count of the first section because we add one more point
+        val count = guidePointsWithoutDummy[0].count
+        for(i in 0 .. count) {
+            guidePointsWithoutDummy[i].count++
+        }
         val dummyVecBeg = caBegin.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0],
-                guidePointsWithoutDummy[0].type))
+                guidePointsWithoutDummy[0].type, 0))
         guidePoints.add(GuidePoint(caBegin, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0],
-                guidePointsWithoutDummy[0].type))
+                guidePointsWithoutDummy[0].type, 0))
         //add all guide points from the previous calculation
         guidePoints.addAll(guidePointsWithoutDummy)
         //add dummy points at the end
         val caEnd = aminoList.last().getAtom("CA").getVector()
+        val lastCount = guidePoints.last().count
+        /*
+        for(i in guidePoints.lastIndex-lastCount .. guidePoints.lastIndex) {
+            guidePoints[i].count++
+        }
+         */
         guidePoints.add(GuidePoint(caEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type))
+                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type,
+                guidePointsWithoutDummy.last().count))
         val dummyVecEnd = caEnd.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type))
+                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type,
+                0))
 
         return untwistRibbon(guidePoints)
     }
