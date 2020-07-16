@@ -5,14 +5,9 @@ import graphics.scenery.HasGeometry
 import graphics.scenery.Mesh
 import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.toFloatArray
-import graphics.scenery.utils.extensions.xyz
 import org.joml.*
 import kotlin.Float.Companion.MIN_VALUE
-import kotlin.math.abs
 import kotlin.math.acos
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
-import kotlin.time.measureTimedValue
 
 /**
  * Constructs a geometry along the calculates points of a Spline (in this case a Catmull Rom Spline).
@@ -25,6 +20,7 @@ import kotlin.time.measureTimedValue
  */
 class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
     private val chain = curve.splinePoints()
+    private val countList = ArrayList<Int>(50).toMutableList()
 
     /**
      * This function renders the spline.
@@ -52,8 +48,65 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     nn.z(), nb.z(), nt.z(), 0f,
                     tr.x(), tr.y(), tr.z(), 1f)
         }
-        val curveGeometry = ArrayList<ArrayList<Vector3f>>(bases.size)
-        baseShape.invoke().forEachIndexed { index, shape ->
+        val curveGeometry = ArrayList<ArrayList<Vector3f>>()
+        val baseShapes = baseShape.invoke()
+        var i = 0
+        while (i <= baseShapes.lastIndex) {
+            var partialCurveSize = 0
+            baseShapes.drop(i).takeWhile { firstShape ->
+                val index = ++i
+                partialCurveSize++
+                if (index < baseShapes.lastIndex) {
+                    firstShape.size == baseShapes[index + 1].size
+                }
+                else {
+                    false
+                }
+            }
+            countList.add(partialCurveSize)
+        }
+        curveGeometry.ensureCapacity(bases.size + countList.size-1)
+        var position = 0
+        var lastShapeUnique = false
+        if(countList.last() == 1) {
+            countList.removeAt(countList.lastIndex)
+            lastShapeUnique = true
+        }
+        countList.forEach {count ->
+            for(i in 0 until count) {
+                val shape = baseShapes[position]
+                val shapeVertexList = ArrayList<Vector3f>(shape.size)
+                shape.forEach {
+                    val vec = Vector3f()
+                    shapeVertexList.add(bases[position].transformPosition(it, vec))
+                }
+                curveGeometry.add(shapeVertexList)
+                position++
+            }
+            val helpPosition = position
+            //fill the gaps between the different shapes
+            if(helpPosition < bases.lastIndex) {
+                val shape = baseShapes[helpPosition-1]
+                val shapeVertexList = ArrayList<Vector3f>(shape.size)
+                shape.forEach {
+                    val vec = Vector3f()
+                    shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
+                }
+                curveGeometry.add(shapeVertexList)
+            }
+            //edge case: the last shape is different from its predecessor
+            if(lastShapeUnique && helpPosition == bases.lastIndex) {
+                val shape = baseShapes[helpPosition-1]
+                val shapeVertexList = ArrayList<Vector3f>(shape.size)
+                shape.forEach {
+                    val vec = Vector3f()
+                    shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
+                }
+                curveGeometry.add(shapeVertexList)
+            }
+        }
+
+/*           .forEachIndexed { index, shape ->
             val shapeVertexList = ArrayList<Vector3f>(shape.size)
             shape.forEach {
                 val vec = Vector3f()
@@ -61,7 +114,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             }
             curveGeometry.add(shapeVertexList)
         }
-
+        */
         val verticesVectors: ArrayList<Vector3f>
         verticesVectors = calculateTriangles(curveGeometry)
 
@@ -162,47 +215,48 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         the same number of vertices in the shape. However, this is the best I can can yet come
         up with
         */
-        val subgeometries = ArrayList<List<List<Vector3f>>>(10000)
-        var i = 0
-        while(i <= curveGeometry.lastIndex) {
-            val partialCurve = ArrayList<List<Vector3f>>(10000)
-            var j = 0
-            curveGeometry.drop(i).takeWhile { firstShape ->
-                i++
-                j++
-                val index = i+j-2
-                partialCurve.add(firstShape)
-                if (index < curveGeometry.lastIndex) {
-                    firstShape.size == curveGeometry[index + 1].size
+        val subGeometries = ArrayList<List<List<Vector3f>>>(curveGeometry.size)
+        var position = 0
+        countList.forEachIndexed { index, count ->
+            if(index == countList.lastIndex) {
+                val partialCurve = ArrayList<List<Vector3f>>(count)
+                for(i in 0 until count) {
+                    partialCurve.add(curveGeometry[position])
+                    position++
                 }
-                else {
-                    false
-                }
+                subGeometries.add(partialCurve)
             }
-            subgeometries.add(partialCurve)
+            else {
+                val partialCurve = ArrayList<List<Vector3f>>(count + 1)
+                for(i in 0 .. count) {
+                    partialCurve.add(curveGeometry[position])
+                    position++
+                }
+                subGeometries.add(partialCurve)
+            }
         }
 
-        subgeometries.forEachIndexed { subIndex, subgeometry ->
+        subGeometries.forEachIndexed { subIndex, subgeometry ->
             //if one baseShape is different from both it's predecessor and successor, it will get ignored
             if (subgeometry.size != 1) {
                 subgeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
                     shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
 
-                        verticesVectors.add(subgeometries[subIndex][shapeIndex][vertexIndex])
-                        verticesVectors.add(subgeometries[subIndex][shapeIndex][vertexIndex + 1])
-                        verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][vertexIndex])
+                        verticesVectors.add(subGeometries[subIndex][shapeIndex][vertexIndex])
+                        verticesVectors.add(subGeometries[subIndex][shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][vertexIndex])
 
-                        verticesVectors.add(subgeometries[subIndex][shapeIndex][vertexIndex + 1])
-                        verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][vertexIndex + 1])
-                        verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][vertexIndex])
+                        verticesVectors.add(subGeometries[subIndex][shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][vertexIndex + 1])
+                        verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][vertexIndex])
                     }
-                    verticesVectors.add(subgeometries[subIndex][shapeIndex][0])
-                    verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][0])
-                    verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][shape.lastIndex])
+                    verticesVectors.add(subGeometries[subIndex][shapeIndex][0])
+                    verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][0])
+                    verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][shape.lastIndex])
 
-                    verticesVectors.add(subgeometries[subIndex][shapeIndex + 1][shape.lastIndex])
-                    verticesVectors.add(subgeometries[subIndex][shapeIndex][shape.lastIndex])
-                    verticesVectors.add(subgeometries[subIndex][shapeIndex][0])
+                    verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][shape.lastIndex])
+                    verticesVectors.add(subGeometries[subIndex][shapeIndex][shape.lastIndex])
+                    verticesVectors.add(subGeometries[subIndex][shapeIndex][0])
                 }
             }
         }
