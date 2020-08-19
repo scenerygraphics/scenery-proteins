@@ -14,7 +14,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("3J2T")
+        val protein = Protein.fromID("2w49")
 
         val diagram = RibbonCalculation(protein)
 

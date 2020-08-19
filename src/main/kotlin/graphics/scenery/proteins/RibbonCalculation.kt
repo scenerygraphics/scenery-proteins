@@ -5,6 +5,7 @@ import org.joml.*
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random.Companion.randomFromRange
 import org.biojava.nbio.structure.Atom
+import org.biojava.nbio.structure.AtomPositionMap
 import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucElement
@@ -331,26 +332,46 @@ class RibbonCalculation(val protein: Protein) {
             guidePointsWithoutDummy.add(i, GuidePoint(finalPoint, cVec, dVec, offset, widthFactor,
                     aminoList[i], aminoList[i+1], SecStrucType.bend, 0))
         }
+
         var guidePointVar = 0
         var secStrucVar = 0
         //Then we add the secondary structures from the dssp
+        //TODO fix!
         guidePointsWithoutDummy.drop(guidePointVar).forEach { guide ->
             secStrucs.drop(secStrucVar).forEach { secStruc ->
                 //BioJava uses residueNumber as an identifier for each residue
-                if(secStruc.range.start == guide.nextResidue!!.residueNumber) {
+                if (secStruc.range.start == guide.nextResidue!!.residueNumber) {
                     secStrucVar++
                     val offset = guidePointVar
-                    for(i in 0 until secStruc.range.length){
-                        if(i == guidePointsWithoutDummy.lastIndex) {
+                    for (i in 0 until secStruc.range.length) {
+                        if (i == guidePointsWithoutDummy.lastIndex) {
                             break
                         }
-                        guidePointsWithoutDummy[offset+i].type = secStruc.type
-                        guidePointsWithoutDummy[offset+i].count = secStruc.range.length-1
+                        guidePointsWithoutDummy[offset + i].type = secStruc.type
+                        guidePointsWithoutDummy[offset + i].count = secStruc.range.length - 1
                         guidePointVar++
                     }
                 }
             }
         }
+
+        //This map is a necessary parameter for the range calculation
+        val map = AtomPositionMap(structure)
+
+        //Then we add the secondary structures from the dssp
+        secStrucs.forEach { secStruc ->
+            guidePointsWithoutDummy.forEach {guide ->
+                for( i in 0 .. secStruc.range.length) {
+                    //BioJava uses residueNumber as an identifier for each residue
+                    if(secStruc.range.getResidue(i, map) == guide.nextResidue!!.residueNumber) {
+                        guide.type = secStruc.type
+                        guide.count = secStruc.range.length - 1
+                    }
+                }
+            }
+        }
+
+
 
         //only assign widthFactor if there are three guide points with one in a row
         guidePointsWithoutDummy.windowed(5, 1) { window ->
