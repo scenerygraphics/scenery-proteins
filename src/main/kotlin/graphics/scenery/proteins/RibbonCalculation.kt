@@ -333,44 +333,16 @@ class RibbonCalculation(val protein: Protein) {
                     aminoList[i], aminoList[i+1], SecStrucType.bend, 0))
         }
 
-        var guidePointVar = 0
-        var secStrucVar = 0
-        //Then we add the secondary structures from the dssp
-        //TODO fix!
-        guidePointsWithoutDummy.drop(guidePointVar).forEach { guide ->
-            secStrucs.drop(secStrucVar).forEach { secStruc ->
-                //BioJava uses residueNumber as an identifier for each residue
-                if (secStruc.range.start == guide.nextResidue!!.residueNumber) {
-                    secStrucVar++
-                    val offset = guidePointVar
-                    for (i in 0 until secStruc.range.length) {
-                        if (i == guidePointsWithoutDummy.lastIndex) {
-                            break
-                        }
-                        guidePointsWithoutDummy[offset + i].type = secStruc.type
-                        guidePointsWithoutDummy[offset + i].count = secStruc.range.length - 1
-                        guidePointVar++
+        guidePointsWithoutDummy.forEachIndexed { index, guide ->
+            secStrucs.forEach { ss ->
+                if(ss.range.start == guide.nextResidue!!.residueNumber) {
+                    for(i in 0 until ss.range.length) {
+                        guidePointsWithoutDummy[index + i].type= ss.type
+                        guidePointsWithoutDummy[index + i].count = ss.range.length-1
                     }
                 }
             }
         }
-
-        //This map is a necessary parameter for the range calculation
-        val map = AtomPositionMap(structure)
-
-        //Then we add the secondary structures from the dssp
-        secStrucs.forEach { secStruc ->
-            guidePointsWithoutDummy.forEach {guide ->
-                for( i in 0 .. secStruc.range.length) {
-                    //BioJava uses residueNumber as an identifier for each residue
-                    if(secStruc.range.getResidue(i, map) == guide.nextResidue!!.residueNumber) {
-                        guide.type = secStruc.type
-                        guide.count = secStruc.range.length - 1
-                    }
-                }
-            }
-        }
-
 
 
         //only assign widthFactor if there are three guide points with one in a row
@@ -381,17 +353,6 @@ class RibbonCalculation(val protein: Protein) {
                         window[1].widthFactor = 0f
                         window[2].widthFactor = 0f
                         window[3].widthFactor = 0f
-                    }
-                }
-                //TODO make it more finegrained so that there is not one section bends in a secondary struc
-                (!window[0].type.isHelixType && !window[0].type.isBetaStrand
-                        && !window[4].type.isHelixType && !window[4].type.isBetaStrand) -> {
-                    for(i in 1..3) {
-                        if(!window[i].type.isHelixType || !window[i].type.isBetaStrand) {
-                            window[1].type = SecStrucType.bend
-                            window[2].type = SecStrucType.bend
-                            window[3].type = SecStrucType.bend
-                        }
                     }
                 }
             }
@@ -425,30 +386,24 @@ class RibbonCalculation(val protein: Protein) {
         val dummyVecBeg = caBegin.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0],
-                guidePointsWithoutDummy[0].type, 0))
+                SecStrucType.bend, 0))
         guidePoints.add(GuidePoint(caBegin, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
                 guidePointsWithoutDummy[0].offset, guidePointsWithoutDummy[0].widthFactor, aminoList[0], aminoList[0],
-                guidePointsWithoutDummy[0].type, 0))
+                SecStrucType.bend, 0))
         //add all guide points from the previous calculation
         guidePoints.addAll(guidePointsWithoutDummy)
         //add dummy points at the end
         val caEnd = aminoList.last().getAtom("CA").getVector()
-        val lastCount = guidePoints.last().count
-        /*
-        for(i in guidePoints.lastIndex-lastCount .. guidePoints.lastIndex) {
-            guidePoints[i].count++
-        }
-         */
         guidePoints.add(GuidePoint(caEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type,
+                aminoList.last(), aminoList.last(), SecStrucType.bend,
                 guidePointsWithoutDummy.last().count))
         val dummyVecEnd = caEnd.randomFromVector()
         guidePoints.add(GuidePoint(dummyVecEnd,
                 guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                 guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
-                aminoList.last(), aminoList.last(), guidePointsWithoutDummy.last().type,
+                aminoList.last(), aminoList.last(), SecStrucType.bend,
                 0))
 
         return untwistRibbon(guidePoints)
