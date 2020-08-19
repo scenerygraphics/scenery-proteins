@@ -1,16 +1,15 @@
 package unit
 
 import graphics.scenery.Protein
-import graphics.scenery.proteins.RibbonCalculation
+import graphics.scenery.proteins.RibbonVisualization
 import graphics.scenery.utils.LazyLogger
 import org.junit.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 /**
  * This is the test for the RibbonCalculation, i.e. the pdb-support.
  */
-class RibbonCalculationTests {
+class RibbonVisualizationTests {
     private val logger by LazyLogger()
 
     /**
@@ -20,7 +19,7 @@ class RibbonCalculationTests {
     fun prionTest() {
         logger.info("Tests coherence of curve size and number of residues.")
         val prion = Protein.fromID("2rnm")
-        val ribbon = RibbonCalculation(prion)
+        val ribbon = RibbonVisualization(prion)
         val curve = ribbon.ribbonCurve()
         assertNotNull(curve)
     }

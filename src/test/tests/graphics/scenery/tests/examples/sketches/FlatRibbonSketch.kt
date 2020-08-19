@@ -4,7 +4,7 @@ import org.joml.*
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
-import graphics.scenery.proteins.RibbonCalculation
+import graphics.scenery.proteins.RibbonVisualization
 import org.junit.Test
 
 class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
@@ -16,7 +16,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val protein = Protein.fromID("2w49")
 
-        val diagram = RibbonCalculation(protein)
+        val diagram = RibbonVisualization(protein)
 
         val curve = diagram.ribbonCurve()
 
