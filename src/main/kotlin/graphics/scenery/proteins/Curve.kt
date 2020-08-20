@@ -3,6 +3,7 @@ package graphics.scenery.proteins
 import graphics.scenery.BufferUtils
 import graphics.scenery.HasGeometry
 import graphics.scenery.Mesh
+import graphics.scenery.Node
 import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.toFloatArray
 import org.joml.*
@@ -22,13 +23,12 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
     private val chain = curve.splinePoints()
     private val countList = ArrayList<Int>(50).toMutableList()
 
-    /**
+    /*
      * This function renders the spline.
      * [baseShape] It takes a lambda as a parameter, which is the shape of the
      * curve.
      * If you choose, for example, to have a square as a base shape, your spline will look like
-     * a banister. Please not that the base shape needs an equal number of points in each segments but it
-     * can very well vary in thickness.
+     * a banister.
      */
     init {
         if(chain.isEmpty()) {
@@ -48,6 +48,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     nn.z(), nb.z(), nt.z(), 0f,
                     tr.x(), tr.y(), tr.z(), 1f)
         }
+        //TODO allocate!
         val curveGeometry = ArrayList<ArrayList<Vector3f>>()
         val baseShapes = baseShape.invoke()
         var i = 0
@@ -73,7 +74,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             lastShapeUnique = true
         }
         countList.forEach {count ->
-            for(i in 0 until count) {
+            for(j in 0 until count) {
                 val shape = baseShapes[position]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {

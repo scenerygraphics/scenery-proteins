@@ -20,6 +20,11 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val curve = diagram.ribbonCurve()
 
+        curve.children.forEach {
+            val colourVec = Random.random3DVectorFromRange(0f, 1f)
+            it.material.diffuse.set(colourVec)
+        }
+
         scene.addChild(curve)
 
         val lightbox = Box(Vector3f(100.0f, 100.0f, 100.0f), insideNormals = true)
