@@ -10,7 +10,6 @@ import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucElement
 import org.biojava.nbio.structure.secstruc.SecStrucTools
 import org.biojava.nbio.structure.secstruc.SecStrucType
-import java.lang.Float.min
 
 /**
  * A Ribbon Diagram for Proteins. Ribbon models are currently the most common representations of proteins.

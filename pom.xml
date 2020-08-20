@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.scijava</groupId>
         <artifactId>pom-scijava</artifactId>
-        <version>28.0.0</version>
+        <version>29.2.0</version>
     </parent>
 
     <groupId>graphics.scenery</groupId>
@@ -95,7 +95,7 @@
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
         <javac.target>1.8</javac.target>
-        <kotlin.version>1.4.0-rc</kotlin.version>
+        <kotlin.version>1.4.0</kotlin.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <dokka.version>0.10.0</dokka.version>
@@ -104,7 +104,6 @@
 
         <cleargl.version>2.2.10</cleargl.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <spirvcrossj.version>0.6.0-1.1.106.0</spirvcrossj.version>
 
         <license.licenseName>lgpl_v3</license.licenseName>
         <license.copyrightOwners>the scenery development team</license.copyrightOwners>
