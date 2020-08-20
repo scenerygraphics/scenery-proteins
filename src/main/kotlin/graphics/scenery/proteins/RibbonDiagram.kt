@@ -356,12 +356,6 @@ class RibbonDiagram(val protein: Protein) {
             }
 
             //dummy points at the beginning
-            fun Vector3f.randomFromVector(): Vector3f {
-                return Vector3f(Random.randomFromRange(this.x() - 1f, this.x() + 1f),
-                        Random.randomFromRange(this.y() - 1f, this.y() + 1f),
-                        Random.randomFromRange(this.z() - 1f, this.z() + 1f))
-            }
-
             val caBegin = aminoList[0].getAtom("CA").getVector()
             //increase the count of the first section because we add one more point
             val count = guidePointsWithoutDummy[0].count
@@ -410,11 +404,22 @@ class RibbonDiagram(val protein: Protein) {
         }
 
         /**
-         * Inline function to make a Vector out of an atom position, as for now we do not
+         * Extension function to make a Vector out of an atom position, as for now we do not
          * need any information about an atom besides its name and its position
          */
         private fun Atom.getVector(): Vector3f {
             return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
+        }
+
+        /**
+         * Extension Function to make Dummy Points not too far away from the original points - the spline
+         * doesn't include the first and the last controlpoint, which in our case would mean to lose the first
+         * and the last residue, hence, this function.
+         */
+        private fun Vector3f.randomFromVector(): Vector3f {
+            return Vector3f(Random.randomFromRange(this.x() - 1f, this.x() + 1f),
+                    Random.randomFromRange(this.y() - 1f, this.y() + 1f),
+                    Random.randomFromRange(this.z() - 1f, this.z() + 1f))
         }
     }
 }
