@@ -49,19 +49,19 @@ import org.biojava.nbio.structure.secstruc.SecStrucType
 
 class RibbonVisualization(val protein: Protein) {
 
-    /**
-     *@param [structure] the structure of the protein stored in the class Structure of BioJava
-     *@param [chains] all the chains of the protein (C-alpha trace and sidechains)
-     *@param [groups] atomGroups within the chains
-     *@param [widthAlpha] specifies how wide outside the C-alpha trace the controlpoints
+    /*
+     *[structure] the structure of the protein stored in the class Structure of BioJava
+     *[chains] all the chains of the protein (C-alpha trace and sidechains)
+     *[groups] atomGroups within the chains
+     *[widthAlpha] specifies how wide outside the C-alpha trace the controlpoints
      * of the alpha helices will be
-     *@param [widthBeta] specifies how wide outside the C-alpha trace the controlpoints
+     *[widthBeta] specifies how wide outside the C-alpha trace the controlpoints
      * of the beta sheets will be
-     *@param [widthCoil] specifies how wide outside the C-alpha trace the controlpoints
+     *[widthCoil] specifies how wide outside the C-alpha trace the controlpoints
      * of the coil will be. The value 1 corresponds to the point laying approximately on
      * the trace.
-     *@param [aminoList] List of all the amino acids in the protein
-     *@param [sectionVerticesCount] Specifies how fine grained the geometry along the backbone
+     *[aminoList] List of all the amino acids in the protein
+     *[sectionVerticesCount] Specifies how fine grained the geometry along the backbone
      * will be. Please note that the calculation could take much longer if this parameter is too
      * big, especially for large proteins.
      */
