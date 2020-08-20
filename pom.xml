@@ -104,6 +104,7 @@
 
         <cleargl.version>2.2.10</cleargl.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <spirvcrossj.version>0.6.0-1.1.106.0</spirvcrossj.version>
 
         <license.licenseName>lgpl_v3</license.licenseName>
         <license.copyrightOwners>the scenery development team</license.copyrightOwners>
