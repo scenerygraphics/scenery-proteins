@@ -30,16 +30,16 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
      * a banister.
      */
     init {
-        if(chain.isEmpty()) {
+        if (chain.isEmpty()) {
             println("The spline provided for the Curve is empty.")
         }
         val bases = computeFrenetFrames(chain as ArrayList<Vector3f>).map { (t, n, b, tr) ->
             val inverseMatrix = Matrix4f(n.x(), b.x(), t.x(), 0f,
                     n.y(), b.y(), t.y(), 0f,
                     n.z(), b.z(), t.z(), 0f,
-                    0f, 0f ,0f ,1f).invert()
+                    0f, 0f, 0f, 1f).invert()
             val nn = Vector3f(inverseMatrix[0, 0], inverseMatrix[1, 0], inverseMatrix[2, 0]).normalize()
-            val nb = Vector3f(inverseMatrix[0, 1],inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
+            val nb = Vector3f(inverseMatrix[0, 1], inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
             val nt = Vector3f(inverseMatrix[0, 2], inverseMatrix[2, 1], inverseMatrix[2, 2]).normalize()
             Matrix4f(
                     nn.x(), nb.x(), nt.x(), 0f,
@@ -56,8 +56,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                 partialCurveSize++
                 if (index < baseShapes.lastIndex) {
                     firstShape.size == baseShapes[index + 1].size
-                }
-                else {
+                } else {
                     false
                 }
             }
@@ -65,14 +64,14 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         }
         var position = 0
         var lastShapeUnique = false
-        if(countList.last() == 1) {
+        if (countList.last() == 1) {
             countList.removeAt(countList.lastIndex)
             lastShapeUnique = true
         }
-
-        countList.forEach {count ->
+        val subShapeList = ArrayList<ArrayList<Vector3f>>(countList.size)
+        countList.forEach { count ->
             val partialCurveGeometry = ArrayList<ArrayList<Vector3f>>(count)
-            for(j in 0 until count) {
+            for (j in 0 until count) {
                 val shape = baseShapes[position]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
@@ -84,8 +83,8 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             }
             val helpPosition = position
             //fill the gaps between the different shapes
-            if(helpPosition < bases.lastIndex) {
-                val shape = baseShapes[helpPosition-1]
+            if (helpPosition < bases.lastIndex) {
+                val shape = baseShapes[helpPosition - 1]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
                     val vec = Vector3f()
@@ -94,8 +93,8 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                 partialCurveGeometry.add(shapeVertexList)
             }
             //edge case: the last shape is different from its predecessor
-            if(lastShapeUnique && helpPosition == bases.lastIndex) {
-                val shape = baseShapes[helpPosition-1]
+            if (lastShapeUnique && helpPosition == bases.lastIndex) {
+                val shape = baseShapes[helpPosition - 1]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
                     val vec = Vector3f()
@@ -104,9 +103,24 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                 partialCurveGeometry.add(shapeVertexList)
             }
             val partialVerticesVector = calculateTriangles(partialCurveGeometry)
-            val partialCurve = PartialCurve(partialVerticesVector)
-            this.children.add(partialCurve)
+            subShapeList.add(partialVerticesVector)
         }
+        subShapeList.groupBy { geometry ->
+            var number = 0
+            geometry.drop(1).takeWhile {
+                number++
+                it != geometry.first()
+            }
+            (number / 6) - 5
+        }.forEach{ childrenList ->
+            val parent = Mesh("parent")
+            childrenList.value.forEach {
+                val partialCurve = PartialCurve(it)
+                parent.children.add(partialCurve)
+            }
+            this.children.add(parent)
+        }
+
     }
 
     /**
