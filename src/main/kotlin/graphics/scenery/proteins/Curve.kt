@@ -3,7 +3,6 @@ package graphics.scenery.proteins
 import graphics.scenery.BufferUtils
 import graphics.scenery.HasGeometry
 import graphics.scenery.Mesh
-import graphics.scenery.Node
 import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.toFloatArray
 import org.joml.*
@@ -48,8 +47,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     nn.z(), nb.z(), nt.z(), 0f,
                     tr.x(), tr.y(), tr.z(), 1f)
         }
-        //TODO allocate!
-        val curveGeometry = ArrayList<ArrayList<Vector3f>>()
         val baseShapes = baseShape.invoke()
         var i = 0
         while (i <= baseShapes.lastIndex) {
@@ -66,14 +63,15 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             }
             countList.add(partialCurveSize)
         }
-        curveGeometry.ensureCapacity(bases.size + countList.size-1)
         var position = 0
         var lastShapeUnique = false
         if(countList.last() == 1) {
             countList.removeAt(countList.lastIndex)
             lastShapeUnique = true
         }
+
         countList.forEach {count ->
+            val partialCurveGeometry = ArrayList<ArrayList<Vector3f>>(count)
             for(j in 0 until count) {
                 val shape = baseShapes[position]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
@@ -81,7 +79,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     val vec = Vector3f()
                     shapeVertexList.add(bases[position].transformPosition(it, vec))
                 }
-                curveGeometry.add(shapeVertexList)
+                partialCurveGeometry.add(shapeVertexList)
                 position++
             }
             val helpPosition = position
@@ -93,7 +91,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     val vec = Vector3f()
                     shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
                 }
-                curveGeometry.add(shapeVertexList)
+                partialCurveGeometry.add(shapeVertexList)
             }
             //edge case: the last shape is different from its predecessor
             if(lastShapeUnique && helpPosition == bases.lastIndex) {
@@ -103,30 +101,12 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     val vec = Vector3f()
                     shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
                 }
-                curveGeometry.add(shapeVertexList)
+                partialCurveGeometry.add(shapeVertexList)
             }
+            val partialVerticesVector = calculateTriangles(partialCurveGeometry)
+            val partialCurve = PartialCurve(partialVerticesVector)
+            this.children.add(partialCurve)
         }
-
-/*           .forEachIndexed { index, shape ->
-            val shapeVertexList = ArrayList<Vector3f>(shape.size)
-            shape.forEach {
-                val vec = Vector3f()
-                shapeVertexList.add(bases[index].transformPosition(it, vec))
-            }
-            curveGeometry.add(shapeVertexList)
-        }
-        */
-        val verticesVectors: ArrayList<Vector3f>
-        verticesVectors = calculateTriangles(curveGeometry)
-
-
-        vertices = BufferUtils.allocateFloat(verticesVectors.size*3)
-        verticesVectors.forEach{
-            vertices.put(it.toFloatArray())
-        }
-        vertices.flip()
-        texcoords = BufferUtils.allocateFloat(verticesVectors.size*2)
-        recalculateNormals()
     }
 
     /**
@@ -207,59 +187,34 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
      * along the curve.
      */
     private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
-        val verticesVectors = ArrayList<Vector3f>(10000)
-        if (curveGeometry.isEmpty()) {
+        val verticesVectors = ArrayList<Vector3f>()
+        if(curveGeometry.isEmpty()) {
             return verticesVectors
         }
-        /*
-        The initial capacity is not correct if the curveGeometry has multiple parts with
-        the same number of vertices in the shape. However, this is the best I can can yet come
-        up with
-        */
-        val subGeometries = ArrayList<List<List<Vector3f>>>(curveGeometry.size)
-        var position = 0
-        countList.forEachIndexed { index, count ->
-            if(index == countList.lastIndex) {
-                val partialCurve = ArrayList<List<Vector3f>>(count)
-                for(i in 0 until count) {
-                    partialCurve.add(curveGeometry[position])
-                    position++
+        //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
+        if(curveGeometry.distinctBy{ it.size }.size == 1) {
+            curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
+                shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
+
+                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
+                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+
+                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
                 }
-                subGeometries.add(partialCurve)
-            }
-            else {
-                val partialCurve = ArrayList<List<Vector3f>>(count + 1)
-                for(i in 0 .. count) {
-                    partialCurve.add(curveGeometry[position])
-                    position++
-                }
-                subGeometries.add(partialCurve)
+                verticesVectors.add(curveGeometry[shapeIndex][0])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][0])
+                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+
+                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+                verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
+                verticesVectors.add(curveGeometry[shapeIndex][0])
             }
         }
-
-        subGeometries.forEachIndexed { subIndex, subgeometry ->
-            //if one baseShape is different from both it's predecessor and successor, it will get ignored
-            if (subgeometry.size != 1) {
-                subgeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
-                    shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
-
-                        verticesVectors.add(subGeometries[subIndex][shapeIndex][vertexIndex])
-                        verticesVectors.add(subGeometries[subIndex][shapeIndex][vertexIndex + 1])
-                        verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][vertexIndex])
-
-                        verticesVectors.add(subGeometries[subIndex][shapeIndex][vertexIndex + 1])
-                        verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][vertexIndex + 1])
-                        verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][vertexIndex])
-                    }
-                    verticesVectors.add(subGeometries[subIndex][shapeIndex][0])
-                    verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][0])
-                    verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][shape.lastIndex])
-
-                    verticesVectors.add(subGeometries[subIndex][shapeIndex + 1][shape.lastIndex])
-                    verticesVectors.add(subGeometries[subIndex][shapeIndex][shape.lastIndex])
-                    verticesVectors.add(subGeometries[subIndex][shapeIndex][0])
-                }
-            }
+        else {
+            throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
         return verticesVectors
     }
@@ -269,5 +224,17 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
      */
     fun getCurve(): ArrayList<Vector3f> {
         return chain as ArrayList<Vector3f>
+    }
+
+    class PartialCurve(val verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
+        init {
+            vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
+            verticesVectors.forEach {
+                vertices.put(it.toFloatArray())
+            }
+            vertices.flip()
+            texcoords = BufferUtils.allocateFloat(verticesVectors.size * 2)
+            recalculateNormals()
+        }
     }
 }
