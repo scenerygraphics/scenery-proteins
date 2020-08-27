@@ -78,7 +78,7 @@ class RibbonDiagram(val protein: Protein) {
     /**
      * Returns the final Ribbon Diagram
      */
-    fun ribbonCurve(): Mesh {
+    fun ribbon(): Mesh {
         val ribbon = Mesh("Mesh of the Ribbon")
         chains.forEach{ chain ->
             if(chain.isProtein) {
@@ -107,8 +107,8 @@ class RibbonDiagram(val protein: Protein) {
     private fun subShapes(guidePointList: ArrayList<GuidePoint>, spline: Spline): Mesh {
 
         val ssParent = Mesh("SubProtein")
-        val alphas = Mesh("alpha helices")
-        val betas = Mesh("beta sheets")
+        val alphas = Mesh("alpha")
+        val betas = Mesh("beta")
         val coils = Mesh("coil")
 
         val splinePoints = spline.splinePoints()
@@ -141,7 +141,7 @@ class RibbonDiagram(val protein: Protein) {
         while(guidePointsOffset < guidePointList.lastIndex-1) {
             val guide = guidePointList[guidePointsOffset]
             val count = guide.count
-            //one subspline for each secondary structure
+            //one subSpline for each secondary structure
             val subSpline = ArrayList<Vector3f>(sectionVerticesCount*count)
             val ssSubList = ArrayList<ArrayList<Vector3f>>(count)
             val helpSpline = splinePoints.drop(splineOffset)

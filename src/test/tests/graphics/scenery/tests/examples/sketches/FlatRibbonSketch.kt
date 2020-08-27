@@ -18,16 +18,41 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val diagram = RibbonDiagram(protein)
 
-        val curve = diagram.ribbonCurve()
+        val ribbon = diagram.ribbon()
 
-        curve.children.forEach {
-            it.children.forEach {
-                val colourVec = Random.random3DVectorFromRange(0f, 1f)
-                it.material.diffuse.set(colourVec)
+        val alphaColour =  Random.random3DVectorFromRange(0f, 1f)
+        val betaColour =  Random.random3DVectorFromRange(0f, 1f)
+        val coilColour =  Random.random3DVectorFromRange(0f, 1f)
+
+        ribbon.children.forEach {subProtein ->
+            subProtein.children.forEach { ss ->
+                when {
+                    (ss.name == "alpha") -> {
+                        ss.children.forEach {alpha ->
+                            alpha.children.forEach {
+                                it.material.diffuse.set(alphaColour)
+                            }
+                        }
+                    }
+                    (ss.name == "beta") -> {
+                        ss.children.forEach {beta ->
+                            beta.children.forEach {
+                                it.material.diffuse.set(betaColour)
+                            }
+                        }
+                    }
+                    else -> {
+                        ss.children.forEach {coil ->
+                            coil.children.forEach {
+                                it.material.diffuse.set(coilColour)
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        scene.addChild(curve)
+        scene.addChild(ribbon)
 
         val lightbox = Box(Vector3f(100.0f, 100.0f, 100.0f), insideNormals = true)
         lightbox.name = "Lightbox"
