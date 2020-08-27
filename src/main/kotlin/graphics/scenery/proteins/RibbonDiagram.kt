@@ -63,7 +63,7 @@ class RibbonDiagram(val protein: Protein) {
      *[aminoList] List of all the amino acids in the protein
      *[sectionVerticesCount] Specifies how fine grained the geometry along the backbone
      * will be. Please note that the calculation could take much longer if this parameter is too
-     * big, especially for large proteins.
+     * big, especially, for large proteins.
      */
     private val structure = protein.structure
     private val chains = structure.chains
@@ -72,7 +72,7 @@ class RibbonDiagram(val protein: Protein) {
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
     private val chainList =  ArrayList<List<Group>>(groups.size)
-    private val sectionVerticesCount = 10
+    private val sectionVerticesCount = 30
     private val secStruc = dssp()
 
     /**
@@ -114,10 +114,10 @@ class RibbonDiagram(val protein: Protein) {
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(1f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1f, -0.1f, 0f))
-        rectangle.add(Vector3f(1f, -0.1f, 0f))
+        rectangle.add(Vector3f(1.2f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1.2f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1.2f, -0.1f, 0f))
+        rectangle.add(Vector3f(1.2f, -0.1f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -131,10 +131,10 @@ class RibbonDiagram(val protein: Protein) {
         octagon.add(Vector3f(sin45, -sin45, 0f))
 
         val reversedRectangle = ArrayList<Vector3f>(4)
-        reversedRectangle.add(Vector3f(0.1f, 1f, 0f))
-        reversedRectangle.add(Vector3f(-0.1f, 1f, 0f))
-        reversedRectangle.add(Vector3f(-0.1f, -1f, 0f))
-        reversedRectangle.add(Vector3f(0.1f, -1f, 0f))
+        reversedRectangle.add(Vector3f(0.1f, 0.8f, 0f))
+        reversedRectangle.add(Vector3f(-0.1f, 0.8f, 0f))
+        reversedRectangle.add(Vector3f(-0.1f, -0.8f, 0f))
+        reversedRectangle.add(Vector3f(0.1f, -0.8f, 0f))
         var guidePointsOffset = 1
         //offset to divide the spline into partial splines for the secondary structures
         var splineOffset = 0
@@ -159,6 +159,7 @@ class RibbonDiagram(val protein: Protein) {
                     val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList)}
                     alphas.addChild(helixCurve)
                 }
+                //the beta sheets are visualized with arrows
                 (guide.type.isBetaStrand) -> {
                     val sheetSize = (count+1)*(sectionVerticesCount+1)
                     for (i in 0 until (count+1)*(sectionVerticesCount+1)) {
@@ -166,13 +167,13 @@ class RibbonDiagram(val protein: Protein) {
                         subSpline.add(helpSpline[i])
                     }
                     guidePointsOffset += count
-                    val seventyeightPercent = (sheetSize*0.78).toInt()
-                    for (j in 0 until seventyeightPercent) {
+                    val seventyPercent = (sheetSize*0.70).toInt()
+                    for (j in 0 until seventyPercent) {
                         ssSubList.add(reversedRectangle)
                     }
-                    val twentytwoPercent = sheetSize-seventyeightPercent
-                    for(j in twentytwoPercent downTo 1) {
-                        val y = 1.5f*j/twentytwoPercent
+                    val thirtyPercent = sheetSize-seventyPercent
+                    for(j in thirtyPercent downTo 1) {
+                        val y = 1.65f*j/thirtyPercent
                         val x = 0.1f
                         val arrowHeadList = ArrayList<Vector3f>(4)
                         arrowHeadList.add(Vector3f(x, y, 0f))

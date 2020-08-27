@@ -14,7 +14,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("3nir")
+        val protein = Protein.fromID("2eir")
 
         val diagram = RibbonDiagram(protein)
 
@@ -23,7 +23,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
         val alphaColour =  Random.random3DVectorFromRange(0f, 1f)
         val betaColour =  Random.random3DVectorFromRange(0f, 1f)
         val coilColour =  Random.random3DVectorFromRange(0f, 1f)
-        /*
+
         ribbon.children.forEach {subProtein ->
             subProtein.children.forEach { ss ->
                 when {
@@ -51,8 +51,6 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                 }
             }
         }
-
-         */
 
         scene.addChild(ribbon)
 
