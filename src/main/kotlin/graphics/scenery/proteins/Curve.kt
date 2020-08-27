@@ -83,15 +83,16 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                 position++
             }
             val helpPosition = position
+            val beginingPosition = helpPosition-count+1
             //fill the gaps between the different shapes
             if(helpPosition < bases.lastIndex) {
-                val shape = baseShapes[helpPosition-1]
+                val shape = baseShapes[beginingPosition]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
                     val vec = Vector3f()
-                    shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
+                    shapeVertexList.add(bases[beginingPosition].transformPosition(it, vec))
                 }
-                partialCurveGeometry.add(shapeVertexList)
+                partialCurveGeometry.add(0, shapeVertexList)
             }
             //edge case: the last shape is different from its predecessor
             if(lastShapeUnique && helpPosition == bases.lastIndex) {

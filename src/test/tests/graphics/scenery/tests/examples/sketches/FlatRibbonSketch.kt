@@ -41,7 +41,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                             }
                         }
                     }
-                    else -> {
+                    (ss.name == "coil") -> {
                         ss.children.forEach {coil ->
                             coil.children.forEach {
                                 it.material.diffuse.set(coilColour)

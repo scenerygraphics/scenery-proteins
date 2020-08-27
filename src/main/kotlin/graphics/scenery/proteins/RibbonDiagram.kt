@@ -193,7 +193,7 @@ class RibbonDiagram(val protein: Protein) {
                             ssSubList.add(octagon)
                         }
                     }
-                    val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList)}
+                    val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
                     coils.addChild(coilCurve)
                 }
             }
