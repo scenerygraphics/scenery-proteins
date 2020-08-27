@@ -79,7 +79,7 @@ class RibbonDiagram(val protein: Protein) {
      * Returns the final Ribbon Diagram
      */
     fun ribbon(): Mesh {
-        val ribbon = Mesh("Mesh of the Ribbon")
+        val ribbon = Mesh("ribbon")
         chains.forEach{ chain ->
             if(chain.isProtein) {
                 val aminoList = ArrayList<Group>(chain.atomGroups.size)
@@ -152,7 +152,7 @@ class RibbonDiagram(val protein: Protein) {
                     for (j in 0 .. count) {
                         for (i in 0 .. sectionVerticesCount) {
                             splineOffset++
-                            subSpline.add(helpSpline[i+sectionVerticesCount*j])
+                            subSpline.add(helpSpline[i+(sectionVerticesCount+1)*j])
                             ssSubList.add(rectangle)
                         }
                     }
@@ -189,7 +189,7 @@ class RibbonDiagram(val protein: Protein) {
                     for (j in 0 .. count) {
                         for (i in 0 .. sectionVerticesCount) {
                             splineOffset++
-                            subSpline.add(helpSpline[i+sectionVerticesCount*j])
+                            subSpline.add(helpSpline[i+(sectionVerticesCount+1)*j])
                             ssSubList.add(octagon)
                         }
                     }
