@@ -47,8 +47,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     nn.z(), nb.z(), nt.z(), 0f,
                     tr.x(), tr.y(), tr.z(), 1f)
         }
-        //TODO allocate!
-        val curveGeometry = ArrayList<ArrayList<Vector3f>>()
         val baseShapes = baseShape.invoke()
         var i = 0
         while (i <= baseShapes.lastIndex) {
@@ -65,7 +63,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             }
             countList.add(partialCurveSize)
         }
-        curveGeometry.ensureCapacity(bases.size + countList.size-1)
         var position = 0
         var lastShapeUnique = false
         if(countList.last() == 1) {
@@ -82,7 +79,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     val vec = Vector3f()
                     shapeVertexList.add(bases[position].transformPosition(it, vec))
                 }
-                curveGeometry.add(shapeVertexList)
                 partialCurveGeometry.add(shapeVertexList)
                 position++
             }
@@ -95,7 +91,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     val vec = Vector3f()
                     shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
                 }
-                curveGeometry.add(shapeVertexList)
                 partialCurveGeometry.add(shapeVertexList)
             }
             //edge case: the last shape is different from its predecessor
@@ -106,7 +101,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
                     val vec = Vector3f()
                     shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
                 }
-                curveGeometry.add(shapeVertexList)
                 partialCurveGeometry.add(shapeVertexList)
             }
             val partialVerticesVector = calculateTriangles(partialCurveGeometry)
