@@ -161,7 +161,7 @@ class RibbonDiagram(val protein: Protein) {
                 }
                 (guide.type.isBetaStrand) -> {
                     val sheetSize = (count+1)*(sectionVerticesCount+1)
-                    for (i in 0.. count*sectionVerticesCount) {
+                    for (i in 0 until (count+1)*(sectionVerticesCount+1)) {
                         splineOffset++
                         subSpline.add(helpSpline[i])
                     }
