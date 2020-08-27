@@ -120,7 +120,6 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
             }
             this.children.add(parent)
         }
-
     }
 
     /**

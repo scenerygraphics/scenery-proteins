@@ -94,19 +94,25 @@ class RibbonDiagram(val protein: Protein) {
         chainList.forEach { aminoList ->
             val guidePointList = calculateGuidePoints(aminoList, secStruc)
             val spline = ribbonSpline(guidePointList)
-            val chainCurve = Curve(spline) { baseShape(guidePointList, spline.splinePoints().size) }
-            ribbon.addChild(chainCurve)
+            ribbon.addChild(subShapes(guidePointList, spline))
         }
         return ribbon
     }
+
 
     /**
      * The baseShape for the Spline, the coil is represented with an octagon,
      * the helices with rectangles, and the sheets with arrows.
      */
-    private fun baseShape(guidePointList: ArrayList<GuidePoint>, size: Int): List<List<Vector3f>> {
+    private fun subShapes(guidePointList: ArrayList<GuidePoint>, spline: Spline): Mesh {
 
-        val baseShapeList = ArrayList<ArrayList<Vector3f>>(size)
+        val ssParent = Mesh("SubProtein")
+        val alphas = Mesh("alpha helices")
+        val betas = Mesh("beta sheets")
+        val coils = Mesh("coil")
+
+        val splinePoints = spline.splinePoints()
+
         val rectangle = ArrayList<Vector3f>(4)
         rectangle.add(Vector3f(1f, 0.1f, 0f))
         rectangle.add(Vector3f(-1f, 0.1f, 0f))
@@ -130,25 +136,39 @@ class RibbonDiagram(val protein: Protein) {
         reversedRectangle.add(Vector3f(-0.1f, -1f, 0f))
         reversedRectangle.add(Vector3f(0.1f, -1f, 0f))
         var guidePointsOffset = 1
+        //offset to divide the spline into partial splines for the secondary structures
+        var splineOffset = 0
         while(guidePointsOffset < guidePointList.lastIndex-1) {
             val guide = guidePointList[guidePointsOffset]
             val count = guide.count
+            //one subspline for each secondary structure
+            val subSpline = ArrayList<Vector3f>(sectionVerticesCount*count)
+            val ssSubList = ArrayList<ArrayList<Vector3f>>(count)
+            val helpSpline = splinePoints.drop(splineOffset)
             guidePointsOffset++
             when {
                 (guide.type == SecStrucType.helix4) -> {
                     guidePointsOffset += count
                     for (j in 0 .. count) {
                         for (i in 0 .. sectionVerticesCount) {
-                            baseShapeList.add(rectangle)
+                            splineOffset++
+                            subSpline.add(helpSpline[i+sectionVerticesCount*j])
+                            ssSubList.add(rectangle)
                         }
                     }
+                    val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList)}
+                    alphas.addChild(helixCurve)
                 }
                 (guide.type.isBetaStrand) -> {
                     val sheetSize = (count+1)*(sectionVerticesCount+1)
+                    for (i in 0.. count*sectionVerticesCount) {
+                        splineOffset++
+                        subSpline.add(helpSpline[i])
+                    }
                     guidePointsOffset += count
                     val seventyeightPercent = (sheetSize*0.78).toInt()
                     for (j in 0 until seventyeightPercent) {
-                        baseShapeList.add(reversedRectangle)
+                        ssSubList.add(reversedRectangle)
                     }
                     val twentytwoPercent = sheetSize-seventyeightPercent
                     for(j in twentytwoPercent downTo 1) {
@@ -159,20 +179,29 @@ class RibbonDiagram(val protein: Protein) {
                         arrowHeadList.add(Vector3f(-x, y, 0f))
                         arrowHeadList.add(Vector3f(-x, -y, 0f))
                         arrowHeadList.add(Vector3f(x, -y, 0f))
-                        baseShapeList.add(arrowHeadList)
+                        ssSubList.add(arrowHeadList)
                     }
+                    val betaCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
+                    betas.addChild(betaCurve)
                 }
                 else -> {
                     guidePointsOffset += count
                     for (j in 0 .. count) {
                         for (i in 0 .. sectionVerticesCount) {
-                            baseShapeList.add(octagon)
+                            splineOffset++
+                            subSpline.add(helpSpline[i+sectionVerticesCount*j])
+                            ssSubList.add(octagon)
                         }
                     }
+                    val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList)}
+                    coils.addChild(coilCurve)
                 }
             }
         }
-        return baseShapeList
+        ssParent.addChild(alphas)
+        ssParent.addChild(betas)
+        ssParent.addChild(coils)
+        return ssParent
     }
 
 
@@ -401,6 +430,13 @@ class RibbonDiagram(val protein: Protein) {
                 }
             }
             return guidePoints
+        }
+
+        /**
+         * Dummy lambda function for the curve
+         */
+        private fun baseShape(baseShapes: List<List<Vector3f>>): List<List<Vector3f>> {
+            return baseShapes
         }
 
         /**
