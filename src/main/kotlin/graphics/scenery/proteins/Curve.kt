@@ -6,6 +6,7 @@ import graphics.scenery.Mesh
 import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.toFloatArray
 import org.joml.*
+import org.ojalgo.random.Uniform
 import kotlin.Float.Companion.MIN_VALUE
 import kotlin.math.acos
 
@@ -19,8 +20,6 @@ import kotlin.math.acos
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
 class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
-    private val controlPoints = spline.controlPoints()
-    private val verticesCount = spline.verticesCountPerSection()
     private val chain = spline.splinePoints()
     private val countList = ArrayList<Int>(50).toMutableList()
 
@@ -115,16 +114,42 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * This function calculates the tangent at a given index.
      * [i] index of the curve (not the geometry!)
      */
-    private fun getTangent(j: Int): Vector3f {
-        val fineSpline = UniformBSpline(controlPoints as ArrayList<Vector3f>, verticesCount*10)
-        val i = j*10
-        val finePoints = fineSpline.splinePoints()
-        val s = finePoints.size
-        return when(i) {
-            0 -> ((finePoints[i+1] - finePoints[i]).normalize())
-            (s-2) -> ((finePoints[i+1] - finePoints[i]).normalize())
-            (s-1) -> ((finePoints[i] - finePoints[i-1]).normalize())
-            else -> ((finePoints[i+1] - finePoints[i-1]).normalize())
+    private fun getTangent(i: Int): Vector3f {
+        if(chain.size >= 2) {
+            return when (i) {
+                0 -> ((chain[1].sub(chain[0])).normalize())
+                1 -> ((chain[2].sub(chain[0])).normalize())
+                chain.lastIndex - 1 -> ((chain[i + 1].sub(chain[i - 1])).normalize())
+                chain.lastIndex -> (chain[i].sub(chain[i - 1].normalize()))
+                else -> {
+                    val tangent = Vector3f()
+                    val p0 = chain[i-2]
+                    val p1 = chain[i-1]
+                    val p2 = chain[i]
+                    val p3 = chain[i+1]
+                    val p4 = chain[i+2]
+                    if(p0 != p1 && p0 != p1 && p0 != p2 && p0 != p3 && p0 != p4 &&
+                            p1 != p2 && p1 != p3 && p1 != p4 &&
+                            p2 != p3 && p2 != p4 &&
+                            p3 != p4) {
+                        val fineSpline = CatmullRomSpline(arrayListOf(p0, p1, p2, p3, p4), 10)
+                        val finePoints = fineSpline.splinePoints()
+                        finePoints.forEachIndexed { index, point ->
+                            if (point == chain[i]) {
+                                finePoints[index + 1].sub(finePoints[index - 1], tangent).normalize()
+                            }
+                        }
+                        if (tangent.length() == 0f) {
+                            finePoints[12].sub(finePoints[10], tangent).normalize()
+                        }
+                    }
+                    else { chain[i+1].sub(chain[i-1], tangent).normalize() }
+                    tangent
+                }
+            }
+        }
+        else {
+            throw Exception("The spline deosn't provide enough points")
         }
     }
 

@@ -1,5 +1,6 @@
 package graphics.scenery.proteins
 
+import graphics.scenery.numerics.Random
 import graphics.scenery.utils.extensions.plus
 import graphics.scenery.utils.extensions.times
 import org.joml.Vector3f
@@ -15,7 +16,8 @@ import kotlin.math.pow
  * resulting curve for alpha = 0 is a standart Catmull Rom Spline, for alpha = 1 we get
  * a chordal Catmull Rom Spline.
  */
-class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int = 100, val alpha: Float = 0.5f): Spline {
+class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int = 100, val alpha: Float = 0.5f,
+                       val addRandomLastAndFirstPoint: Boolean = false): Spline {
 
     /**
      * Calculates the parameter t; t is an intermediate product for the calculation of the spline
@@ -70,6 +72,12 @@ class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int =
      * [n] number of points the curve has
      */
     override fun splinePoints(): ArrayList<Vector3f> {
+        if(addRandomLastAndFirstPoint) {
+            val firstPoint = controlPoints.first().randomFromVector()
+            val lastPoint = controlPoints.last().randomFromVector()
+            controlPoints[0].add(firstPoint)
+            controlPoints[controlPoints.lastIndex].add(lastPoint)
+        }
         val chainPoints = ArrayList<Vector3f>(controlPoints.size*(n+1))
         controlPoints.dropLast(3).forEachIndexed {  index, _ ->
             val c = CatmulRomSpline(controlPoints[index], controlPoints[index+1],
@@ -77,6 +85,17 @@ class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int =
             chainPoints.addAll(c)
         }
         return chainPoints
+    }
+
+    /**
+     * Extension Function to make Dummy Points not too far away from the original points - the spline
+     * doesn't include the first and the last controlpoint.
+     */
+    private fun Vector3f.randomFromVector(): Vector3f {
+        val distance = controlPoints.first().distance(controlPoints[1])/10
+        return Vector3f(Random.randomFromRange(this.x() - distance, this.x() + distance),
+                Random.randomFromRange(this.y() - distance, this.y() + distance),
+                Random.randomFromRange(this.z() - distance, this.z() + distance))
     }
 
     override fun controlPoints(): List<Vector3f> {

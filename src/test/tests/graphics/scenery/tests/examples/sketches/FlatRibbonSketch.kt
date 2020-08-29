@@ -31,7 +31,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                         ss.children.forEach {alpha ->
                             alpha.children.forEach {
                                 //it.material.diffuse.set(alphaColour)
-                                it.material.cullingMode = Material.CullingMode.None
+                                it.material.wireframe = true
                             }
                         }
                     }
@@ -39,7 +39,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                         ss.children.forEach {beta ->
                             beta.children.forEach {
                                 //it.material.diffuse.set(betaColour)
-                                it.material.cullingMode = Material.CullingMode.None
+                                it.material.wireframe = true
                             }
                         }
                     }
@@ -47,7 +47,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                         ss.children.forEach {coil ->
                             coil.children.forEach {
                                 //it.material.diffuse.set(coilColour)
-                                it.material.cullingMode = Material.CullingMode.None
+                                it.material.wireframe = true
                             }
                         }
                     }
