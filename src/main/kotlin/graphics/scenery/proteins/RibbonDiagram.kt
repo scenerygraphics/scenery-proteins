@@ -72,7 +72,7 @@ class RibbonDiagram(val protein: Protein) {
     private val widthBeta = 2.2f
     private val widthCoil = 1.0f
     private val chainList =  ArrayList<List<Group>>(groups.size)
-    private val sectionVerticesCount = 30
+    private val sectionVerticesCount = 10
     private val secStruc = dssp()
 
     /**
@@ -114,10 +114,10 @@ class RibbonDiagram(val protein: Protein) {
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(1.2f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1.2f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1.2f, -0.1f, 0f))
-        rectangle.add(Vector3f(1.2f, -0.1f, 0f))
+        rectangle.add(Vector3f(1.0f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1.0f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1.0f, -0.1f, 0f))
+        rectangle.add(Vector3f(1.0f, -0.1f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -138,6 +138,7 @@ class RibbonDiagram(val protein: Protein) {
         var guidePointsOffset = 1
         //offset to divide the spline into partial splines for the secondary structures
         var splineOffset = 0
+        //TODO document
         while(guidePointsOffset < guidePointList.lastIndex-1) {
             val guide = guidePointList[guidePointsOffset]
             val count = guide.count
@@ -175,12 +176,10 @@ class RibbonDiagram(val protein: Protein) {
                     for(j in thirtyPercent downTo 1) {
                         val y = 1.65f*j/thirtyPercent
                         val x = 0.1f
-                        val arrowHeadList = ArrayList<Vector3f>(4)
-                        arrowHeadList.add(Vector3f(x, y, 0f))
-                        arrowHeadList.add(Vector3f(-x, y, 0f))
-                        arrowHeadList.add(Vector3f(-x, -y, 0f))
-                        arrowHeadList.add(Vector3f(x, -y, 0f))
-                        ssSubList.add(arrowHeadList)
+                        ssSubList.add(arrayListOf(Vector3f(x, y, 0f),
+                                                Vector3f(-x, y, 0f),
+                                                Vector3f(-x, -y, 0f),
+                                                Vector3f(x, -y, 0f)))
                     }
                     val betaCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
                     betas.addChild(betaCurve)

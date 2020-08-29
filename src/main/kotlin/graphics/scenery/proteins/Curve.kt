@@ -15,11 +15,13 @@ import kotlin.math.acos
  * The number n corresponds to the number of segments you wish to have between your control points.
  *
  * @author  Justin Buerger <burger@mpi-cbg.de>
- * @param [curve] the spline along which the geometry will be rendered
+ * @param [spline] the spline along which the geometry will be rendered
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
-class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
-    private val chain = curve.splinePoints()
+class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
+    private val controlPoints = spline.controlPoints()
+    private val verticesCount = spline.verticesCountPerSection()
+    private val chain = spline.splinePoints()
     private val countList = ArrayList<Int>(50).toMutableList()
 
     /*
@@ -113,13 +115,16 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
      * This function calculates the tangent at a given index.
      * [i] index of the curve (not the geometry!)
      */
-    private fun getTangent(i: Int): Vector3f {
-        val s = chain.size
+    private fun getTangent(j: Int): Vector3f {
+        val fineSpline = UniformBSpline(controlPoints as ArrayList<Vector3f>, verticesCount*10)
+        val i = j*10
+        val finePoints = fineSpline.splinePoints()
+        val s = finePoints.size
         return when(i) {
-            0 -> ((chain[i+1] - chain[i]).normalize())
-            (s-2) -> ((chain[i+1] - chain[i]).normalize())
-            (s-1) -> ((chain[i] - chain[i-1]).normalize())
-            else -> ((chain[i+1] - chain[i-1]).normalize())
+            0 -> ((finePoints[i+1] - finePoints[i]).normalize())
+            (s-2) -> ((finePoints[i+1] - finePoints[i]).normalize())
+            (s-1) -> ((finePoints[i] - finePoints[i-1]).normalize())
+            else -> ((finePoints[i+1] - finePoints[i-1]).normalize())
         }
     }
 
@@ -159,7 +164,7 @@ class Curve(curve: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGe
         if(frenetFrameList[0].tangent.z() <= min) {
             normal.set(0f, 0f, 1f)
         }
-        else { normal.set(1f, 0f, 0f) }
+        else { normal.set(1f, 0f, 0f).normalize() }
         frenetFrameList[0].tangent.cross(normal, vec).normalize()
         frenetFrameList[0].tangent.cross(vec, frenetFrameList[0].normal).normalize()
         frenetFrameList[0].tangent.cross(frenetFrameList[0].normal, frenetFrameList[0].binormal).normalize()

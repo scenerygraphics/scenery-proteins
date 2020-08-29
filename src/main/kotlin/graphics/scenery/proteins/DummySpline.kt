@@ -20,4 +20,8 @@ class DummySpline(protected val controlPoints: ArrayList<Vector3f>): Spline {
     override fun controlPoints(): List<Vector3f> {
         return controlPoints
     }
+
+    override fun verticesCountPerSection(): Int {
+        return 1
+    }
 }

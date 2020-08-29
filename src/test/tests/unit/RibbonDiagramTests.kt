@@ -20,8 +20,7 @@ class RibbonDiagramTests {
         logger.info("Tests coherence of curve size and number of residues.")
         val prion = Protein.fromID("2rnm")
         val ribbon = RibbonDiagram(prion)
-        val curve = ribbon.ribbon()
-        assertNotNull(curve)
+
     }
 
 }
