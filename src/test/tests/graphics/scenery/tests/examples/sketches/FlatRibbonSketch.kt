@@ -30,24 +30,21 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                     (ss.name == "alpha") -> {
                         ss.children.forEach {alpha ->
                             alpha.children.forEach {
-                                //it.material.diffuse.set(alphaColour)
-                                it.material.wireframe = true
+                                it.material.diffuse.set(alphaColour)
                             }
                         }
                     }
                     (ss.name == "beta") -> {
                         ss.children.forEach {beta ->
                             beta.children.forEach {
-                                //it.material.diffuse.set(betaColour)
-                                it.material.wireframe = true
+                                it.material.diffuse.set(betaColour)
                             }
                         }
                     }
                     (ss.name == "coil") -> {
                         ss.children.forEach {coil ->
                             coil.children.forEach {
-                                //it.material.diffuse.set(coilColour)
-                                it.material.wireframe = true
+                                it.material.diffuse.set(coilColour)
                             }
                         }
                     }

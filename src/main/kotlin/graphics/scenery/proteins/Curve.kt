@@ -3,10 +3,8 @@ package graphics.scenery.proteins
 import graphics.scenery.BufferUtils
 import graphics.scenery.HasGeometry
 import graphics.scenery.Mesh
-import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.toFloatArray
 import org.joml.*
-import org.ojalgo.random.Uniform
 import kotlin.Float.Companion.MIN_VALUE
 import kotlin.math.acos
 
@@ -115,14 +113,14 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * [i] index of the curve (not the geometry!)
      */
     private fun getTangent(i: Int): Vector3f {
-        if(chain.size >= 2) {
-            return when (i) {
-                0 -> ((chain[1].sub(chain[0])).normalize())
-                1 -> ((chain[2].sub(chain[0])).normalize())
-                chain.lastIndex - 1 -> ((chain[i + 1].sub(chain[i - 1])).normalize())
-                chain.lastIndex -> (chain[i].sub(chain[i - 1].normalize()))
+        if(chain.size >= 3) {
+            val tangent = Vector3f()
+            when (i) {
+                0 -> ((chain[1].sub(chain[0], tangent)).normalize())
+                1 -> ((chain[2].sub(chain[0], tangent)).normalize())
+                chain.lastIndex - 1 -> ((chain[i + 1].sub(chain[i - 1], tangent)).normalize())
+                chain.lastIndex -> ((chain[i].sub(chain[i - 1], tangent)).normalize())
                 else -> {
-                    val tangent = Vector3f()
                     val p0 = chain[i-2]
                     val p1 = chain[i-1]
                     val p2 = chain[i]
@@ -132,7 +130,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                             p1 != p2 && p1 != p3 && p1 != p4 &&
                             p2 != p3 && p2 != p4 &&
                             p3 != p4) {
-                        val fineSpline = CatmullRomSpline(arrayListOf(p0, p1, p2, p3, p4), 10)
+                        val fineSpline = CatmullRomSpline(arrayListOf(p0, p1, p2, p3, p4), 5)
                         val finePoints = fineSpline.splinePoints()
                         finePoints.forEachIndexed { index, point ->
                             if (point == chain[i]) {
@@ -140,13 +138,13 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                             }
                         }
                         if (tangent.length() == 0f) {
-                            finePoints[12].sub(finePoints[10], tangent).normalize()
+                            finePoints[6].sub(finePoints[4], tangent).normalize()
                         }
                     }
                     else { chain[i+1].sub(chain[i-1], tangent).normalize() }
-                    tangent
                 }
             }
+            return tangent
         }
         else {
             throw Exception("The spline deosn't provide enough points")
