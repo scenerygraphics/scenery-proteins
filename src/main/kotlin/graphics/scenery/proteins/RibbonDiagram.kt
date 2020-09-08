@@ -152,9 +152,11 @@ class RibbonDiagram(val protein: Protein) {
                     guidePointsOffset += count
                     for (j in 0 .. count) {
                         for (i in 0 .. sectionVerticesCount) {
-                            splineOffset++
-                            subSpline.add(helpSpline[i+(sectionVerticesCount+1)*j])
-                            ssSubList.add(rectangle)
+                            if(i+(sectionVerticesCount+1)*j <= helpSpline.lastIndex) {
+                                splineOffset++
+                                subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
+                                ssSubList.add(rectangle)
+                            }
                         }
                     }
                     val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList)}
@@ -188,9 +190,11 @@ class RibbonDiagram(val protein: Protein) {
                     guidePointsOffset += count
                     for (j in 0 .. count) {
                         for (i in 0 .. sectionVerticesCount) {
-                            splineOffset++
-                            subSpline.add(helpSpline[i+(sectionVerticesCount+1)*j])
-                            ssSubList.add(octagon)
+                            if(i+(sectionVerticesCount+1)*j <= helpSpline.lastIndex) {
+                                splineOffset++
+                                subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
+                                ssSubList.add(octagon)
+                            }
                         }
                     }
                     val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
