@@ -145,7 +145,7 @@ class RibbonDiagram(val protein: Protein) {
         certain type (or none). With the type we adapt the curve base shapes: rectangles for the helices, small octagons
         for loops, and flat rectangles for the sheets. What is missing are the spline points. Fortunately, we already
         have a spline for the whole backbone. We take the points belonging to this section and put them into a new
-        spline ("subSpline"). Now a instance of the curve class is created, with the base shapes and the subSpline as
+        spline ("subSpline"). Now, an instance of the curve class is created, with the base shapes and the subSpline as
         properties. Depending on the type this curve gets its parent, so it satisfies this tree structure:
                                                 PDB (protein)
                                                | | ...  |

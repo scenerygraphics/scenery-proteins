@@ -29,16 +29,16 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * a banister.
      */
     init {
-        if(chain.isEmpty()) {
+        if (chain.isEmpty()) {
             println("The spline provided for the Curve is empty.")
         }
         val bases = computeFrenetFrames(chain as ArrayList<Vector3f>).map { (t, n, b, tr) ->
             val inverseMatrix = Matrix4f(n.x(), b.x(), t.x(), 0f,
                     n.y(), b.y(), t.y(), 0f,
                     n.z(), b.z(), t.z(), 0f,
-                    0f, 0f ,0f ,1f).invert()
+                    0f, 0f, 0f, 1f).invert()
             val nn = Vector3f(inverseMatrix[0, 0], inverseMatrix[1, 0], inverseMatrix[2, 0]).normalize()
-            val nb = Vector3f(inverseMatrix[0, 1],inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
+            val nb = Vector3f(inverseMatrix[0, 1], inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
             val nt = Vector3f(inverseMatrix[0, 2], inverseMatrix[2, 1], inverseMatrix[2, 2]).normalize()
             Matrix4f(
                     nn.x(), nb.x(), nt.x(), 0f,
@@ -47,21 +47,20 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                     tr.x(), tr.y(), tr.z(), 1f)
         }
         val baseShapes = baseShape.invoke()
-        var i = 0
-        while (i <= baseShapes.lastIndex) {
-            var partialCurveSize = 0
-            baseShapes.drop(i).takeWhile { firstShape ->
-                val index = ++i
-                partialCurveSize++
-                if (index < baseShapes.lastIndex) {
-                    firstShape.size == baseShapes[index + 1].size
+
+        var partialCurveSize = 1
+        baseShapes.windowed(2, 1) { frame ->
+            when (frame[0].size) {
+                frame[1].size -> {
+                    partialCurveSize++
                 }
-                else {
-                    false
+                else -> {
+                    countList.add(partialCurveSize)
+                    partialCurveSize = 1
                 }
             }
-            countList.add(partialCurveSize)
         }
+        countList.add(partialCurveSize)
         var position = 0
         var lastShapeUnique = false
         if(countList.last() == 1) {
@@ -84,11 +83,11 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
             val helpPosition = position
             //fill the gaps between the different shapes
             if(helpPosition < bases.lastIndex) {
-                val shape = baseShapes[helpPosition]
+                val shape = baseShapes[helpPosition-1]
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
                     val vec = Vector3f()
-                    shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
+                    shapeVertexList.add(bases[helpPosition-1].transformPosition(it, vec))
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
@@ -121,6 +120,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 chain.lastIndex - 1 -> { ((chain[i + 1].sub(chain[i - 1], tangent)).normalize()) }
                 chain.lastIndex -> { ((chain[i].sub(chain[i - 1], tangent)).normalize()) }
                 else -> {
+                    /*
                     val p0 = chain[i-2]
                     val p1 = chain[i-1]
                     val p2 = chain[i]
@@ -142,6 +142,9 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                         }
                     }
                     else { chain[i+1].sub(chain[i-1], tangent).normalize() }
+                     */
+                    chain[i+1].sub(chain[i-1], tangent).normalize()
+
                 }
             }
             return tangent
@@ -266,3 +269,4 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         }
     }
 }
+

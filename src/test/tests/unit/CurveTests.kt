@@ -52,9 +52,9 @@ class CurveTests {
         assertEquals(curve.splinePoints(), geometry.getCurve())
         assertNotNull(frenetFrames.forEach { it.normal })
         assertNotNull(frenetFrames.forEach{ it.binormal })
-        assertEquals(frenetFrames.filter { it.binormal?.length()!! < 1.001f && it.binormal?.length()!! > 0.999f },
+        assertEquals(frenetFrames.filter { it.binormal.length() < 1.001f && it.binormal.length() > 0.999f },
                 frenetFrames)
-        assertEquals(frenetFrames.filter { it.normal?.length()!! < 1.001f && it.normal?.length()!! > 0.999f },
+        assertEquals(frenetFrames.filter { it.normal.length() < 1.001f && it.normal.length() > 0.999f },
                 frenetFrames)
         assertEquals(frenetFrames.filter { it.tangent.length() < 1.001f && it.tangent.length() > 0.999f },
                 frenetFrames)
