@@ -138,10 +138,30 @@ class RibbonDiagram(val protein: Protein) {
         var guidePointsOffset = 1
         //offset to divide the spline into partial splines for the secondary structures
         var splineOffset = 0
-        //TODO document
+        /*
+        In the following lines of code(144-211), we build a curve for each secondary structure. How does this work, step
+        by step? First, we iterate through the guide points. A guide point represents a residue, therefore, it can be
+        assigned a secondary structure or none, respectively. Each secondary structure is of a certain length and has a
+        certain type (or none). With the type we adapt the curve base shapes: rectangles for the helices, small octagons
+        for loops, and flat rectangles for the sheets. What is missing are the spline points. Fortunately, we already
+        have a spline for the whole backbone. We take the points belonging to this section and put them into a new
+        spline ("subSpline"). Now a instance of the curve class is created, with the base shapes and the subSpline as
+        properties. Depending on the type this curve gets its parent, so it satisfies this tree structure:
+                                                PDB (protein)
+                                               | | ...  |
+                                              /  | ...   \
+                                             /   | ...    \
+                                            /    | ...     \
+                                           /     | ...      \
+                                  subUnit 1      subUnit 2 ...subUnit n
+                                 |   |   |        |   |   |    ....
+                                /    |    \      /    |    \
+                               /     |     \    /     |     \
+                          alphas  coils betas  alphas coils betas
+         */
         while(guidePointsOffset < guidePointList.lastIndex-1) {
             val guide = guidePointList[guidePointsOffset]
-            val count = guide.count
+            val count = guide.ssLength
             //one subSpline for each secondary structure
             val subSpline = ArrayList<Vector3f>(sectionVerticesCount*count)
             val ssSubList = ArrayList<ArrayList<Vector3f>>(count)
@@ -354,7 +374,7 @@ class RibbonDiagram(val protein: Protein) {
                     if (ss.range.start == guide.nextResidue!!.residueNumber) {
                         for (i in 0 until ss.range.length) {
                             guidePointsWithoutDummy[index + i].type = ss.type
-                            guidePointsWithoutDummy[index + i].count = ss.range.length - 1
+                            guidePointsWithoutDummy[index + i].ssLength = ss.range.length - 1
                         }
                     }
                 }
@@ -391,9 +411,9 @@ class RibbonDiagram(val protein: Protein) {
             //dummy points at the beginning
             val caBegin = aminoList[0].getAtom("CA").getVector()
             //increase the count of the first section because we add one more point
-            val count = guidePointsWithoutDummy[0].count
+            val count = guidePointsWithoutDummy[0].ssLength
             for (i in 0..count) {
-                guidePointsWithoutDummy[i].count++
+                guidePointsWithoutDummy[i].ssLength++
             }
             val dummyVecBeg = caBegin.randomFromVector()
             guidePoints.add(GuidePoint(dummyVecBeg, guidePointsWithoutDummy[0].cVec, guidePointsWithoutDummy[0].dVec,
@@ -410,7 +430,7 @@ class RibbonDiagram(val protein: Protein) {
                     guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
                     guidePointsWithoutDummy.last().offset, guidePointsWithoutDummy.last().widthFactor,
                     aminoList.last(), aminoList.last(), SecStrucType.bend,
-                    guidePointsWithoutDummy.last().count))
+                    guidePointsWithoutDummy.last().ssLength))
             val dummyVecEnd = caEnd.randomFromVector()
             guidePoints.add(GuidePoint(dummyVecEnd,
                     guidePointsWithoutDummy.last().cVec, guidePointsWithoutDummy.last().dVec,
