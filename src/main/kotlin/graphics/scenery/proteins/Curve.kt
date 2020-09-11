@@ -116,27 +116,21 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         if(chain.size >= 3) {
             val tangent = Vector3f()
             when (i) {
-                0 -> ((chain[1].sub(chain[0], tangent)).normalize())
-                1 -> ((chain[2].sub(chain[0], tangent)).normalize())
-                2 -> ((chain[3].sub(chain[1], tangent)).normalize())
-                chain.lastIndex - 2 -> ((chain[i].sub(chain[i - 2], tangent)).normalize())
-                chain.lastIndex - 1 -> ((chain[i + 1].sub(chain[i - 1], tangent)).normalize())
-                chain.lastIndex -> ((chain[i].sub(chain[i - 1], tangent)).normalize())
+                0 -> { ((chain[1].sub(chain[0], tangent)).normalize()) }
+                1 -> { ((chain[2].sub(chain[0], tangent)).normalize()) }
+                chain.lastIndex - 1 -> { ((chain[i + 1].sub(chain[i - 1], tangent)).normalize()) }
+                chain.lastIndex -> { ((chain[i].sub(chain[i - 1], tangent)).normalize()) }
                 else -> {
-                    val p5 = chain[i-3]
                     val p0 = chain[i-2]
                     val p1 = chain[i-1]
                     val p2 = chain[i]
                     val p3 = chain[i+1]
                     val p4 = chain[i+2]
-                    val p6 = chain[i+3]
-                    if(p0 != p1 && p0 != p1 && p0 != p2 && p0 != p3 && p0 != p4 && p0 != p5 && p0 != p6 &&
-                            p1 != p2 && p1 != p3 && p1 != p4 && p1 != p5 && p1 != p6 &&
-                            p2 != p3 && p2 != p4 && p2 != p5 && p2 != p6 &&
-                            p3 != p4 && p3 != p5 && p3 != p6 &&
-                            p4 != p5 && p4 != p6 &&
-                            p5 != p6) {
-                        val fineSpline = CatmullRomSpline(arrayListOf(p5, p0, p1, p2, p3, p4, p6), 5)
+                    if(p0 != p1 && p0 != p1 && p0 != p2 && p0 != p3 && p0 != p4 &&
+                            p1 != p2 && p1 != p3 && p1 != p4 &&
+                            p2 != p3 && p2 != p4 &&
+                            p3 != p4) {
+                        val fineSpline = CatmullRomSpline(arrayListOf(p0, p1, p2, p3, p4), 5)
                         val finePoints = fineSpline.splinePoints()
                         finePoints.forEachIndexed { index, point ->
                             if (point == chain[i]) {
@@ -144,7 +138,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                             }
                         }
                         if (tangent.length() == 0f) {
-                            finePoints[11].sub(finePoints[9], tangent).normalize()
+                            finePoints[6].sub(finePoints[4], tangent).normalize()
                         }
                     }
                     else { chain[i+1].sub(chain[i-1], tangent).normalize() }
@@ -205,7 +199,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
             if (b.length() > 0.00001f) {
                 val firstNormal = firstFrame.normal
                 b.normalize()
-                val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(-1f, 1f))
+                val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(0.998f, 1f))
                 val q = Quaternionf(AxisAngle4f(theta, b)).normalize()
                 secondFrame.normal = q.transform(Vector3f(firstNormal)).normalize()
             }
