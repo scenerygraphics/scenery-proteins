@@ -301,7 +301,7 @@ class CurveTests {
 
         assertEquals(calculatedVerticesList, correctVerticesList)
     }
-    
+
     //Inline function to access private function in curve
     private inline fun <reified T> T.callPrivateFunc(name: String, vararg args: Any?): Any? =
             T::class
