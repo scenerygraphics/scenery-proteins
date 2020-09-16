@@ -223,7 +223,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         if(curveGeometry.isEmpty()) {
             return verticesVectors
         }
-        verticesVectors.addAll(curveGeometry[0].getCoverVertices(true))
+        verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
         //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
         if(curveGeometry.distinctBy{ it.size }.size == 1) {
             curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
@@ -249,7 +249,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         else {
             throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
-        verticesVectors.addAll(curveGeometry.last().getCoverVertices(false))
+        verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
         return verticesVectors
     }
 
@@ -264,7 +264,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * Each children of the curve must be, per definition, another Mesh. Therefore this class turns a List of
      * vertices into a Mesh.
      */
-    class PartialCurve(verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
+    class PartialCurve( verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
         init {
             vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
             verticesVectors.forEach {
@@ -281,20 +281,20 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
     the bottom of a curve, the triangles should be arranged counterclockwise, for the top clockwise - this is signified
     by [ccw].
      */
-    private fun List<Vector3f>.getCoverVertices(ccw: Boolean): ArrayList<Vector3f> {
-        val size = this.size
+    private fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
+        val size = list.size
         val verticesList = ArrayList<Vector3f>(size + (size/2))
         val workList = ArrayList<Vector3f>(size)
-        workList.addAll(this)
+        workList.addAll(list)
         if(size >= 3) {
             /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
             that the last triangle, which contains the last point as well as the first point, is included.
              */
             when(size%3) {
                 0 -> { }
-                1 -> { workList.add(this[0])
-                        workList.add(this[1])}
-                2 -> { workList.add(this[0])}
+                1 -> { workList.add(list[0])
+                        workList.add(list[1])}
+                2 -> { workList.add(list[0])}
             }
             val newList = ArrayList<Vector3f>((size + (size/2))/2)
             workList.windowed(3, 2) { triangle ->
@@ -306,7 +306,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 }
                 else{ for(i in 0..2) {verticesList.add(triangle[i]) } }
             }
-            verticesList.addAll(newList.getCoverVertices(ccw))
+            verticesList.addAll(getCoverVertices(newList, ccw))
         }
         return verticesList
     }

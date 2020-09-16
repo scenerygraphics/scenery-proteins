@@ -8,6 +8,8 @@ import graphics.scenery.proteins.UniformBSpline
 import graphics.scenery.utils.LazyLogger
 import org.junit.Test
 import org.lwjgl.BufferUtils
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.jvm.isAccessible
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertNotNull
@@ -189,4 +191,122 @@ class CurveTests {
         val curve = Curve(spline) { triangle(spline.controlPoints().size) }
         assertEquals(curve.vertices, emptyFloatBuffer)
     }
+
+    /**
+     * Tests if the algorithm for the cover of the curve works for a polygon with 16 points.
+     */
+    @Test
+    fun testBigPolygon() {
+        logger.info("Tests if the algorithm for the cover of the curve works for a polygon with 16 points.")
+        val point1 = Random.random3DVectorFromRange(-30f, -10f)
+        val point2 = Random.random3DVectorFromRange(-9f, 20f)
+        val point3 = Random.random3DVectorFromRange(21f, 30f)
+        val point4 = Random.random3DVectorFromRange(31f, 100f)
+
+        val controlPoints = arrayListOf(point1, point2, point3, point4)
+
+        val spline = UniformBSpline(controlPoints)
+
+        val sixteenPoints = ArrayList<Vector3f>(16)
+        sixteenPoints.add(Vector3f(1f, 0f, 0f))
+        sixteenPoints.add(Vector3f(0.9f, 0.45f, 0f))
+        sixteenPoints.add(Vector3f(0.75f, 0.75f, 0f))
+        sixteenPoints.add(Vector3f(0.45f, 0.9f, 0f))
+        sixteenPoints.add(Vector3f(0f, 1f, 0f))
+        sixteenPoints.add(Vector3f(-0.45f, 0.9f, 0f))
+        sixteenPoints.add(Vector3f(-0.75f, 0.75f, 0f))
+        sixteenPoints.add(Vector3f(-0.9f, 0.45f, 0f))
+        sixteenPoints.add(Vector3f(-1f, 0f, 0f))
+        sixteenPoints.add(Vector3f(-0.9f, -0.45f, 0f))
+        sixteenPoints.add(Vector3f(-0.75f, -0.75f, 0f))
+        sixteenPoints.add(Vector3f(-0.45f, -0.9f, 0f))
+        sixteenPoints.add(Vector3f(0f, -1f, 0f))
+        sixteenPoints.add(Vector3f(0.45f, -0.9f, 0f))
+        sixteenPoints.add(Vector3f(0.75f, -0.75f, 0f))
+        sixteenPoints.add(Vector3f(0.9f, -0.45f, 0f))
+
+        fun shapeGenerator(splineVerticesCount: Int): ArrayList<ArrayList<Vector3f>> {
+            val finalList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
+            for (i in 0 until splineVerticesCount) {
+                finalList.add(sixteenPoints)
+            }
+            return finalList
+        }
+
+        val curve = Curve(spline) { shapeGenerator(spline.splinePoints().size) }
+
+        //list of the vertices of the triangles from the cover of the curve
+        val correctVerticesList = ArrayList<Vector3f>(14*3)
+
+        //first iteration
+        correctVerticesList.add(sixteenPoints[0])
+        correctVerticesList.add(sixteenPoints[2])
+        correctVerticesList.add(sixteenPoints[1])
+
+        correctVerticesList.add(sixteenPoints[2])
+        correctVerticesList.add(sixteenPoints[4])
+        correctVerticesList.add(sixteenPoints[3])
+
+        correctVerticesList.add(sixteenPoints[4])
+        correctVerticesList.add(sixteenPoints[6])
+        correctVerticesList.add(sixteenPoints[5])
+
+        correctVerticesList.add(sixteenPoints[6])
+        correctVerticesList.add(sixteenPoints[8])
+        correctVerticesList.add(sixteenPoints[7])
+
+        correctVerticesList.add(sixteenPoints[8])
+        correctVerticesList.add(sixteenPoints[10])
+        correctVerticesList.add(sixteenPoints[9])
+
+        correctVerticesList.add(sixteenPoints[10])
+        correctVerticesList.add(sixteenPoints[12])
+        correctVerticesList.add(sixteenPoints[11])
+
+        correctVerticesList.add(sixteenPoints[12])
+        correctVerticesList.add(sixteenPoints[14])
+        correctVerticesList.add(sixteenPoints[13])
+
+        correctVerticesList.add(sixteenPoints[14])
+        correctVerticesList.add(sixteenPoints[0])
+        correctVerticesList.add(sixteenPoints[15])
+
+        //second iteration
+        correctVerticesList.add(sixteenPoints[0])
+        correctVerticesList.add(sixteenPoints[4])
+        correctVerticesList.add(sixteenPoints[2])
+
+        correctVerticesList.add(sixteenPoints[4])
+        correctVerticesList.add(sixteenPoints[8])
+        correctVerticesList.add(sixteenPoints[6])
+
+        correctVerticesList.add(sixteenPoints[8])
+        correctVerticesList.add(sixteenPoints[12])
+        correctVerticesList.add(sixteenPoints[10])
+
+        correctVerticesList.add(sixteenPoints[12])
+        correctVerticesList.add(sixteenPoints[0])
+        correctVerticesList.add(sixteenPoints[14])
+
+        //third and last iteration
+        correctVerticesList.add(sixteenPoints[0])
+        correctVerticesList.add(sixteenPoints[8])
+        correctVerticesList.add(sixteenPoints[4])
+
+        correctVerticesList.add(sixteenPoints[8])
+        correctVerticesList.add(sixteenPoints[0])
+        correctVerticesList.add(sixteenPoints[12])
+
+        val calculatedVerticesList = curve.callPrivateFunc("getCoverVertices", sixteenPoints, true)
+
+        assertEquals(calculatedVerticesList, correctVerticesList)
+    }
+    
+    //Inline function to access private function in curve
+    private inline fun <reified T> T.callPrivateFunc(name: String, vararg args: Any?): Any? =
+            T::class
+                    .declaredMemberFunctions
+                    .firstOrNull { it.name == name }
+                    ?.apply { isAccessible = true }
+                    ?.call(this, *args)
 }
