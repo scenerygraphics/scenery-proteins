@@ -9,6 +9,7 @@ import graphics.scenery.utils.LazyLogger
 import org.junit.Test
 import org.lwjgl.BufferUtils
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 
 /**
@@ -140,6 +141,61 @@ class CurveTests {
         val curve1 = Curve(spline) { shapeGenerator(spline.splinePoints().size) }
         val curve2 = Curve(spline) { shapeGeneratorOnePointTooMuch(spline.splinePoints().size) }
         assertEquals(curve1.vertices, curve2.vertices)
+    }
+
+    /**
+     * Verifies the curve fails when the there are more baseShapes than splinePoints or vice versa.
+     */
+    @Test
+    fun testTooMuchShapeOrPoints() {
+        logger.info("This is the test for the CurveGeometry.")
+        val point1 = Random.random3DVectorFromRange( -30f, -10f)
+        val point2 = Random.random3DVectorFromRange( -9f, 20f)
+        val point3 = Random.random3DVectorFromRange( 21f, 30f)
+        val point4 = Random.random3DVectorFromRange( 31f, 100f)
+        val point5 = Random.random3DVectorFromRange(101f, 122f)
+
+        val controlPoints = arrayListOf(point1, point2, point3, point4)
+
+        val spline = CatmullRomSpline(controlPoints)
+
+        val controlPoints2 = arrayListOf(point1, point2, point3, point4, point5)
+
+        val spline2 = CatmullRomSpline(controlPoints2)
+
+        fun shapeGenerator(splineVerticesCount: Int): ArrayList<ArrayList<Vector3f>> {
+            val shapeList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
+            val splineVerticesCountThird = splineVerticesCount / 3
+            val splineVerticesCountTwoThirds = splineVerticesCount * 2 / 3
+            for (i in 0 until splineVerticesCountThird) {
+                val list = ArrayList<Vector3f>()
+                list.add(Vector3f(0.3f, 0.3f, 0f))
+                list.add(Vector3f(0.3f, -0.3f, 0f))
+                list.add(Vector3f(-0.3f, -0.3f, 0f))
+                shapeList.add(list)
+            }
+            for (i in splineVerticesCountThird until splineVerticesCountTwoThirds) {
+                val list = ArrayList<Vector3f>()
+                list.add(Vector3f(0.3f, 0.3f, 0f))
+                list.add(Vector3f(0.3f, -0.3f, 0f))
+                list.add(Vector3f(-0.3f, -0.3f, 0f))
+                list.add(Vector3f(-0.3f, 0.3f, 0f))
+                shapeList.add(list)
+            }
+            for (i in splineVerticesCountTwoThirds..splineVerticesCount) {
+                val list = ArrayList<Vector3f>()
+                list.add(Vector3f(0.3f, 0.3f, 0f))
+                list.add(Vector3f(0.3f, -0.3f, 0f))
+                list.add(Vector3f(0f, -0.5f, 0f))
+                list.add(Vector3f(-0.3f, -0.3f, 0f))
+                list.add(Vector3f(-0.3f, 0.3f, 0f))
+                list.add(Vector3f(0f, 0.5f, 0f))
+                shapeList.add(list)
+            }
+            return shapeList
+        }
+        assertFails { Curve(spline) { shapeGenerator(spline.splinePoints().size) } }
+        assertFails { Curve(spline2) { shapeGenerator(spline2.splinePoints().size) } }
     }
 
     /**
