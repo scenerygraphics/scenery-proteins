@@ -19,6 +19,7 @@ import kotlin.math.acos
  */
 class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
     private val chain = spline.splinePoints()
+    private val sectionVertices = spline.verticesCountPerSection()
     private val countList = ArrayList<Int>(50).toMutableList()
 
     /*
@@ -218,10 +219,11 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * along the curve.
      */
     private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
-        val verticesVectors = ArrayList<Vector3f>()
+        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6+curveGeometry[0].size+1)
         if(curveGeometry.isEmpty()) {
             return verticesVectors
         }
+        verticesVectors.addAll(curveGeometry[0].getCoverVertices(true))
         //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
         if(curveGeometry.distinctBy{ it.size }.size == 1) {
             curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
@@ -247,6 +249,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         else {
             throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
+        verticesVectors.addAll(curveGeometry.last().getCoverVertices(false))
         return verticesVectors
     }
 
@@ -257,6 +260,10 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         return chain as ArrayList<Vector3f>
     }
 
+    /**
+     * Each children of the curve must be, per definition, another Mesh. Therefore this class turns a List of
+     * vertices into a Mesh.
+     */
     class PartialCurve(val verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
         init {
             vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
@@ -267,6 +274,41 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
             texcoords = BufferUtils.allocateFloat(verticesVectors.size * 2)
             recalculateNormals()
         }
+    }
+
+    /**
+    This function contains a generalized algorithm for the cover of a curve. It works like a pot and a lit. If you cover
+    the bottom of a curve, the triangles should be arranged counterclockwise, for the top clockwise - this is signified
+    by [ccw].
+     */
+    private fun List<Vector3f>.getCoverVertices(ccw: Boolean): ArrayList<Vector3f> {
+        val size = this.size
+        val verticesList = ArrayList<Vector3f>(size + (size/2))
+        val workList = ArrayList<Vector3f>(size)
+        workList.addAll(this)
+        /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
+        that the last triangle, which contains the last point as well as the first point, is included.
+         */
+        when(size%3) {
+            0 -> { }
+            1 -> { workList.add(this[0])
+                    workList.add(this[1])}
+            2 -> { workList.add(this[0])}
+        }
+        if(this.size >= 3) {
+            val newList = ArrayList<Vector3f>((size + (size/2))/2)
+            workList.windowed(3, 2) { triangle ->
+                if(ccw) {
+                    verticesList.add(triangle[0])
+                    verticesList.add(triangle[2])
+                    verticesList.add(triangle[1])
+                    newList.add(triangle[0])
+                }
+                else{ for(i in 0..2) {verticesList.add(triangle[i]) } }
+            }
+            verticesList.addAll(newList.getCoverVertices(ccw))
+        }
+        return verticesList
     }
 }
 
