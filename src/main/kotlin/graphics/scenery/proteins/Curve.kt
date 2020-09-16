@@ -286,16 +286,16 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         val verticesList = ArrayList<Vector3f>(size + (size/2))
         val workList = ArrayList<Vector3f>(size)
         workList.addAll(this)
-        /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
-        that the last triangle, which contains the last point as well as the first point, is included.
-         */
-        when(size%3) {
-            0 -> { }
-            1 -> { workList.add(this[0])
-                    workList.add(this[1])}
-            2 -> { workList.add(this[0])}
-        }
-        if(this.size >= 3) {
+        if(size >= 3) {
+            /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
+            that the last triangle, which contains the last point as well as the first point, is included.
+             */
+            when(size%3) {
+                0 -> { }
+                1 -> { workList.add(this[0])
+                        workList.add(this[1])}
+                2 -> { workList.add(this[0])}
+            }
             val newList = ArrayList<Vector3f>((size + (size/2))/2)
             workList.windowed(3, 2) { triangle ->
                 if(ccw) {
