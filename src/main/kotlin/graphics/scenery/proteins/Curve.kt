@@ -264,7 +264,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * Each children of the curve must be, per definition, another Mesh. Therefore this class turns a List of
      * vertices into a Mesh.
      */
-    class PartialCurve(val verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
+    class PartialCurve(verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
         init {
             vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
             verticesVectors.forEach {
