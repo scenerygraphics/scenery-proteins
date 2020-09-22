@@ -14,7 +14,7 @@ import kotlin.math.acos
  * The number n corresponds to the number of segments you wish to have between your control points.
  * The spline and the baseShape lambda must both have the same number of elements, otherwise, the curve is no
  * longer well defined. Concerning the individual baseShapes, no lines must cross for the body of the curve to
- * be visualized flawlessly. Furthermore, for the cover algorithm all baseShapes ought to be convex.
+ * be visualized flawlessly. Furthermore, all baseShapes ought to be convex.
  *
  * @author  Justin Buerger <burger@mpi-cbg.de>
  * @param [spline] the spline along which the geometry will be rendered
@@ -206,6 +206,11 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
             if (b.length() > 0.00001f) {
                 val firstNormal = firstFrame.normal
                 b.normalize()
+                /*
+                Mathematically speaking, theta would need to be coerced in (-1,1). However, less artifacts show up when
+                we limit the angle to roughly 5° which corresponds to a acos of 0.998, hence the value.
+                TODO allow for angles bigger than 5° by removing the artifacts
+                 */
                 val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(0.998f, 1f))
                 val q = Quaternionf(AxisAngle4f(theta, b)).normalize()
                 secondFrame.normal = q.transform(Vector3f(firstNormal)).normalize()
