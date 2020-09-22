@@ -143,7 +143,8 @@ class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
         for loops, and flat rectangles for the sheets. What is missing are the spline points. Fortunately, we already
         have a spline for the whole backbone. We take the points belonging to this section and put them into a new
         spline ("subSpline"). Now, an instance of the curve class is created, with the base shapes and the subSpline as
-        properties. Depending on the type this curve gets its parent, so it satisfies this tree structure:
+        properties. Depending on the secondary structure type this curve gets its parent, so it satisfies this
+        tree structure:
                                                 PDB (protein)
                                                | | ...  |
                                               /  | ...   \
@@ -539,8 +540,8 @@ class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
         }
 
         /**
-         * Extension function to make a Vector out of an atom position, as for now we do not
-         * need any information about an atom besides its name and its position
+         * Extension function to make a Vector out of an atom position. We do not
+         * need any information about an atom besides its name and its position.
          */
         private fun Atom.getVector(): Vector3f {
             return Vector3f(this.x.toFloat(), this.y.toFloat(), this.z.toFloat())
