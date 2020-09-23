@@ -16,9 +16,8 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val protein = Protein.fromID("6zh9")
 
-        val diagram = RibbonDiagram(protein)
+        val ribbon = RibbonDiagram(protein)
 
-        val ribbon = diagram.ribbon()
 
         val alphaColour =  Random.random3DVectorFromRange(0f, 1f)
         val betaColour =  Random.random3DVectorFromRange(0f, 1f)
