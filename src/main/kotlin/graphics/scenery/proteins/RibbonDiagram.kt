@@ -10,6 +10,7 @@ import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucElement
 import org.biojava.nbio.structure.secstruc.SecStrucTools
 import org.biojava.nbio.structure.secstruc.SecStrucType
+import kotlin.math.min
 
 /**
  * A Ribbon Diagram for Proteins. Ribbon models are currently the most common representations of proteins.
@@ -47,7 +48,7 @@ import org.biojava.nbio.structure.secstruc.SecStrucType
  * @param [protein] the polypeptide you wish to visualize, stored in the class Protein
  */
 
-class RibbonDiagram(val protein: Protein, private val distinctAminos: Boolean = false): Mesh("ribbon") {
+class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
 
     /*
      *[structure] the structure of the protein stored in the class Structure of BioJava
@@ -350,7 +351,7 @@ class RibbonDiagram(val protein: Protein, private val distinctAminos: Boolean = 
                                 finalPoint.add(offsetVec)
                             }
                             (ca0Ca3Distance > 9f) -> {
-                                widthFactor = java.lang.Float.min(1.5f, ca0Ca3Distance - 9f) / 1.5f
+                                widthFactor = min(1.5f, ca0Ca3Distance - 9f) / 1.5f
                                 offset = 0f
                             }
                             else -> {
