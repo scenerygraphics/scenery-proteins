@@ -395,6 +395,9 @@ class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
 
 
             }
+            if(guidePointsWithoutDummy.isEmpty()) {
+                return guidePointsWithoutDummy
+            }
             //if there is a width factor is still assigned at the beginning, also assign it to the first point
             if (guidePointsWithoutDummy[1].widthFactor != 0f && guidePointsWithoutDummy[2].widthFactor != 0f &&
                     guidePointsWithoutDummy[3].widthFactor != 0f) {
