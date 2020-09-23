@@ -19,20 +19,20 @@ class Protein(val structure: Structure): Mesh("Protein") {
         fun fromID(id: String): Protein {
                 //print("Please enter the PDB-ID: ")
                 //val id = readLine()
-                val struc = try { StructureIO.getStructure(id) }
-                catch (struc: IOException) {
-                    print("Something went wrong with the loading- are you sure you chose the right ID?")
-                    struc.printStackTrace()
-                }
-                catch(struc: StructureException) {
-                    print("Something went wrong with the loading.")
-                    struc.printStackTrace()
-                }
-                finally {
-                    val struc = StructureIO.getStructure(id)
-                    val protein = Protein(struc)
-                    return protein
-                }
+            try { StructureIO.getStructure(id) }
+            catch (struc: IOException) {
+                print("Something went wrong with the loading- are you sure you chose the right ID?")
+                struc.printStackTrace()
+            }
+            catch(struc: StructureException) {
+                print("Something went wrong with the loading.")
+                struc.printStackTrace()
+            }
+            finally {
+                val struc = StructureIO.getStructure(id)
+                val protein = Protein(struc)
+                return protein
+            }
         }
 
         fun fromFile(path: String): Protein {
