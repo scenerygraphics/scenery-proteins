@@ -47,7 +47,7 @@ import org.biojava.nbio.structure.secstruc.SecStrucType
  * @param [protein] the polypeptide you wish to visualize, stored in the class Protein
  */
 
-class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
+class RibbonDiagram(val protein: Protein, private val distinctAminos: Boolean = false): Mesh("ribbon") {
 
     /*
      *[structure] the structure of the protein stored in the class Structure of BioJava
@@ -63,7 +63,7 @@ class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
      *[aminoList] List of all the amino acids in the protein
      *[sectionVerticesCount] Specifies how fine grained the geometry along the backbone
      * will be. Please note that the calculation could take much longer if this parameter is too
-     * big, especially, for large proteins.
+     * big, especially for large proteins.
      */
     private val structure = protein.structure
     private val chains = structure.chains
@@ -78,8 +78,7 @@ class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
     /**
      * Returns the final Ribbon Diagram
      */
-    fun ribbon(): Mesh {
-        val ribbon = Mesh("ribbon")
+    init {
         chains.forEach{ chain ->
             if(chain.isProtein) {
                 val aminoList = ArrayList<Group>(chain.atomGroups.size)
@@ -94,9 +93,8 @@ class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
         chainList.forEach { aminoList ->
             val guidePointList = calculateGuidePoints(aminoList, secStruc)
             val spline = ribbonSpline(guidePointList)
-            ribbon.addChild(subShapes(guidePointList, spline))
+            this.addChild(subShapes(guidePointList, spline))
         }
-        return ribbon
     }
 
 
@@ -157,152 +155,77 @@ class RibbonDiagram(val protein: Protein, val distinctAminos: Boolean = false) {
                                /     |     \    /     |     \
                           alphas  coils betas  alphas coils betas
          */
-        if(distinctAminos) {
-            while (guidePointsOffset < guidePointList.lastIndex - 1) {
-                val guide = guidePointList[guidePointsOffset]
-                val count = guide.ssLength
-                guidePointsOffset++
-                when {
-                    (guide.type == SecStrucType.helix4) -> {
-                        guidePointsOffset += count
-                        for (j in 0..count) {
-                            val subSpline = ArrayList<Vector3f>(sectionVerticesCount)
-                            val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount)
-                            val helpSpline = splinePoints.drop(splineOffset)
-                            for (i in 0..sectionVerticesCount) {
-                                if (i  <= helpSpline.lastIndex) {
-                                    splineOffset++
-                                    subSpline.add(helpSpline[i])
-                                    ssSubList.add(rectangle)
-                                }
+        val alphas = Mesh("alpha")
+        val betas = Mesh("beta")
+        val coils = Mesh("coil")
+        while (guidePointsOffset < guidePointList.lastIndex - 1) {
+            val guide = guidePointList[guidePointsOffset]
+            val count = guide.ssLength
+            //one subSpline for each secondary structure
+            val subSpline = ArrayList<Vector3f>(sectionVerticesCount * count)
+            val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount * count)
+            val helpSpline = splinePoints.drop(splineOffset)
+            guidePointsOffset++
+            when {
+                (guide.type == SecStrucType.helix4) -> {
+                    guidePointsOffset += count
+                    for (j in 0..count) {
+                        for (i in 0..sectionVerticesCount) {
+                            if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
+                                splineOffset++
+                                subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
+                                ssSubList.add(rectangle)
                             }
-                            val helixResidue = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                            subParent.addChild(helixResidue)
-                        }
-
-                    }
-                    //the beta sheets are visualized with arrows
-                    (guide.type.isBetaStrand) -> {
-                        guidePointsOffset += count
-                        val sheetSize = (count + 1) * (sectionVerticesCount + 1)
-                        val seventyPercent = (sheetSize * 0.70).toInt()
-                        val thirtyPercent = sheetSize - seventyPercent
-                        for(j in 0 .. count) {
-                            val subSpline = ArrayList<Vector3f>(sectionVerticesCount)
-                            val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount)
-                            val helpSpline = splinePoints.drop(splineOffset)
-                            for(i in 0..sectionVerticesCount) {
-                                if (i  <= helpSpline.lastIndex) {
-                                    splineOffset++
-                                    subSpline.add(helpSpline[i])
-                                    //TODO needs to be more sophisticated
-                                    if(i*j < seventyPercent) { ssSubList.add(reversedRectangle) }
-                                    else  {
-                                        val y = 1.65f * j*i / thirtyPercent
-                                        val x = 0.1f
-                                        ssSubList.add(arrayListOf(Vector3f(x, y, 0f),
-                                                Vector3f(-x, y, 0f),
-                                                Vector3f(-x, -y, 0f),
-                                                Vector3f(x, -y, 0f))) }
-                                    }
-                            }
-                            val betaResidue = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                            subParent.addChild(betaResidue)
                         }
                     }
-                    else -> {
-                        guidePointsOffset += count
-                        for (j in 0..count) {
-                            val subSpline = ArrayList<Vector3f>(sectionVerticesCount)
-                            val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount)
-                            val helpSpline = splinePoints.drop(splineOffset)
-                            for (i in 0..sectionVerticesCount) {
-                                if (i <= helpSpline.lastIndex) {
-                                    splineOffset++
-                                    subSpline.add(helpSpline[i])
-                                    ssSubList.add(octagon)
-                                }
+                    val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
+                    alphas.addChild(helixCurve)
+                }
+                //the beta sheets are visualized with arrows
+                (guide.type.isBetaStrand) -> {
+                    val sheetSize = (count + 1) * (sectionVerticesCount + 1)
+                    for (i in 0 until (count + 1) * (sectionVerticesCount + 1)) {
+                        splineOffset++
+                        subSpline.add(helpSpline[i])
+                    }
+                    guidePointsOffset += count
+                    val seventyPercent = (sheetSize * 0.70).toInt()
+                    for (j in 0 until seventyPercent) {
+                        ssSubList.add(reversedRectangle)
+                    }
+                    val thirtyPercent = sheetSize - seventyPercent
+                    for (j in thirtyPercent downTo 1) {
+                        val y = 1.65f * j / thirtyPercent
+                        val x = 0.1f
+                        ssSubList.add(arrayListOf(Vector3f(x, y, 0f),
+                                Vector3f(-x, y, 0f),
+                                Vector3f(-x, -y, 0f),
+                                Vector3f(x, -y, 0f)))
+                    }
+                    val betaCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
+                    betas.addChild(betaCurve)
+                }
+                else -> {
+                    guidePointsOffset += count
+                    for (j in 0..count) {
+                        for (i in 0..sectionVerticesCount) {
+                            if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
+                                splineOffset++
+                                subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
+                                ssSubList.add(octagon)
                             }
-                            val coilResidue = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                            subParent.addChild(coilResidue)
                         }
                     }
+                    val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
+                    coils.addChild(coilCurve)
                 }
             }
         }
-        else {
-            val alphas = Mesh("alpha")
-            val betas = Mesh("beta")
-            val coils = Mesh("coil")
-            while (guidePointsOffset < guidePointList.lastIndex - 1) {
-                val guide = guidePointList[guidePointsOffset]
-                val count = guide.ssLength
-                //one subSpline for each secondary structure
-                val subSpline = ArrayList<Vector3f>(sectionVerticesCount * count)
-                val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount * count)
-                val helpSpline = splinePoints.drop(splineOffset)
-                guidePointsOffset++
-                when {
-                    (guide.type == SecStrucType.helix4) -> {
-                        guidePointsOffset += count
-                        for (j in 0..count) {
-                            for (i in 0..sectionVerticesCount) {
-                                if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
-                                    splineOffset++
-                                    subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
-                                    ssSubList.add(rectangle)
-                                }
-                            }
-                        }
-                        val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                        alphas.addChild(helixCurve)
-                    }
-                    //the beta sheets are visualized with arrows
-                    (guide.type.isBetaStrand) -> {
-                        val sheetSize = (count + 1) * (sectionVerticesCount + 1)
-                        for (i in 0 until (count + 1) * (sectionVerticesCount + 1)) {
-                            splineOffset++
-                            subSpline.add(helpSpline[i])
-                        }
-                        guidePointsOffset += count
-                        val seventyPercent = (sheetSize * 0.70).toInt()
-                        for (j in 0 until seventyPercent) {
-                            ssSubList.add(reversedRectangle)
-                        }
-                        val thirtyPercent = sheetSize - seventyPercent
-                        for (j in thirtyPercent downTo 1) {
-                            val y = 1.65f * j / thirtyPercent
-                            val x = 0.1f
-                            ssSubList.add(arrayListOf(Vector3f(x, y, 0f),
-                                    Vector3f(-x, y, 0f),
-                                    Vector3f(-x, -y, 0f),
-                                    Vector3f(x, -y, 0f)))
-                        }
-                        val betaCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                        betas.addChild(betaCurve)
-                    }
-                    else -> {
-                        guidePointsOffset += count
-                        for (j in 0..count) {
-                            for (i in 0..sectionVerticesCount) {
-                                if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
-                                    splineOffset++
-                                    subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
-                                    ssSubList.add(octagon)
-                                }
-                            }
-                        }
-                        val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                        coils.addChild(coilCurve)
-                    }
-                }
-            }
-            subParent.addChild(alphas)
-            subParent.addChild(betas)
-            subParent.addChild(coils)
-        }
+        subParent.addChild(alphas)
+        subParent.addChild(betas)
+        subParent.addChild(coils)
         return subParent
-    }
+     }
 
 
     /**
