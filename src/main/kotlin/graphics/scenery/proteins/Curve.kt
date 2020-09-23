@@ -105,9 +105,12 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            val partialVerticesVector = calculateTriangles(partialCurveGeometry)
-            val partialCurve = PartialCurve(partialVerticesVector)
-            this.children.add(partialCurve)
+            val sections = Mesh("sections")
+            calculateTriangles(partialCurveGeometry).forEach{
+                val partialCurveSection = PartialCurve(it)
+                sections.children.add(partialCurveSection)
+            }
+            this.children.add(sections)
         }
     }
 
@@ -226,12 +229,11 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * the [curveGeometry] List which contains all the baseShapes transformed and translated
      * along the curve.
      */
-    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
-        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6+curveGeometry[0].size+1)
+    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): List<List<Vector3f>> {
+        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6)
         if(curveGeometry.isEmpty()) {
-            return verticesVectors
+            return verticesVectors.chunked(sectionVertices)
         }
-        verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
         //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
         if(curveGeometry.distinctBy{ it.size }.size == 1) {
             curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
@@ -257,8 +259,14 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         else {
             throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
-        verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
-        return verticesVectors
+        val finalList = ArrayList<List<Vector3f>>(sectionVertices*6+2)
+        //add the top
+        finalList.add(getCoverVertices(curveGeometry[0], true))
+        //add curve
+        finalList.addAll(verticesVectors.chunked(sectionVertices*6))
+        //add bottom
+        finalList.add(getCoverVertices(curveGeometry.last(), false))
+        return finalList
     }
 
     /**
@@ -272,7 +280,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * Each children of the curve must be, per definition, another Mesh. Therefore this class turns a List of
      * vertices into a Mesh.
      */
-    class PartialCurve( verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
+    class PartialCurve( verticesVectors: List<Vector3f>): Mesh("PartialCurve"), HasGeometry {
         init {
             vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
             verticesVectors.forEach {

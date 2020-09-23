@@ -14,7 +14,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("6zh9")
+        val protein = Protein.fromID("2w49")
 
         val ribbon = RibbonDiagram(protein)
 
@@ -28,22 +28,29 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
                 when {
                     (ss.name == "alpha") -> {
                         ss.children.forEach {alpha ->
-                            alpha.children.forEach {
-                                it.material.diffuse.set(alphaColour)
+                            alpha.children.forEach {child ->
+                                child.children.forEach {
+                                    it.material.diffuse.set(alphaColour)
+                                }
                             }
                         }
                     }
                     (ss.name == "beta") -> {
                         ss.children.forEach {beta ->
-                            beta.children.forEach {
-                                it.material.diffuse.set(betaColour)
+                            beta.children.forEach { child ->
+                                    child.children.forEach {
+                                        it.material.diffuse.set(betaColour)
+                                    }
+
                             }
                         }
                     }
                     (ss.name == "coil") -> {
                         ss.children.forEach {coil ->
-                            coil.children.forEach {
-                                it.material.diffuse.set(coilColour)
+                            coil.children.forEach {child ->
+                                child.children.forEach {
+                                    it.material.diffuse.set(coilColour)
+                                }
                             }
                         }
                     }
