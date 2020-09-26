@@ -48,7 +48,7 @@ import kotlin.math.min
  * @param [protein] the polypeptide you wish to visualize, stored in the class Protein
  */
 
-class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
+class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh("ribbon") {
 
     /*
      *[structure] the structure of the protein stored in the class Structure of BioJava
@@ -142,8 +142,8 @@ class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
         for loops, and flat rectangles for the sheets. What is missing are the spline points. Fortunately, we already
         have a spline for the whole backbone. We take the points belonging to this section and put them into a new
         spline ("subSpline"). Now, an instance of the curve class is created, with the base shapes and the subSpline as
-        properties. Depending on the secondary structure type this curve gets its parent, so it satisfies this
-        tree structure:
+        properties. When displaySS is true this curve gets its parent, depending of course on its secondary structure
+        type. In the end it would satisfy this tree structure:
                                                 PDB (protein)
                                                | | ...  |
                                               /  | ...   \
@@ -180,7 +180,8 @@ class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
                         }
                     }
                     val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                    alphas.addChild(helixCurve)
+                    if(displaySS) { alphas.addChild(helixCurve) }
+                    else { subParent.addChild(helixCurve) }
                 }
                 //the beta sheets are visualized with arrows
                 (guide.type.isBetaStrand) -> {
@@ -204,7 +205,8 @@ class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
                                 Vector3f(x, -y, 0f)))
                     }
                     val betaCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                    betas.addChild(betaCurve)
+                    if(displaySS) { betas.addChild(betaCurve) }
+                    else { subParent.addChild(betaCurve) }
                 }
                 else -> {
                     guidePointsOffset += count
@@ -218,13 +220,16 @@ class RibbonDiagram(val protein: Protein): Mesh("ribbon") {
                         }
                     }
                     val coilCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                    coils.addChild(coilCurve)
+                    if(displaySS) { coils.addChild(coilCurve) }
+                    else { subParent.addChild(coilCurve) }
                 }
             }
         }
+        if(displaySS) {
         subParent.addChild(alphas)
         subParent.addChild(betas)
         subParent.addChild(coils)
+        }
         return subParent
      }
 
