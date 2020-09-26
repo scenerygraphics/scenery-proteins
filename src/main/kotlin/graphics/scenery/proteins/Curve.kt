@@ -105,12 +105,9 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            val sections = Mesh("sections")
-            calculateTriangles(partialCurveGeometry).forEach{
-                val partialCurveSection = PartialCurve(it)
-                sections.children.add(partialCurveSection)
-            }
-            this.children.add(sections)
+            val partialVerticesVector = calculateTriangles(partialCurveGeometry)
+            val partialCurve = PartialCurve(partialVerticesVector)
+            this.children.add(partialCurve)
         }
     }
 
@@ -127,31 +124,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 chain.lastIndex - 1 -> { ((chain[i + 1].sub(chain[i - 1], tangent)).normalize()) }
                 chain.lastIndex -> { ((chain[i].sub(chain[i - 1], tangent)).normalize()) }
                 else -> {
-                    /*
-                    val p0 = chain[i-2]
-                    val p1 = chain[i-1]
-                    val p2 = chain[i]
-                    val p3 = chain[i+1]
-                    val p4 = chain[i+2]
-                    if(p0 != p1 && p0 != p1 && p0 != p2 && p0 != p3 && p0 != p4 &&
-                            p1 != p2 && p1 != p3 && p1 != p4 &&
-                            p2 != p3 && p2 != p4 &&
-                            p3 != p4) {
-                        val fineSpline = CatmullRomSpline(arrayListOf(p0, p1, p2, p3, p4), 5)
-                        val finePoints = fineSpline.splinePoints()
-                        finePoints.forEachIndexed { index, point ->
-                            if (point == chain[i]) {
-                                finePoints[index + 1].sub(finePoints[index - 1], tangent).normalize()
-                            }
-                        }
-                        if (tangent.length() == 0f) {
-                            finePoints[6].sub(finePoints[4], tangent).normalize()
-                        }
-                    }
-                    else { chain[i+1].sub(chain[i-1], tangent).normalize() }
-                     */
                     chain[i+1].sub(chain[i-1], tangent).normalize()
-
                 }
             }
             return tangent
@@ -229,11 +202,12 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * the [curveGeometry] List which contains all the baseShapes transformed and translated
      * along the curve.
      */
-    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): List<List<Vector3f>> {
-        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6)
+    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
+        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6+curveGeometry[0].size+1)
         if(curveGeometry.isEmpty()) {
-            return verticesVectors.chunked(sectionVertices)
+            return verticesVectors
         }
+        verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
         //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
         if(curveGeometry.distinctBy{ it.size }.size == 1) {
             curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
@@ -259,14 +233,8 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         else {
             throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
-        val finalList = ArrayList<List<Vector3f>>(sectionVertices*6+2)
-        //add the top
-        finalList.add(getCoverVertices(curveGeometry[0], true))
-        //add curve
-        finalList.addAll(verticesVectors.chunked(sectionVertices*6))
-        //add bottom
-        finalList.add(getCoverVertices(curveGeometry.last(), false))
-        return finalList
+        verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
+        return verticesVectors
     }
 
     /**
@@ -280,7 +248,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * Each children of the curve must be, per definition, another Mesh. Therefore this class turns a List of
      * vertices into a Mesh.
      */
-    class PartialCurve( verticesVectors: List<Vector3f>): Mesh("PartialCurve"), HasGeometry {
+    class PartialCurve( verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
         init {
             vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
             verticesVectors.forEach {
