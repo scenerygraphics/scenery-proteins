@@ -73,6 +73,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         }
 
         countList.forEach {count ->
+            val partialCurve = Mesh("partialCurve")
             val partialCurveGeometry = ArrayList<ArrayList<Vector3f>>(count)
             for(j in 0 until count) {
                 val shape = baseShapes[position]
@@ -105,9 +106,23 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            val partialVerticesVector = calculateTriangles(partialCurveGeometry)
-            val partialCurve = PartialCurve(partialVerticesVector)
-            this.children.add(partialCurve)
+            partialCurveGeometry.windowed(sectionVertices, sectionVertices-1) { section ->
+                var i = when {
+                    section.contains(partialCurveGeometry.first()) -> {
+                        0
+                    }
+                    section.contains(partialCurveGeometry.last()) -> {
+                        1
+                    }
+                    else -> {
+                        2
+                    }
+                }
+                val partialCurveSectionVertices = calculateTriangles(section, i)
+                val partialCurveSection = PartialCurve(partialCurveSectionVertices)
+                partialCurve.addChild(partialCurveSection)
+            }
+            this.addChild(partialCurve)
         }
     }
 
@@ -202,12 +217,14 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
      * the [curveGeometry] List which contains all the baseShapes transformed and translated
      * along the curve.
      */
-    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>): ArrayList<Vector3f> {
+    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>, addCoverOrTop: Int = 2): ArrayList<Vector3f> {
         val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6+curveGeometry[0].size+1)
         if(curveGeometry.isEmpty()) {
             return verticesVectors
         }
-        verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
+        if(addCoverOrTop == 0) {
+            verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
+        }
         //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
         if(curveGeometry.distinctBy{ it.size }.size == 1) {
             curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
@@ -233,7 +250,9 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         else {
             throw IllegalArgumentException("The baseShapes must not differ in size!")
         }
-        verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
+        if(addCoverOrTop == 1) {
+            verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
+        }
         return verticesVectors
     }
 
