@@ -110,10 +110,10 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(1.0f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1.0f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1.0f, -0.1f, 0f))
-        rectangle.add(Vector3f(1.0f, -0.1f, 0f))
+        rectangle.add(Vector3f(1f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1f, 0.1f, 0f))
+        rectangle.add(Vector3f(-1f, -0.1f, 0f))
+        rectangle.add(Vector3f(1f, -0.1f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -161,7 +161,7 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
         val coils = Mesh("coil")
         while (guidePointsOffset < guidePointList.lastIndex - 1) {
             val guide = guidePointList[guidePointsOffset]
-            val count = guide.ssLength
+            val count = getCount(guidePointList.drop(guidePointsOffset))
             //one subSpline for each secondary structure
             val subSpline = ArrayList<Vector3f>(sectionVerticesCount * count)
             val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount * count)
@@ -489,5 +489,27 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
                     Random.randomFromRange(this.y() - 1f, this.y() + 1f),
                     Random.randomFromRange(this.z() - 1f, this.z() + 1f))
         }
+    }
+
+    /**
+     * Counts the secondary structure length.
+     */
+    private fun getCount(guidePointList: List<GuidePoint>): Int {
+        var count = 0
+            guidePointList.forEachIndexed { index, guide ->
+                if (index < guidePointList.lastIndex) {
+                    val nextGuide = guidePointList[index + 1]
+                    //Secondary structures which are not sheets or helices are summarized
+                    if (guide.type == SecStrucType.helix4 && nextGuide.type == SecStrucType.helix4 ||
+                            guide.type.isBetaStrand && nextGuide.type.isBetaStrand ||
+                            (guide.type != SecStrucType.helix4 && nextGuide.type != SecStrucType.helix4
+                                    && !guide.type.isBetaStrand && !nextGuide.type.isBetaStrand)){
+                        count++
+                    } else {
+                        return count
+                    }
+                }
+            }
+        return count
     }
 }
