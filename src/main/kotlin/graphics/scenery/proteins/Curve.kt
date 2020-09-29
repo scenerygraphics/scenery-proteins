@@ -106,7 +106,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            partialCurveGeometry.windowed(sectionVertices, sectionVertices-1) { section ->
+            partialCurveGeometry.windowed(sectionVertices, sectionVertices) { section ->
                 var i = when {
                     section.contains(partialCurveGeometry.first()) -> {
                         0
@@ -202,7 +202,7 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
                 we limit the angle to roughly 5° which corresponds to a acos of 0.998, hence the value.
                 TODO allow for angles bigger than 5° by removing the artifacts
                  */
-                val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(0.998f, 1f))
+                val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(-1f, 1f))
                 val q = Quaternionf(AxisAngle4f(theta, b)).normalize()
                 secondFrame.normal = q.transform(Vector3f(firstNormal)).normalize()
             }

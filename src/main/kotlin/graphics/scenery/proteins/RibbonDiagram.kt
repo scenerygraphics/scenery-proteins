@@ -4,6 +4,7 @@ import graphics.scenery.Mesh
 import org.joml.*
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random
+import graphics.scenery.utils.extensions.plus
 import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
@@ -160,6 +161,7 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
         val betas = Mesh("beta")
         val coils = Mesh("coil")
         while (guidePointsOffset < guidePointList.lastIndex - 1) {
+            val guideIndex = guidePointsOffset
             val guide = guidePointList[guidePointsOffset]
             val count = getCount(guidePointList.drop(guidePointsOffset))
             //one subSpline for each secondary structure
@@ -170,6 +172,19 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
             when {
                 (guide.type == SecStrucType.helix4) -> {
                     guidePointsOffset += count
+                    //helix axis, see: "Defining the axis of a helix" by Peter C. Kahn
+                    val ca1 = guidePointList[guideIndex].nextResidue?.getAtom("CA")?.getVector()
+                    val ca2 = guidePointList[guideIndex+1].nextResidue?.getAtom("CA")?.getVector()
+                    val ca3 = guidePointList[guideIndex+2].nextResidue?.getAtom("CA")?.getVector()
+                    val ca4 = guidePointList[guideIndex+3].nextResidue?.getAtom("CA")?.getVector()
+                    val a1 = ca2?.sub(ca1)
+                    val b1 = ca2?.sub(ca3)
+                    val v1 = a1?.add(b1)?.normalize()
+                    val a2 = ca3?.sub(ca2)
+                    val b2 = ca3?.sub(ca4)
+                    val v2 = a2?.add(b2)?.normalize()
+                    val axis = v1?.cross(v2)?.normalize()
+
                     for (j in 0..count) {
                         for (i in 0..sectionVerticesCount) {
                             if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
@@ -378,7 +393,12 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
                 ssList.forEach { ss ->
                     if (ss.range.start == guide.nextResidue!!.residueNumber) {
                         for (i in 0 until ss.range.length) {
-                            guidePointsWithoutDummy[index + i].type = ss.type
+                            if(ss.type == SecStrucType.helix4 && ss.range.length < 4) {
+                                guidePointsWithoutDummy[index + i].type = SecStrucType.bend
+                            }
+                            else {
+                                guidePointsWithoutDummy[index + i].type = ss.type
+                            }
                             guidePointsWithoutDummy[index + i].ssLength = ss.range.length - 1
                         }
                     }

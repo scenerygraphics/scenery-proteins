@@ -7,7 +7,7 @@ import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
-class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
+class RainbowRibbonTest: SceneryBase("RainbowRibbon", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
@@ -18,34 +18,10 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val ribbon = RibbonDiagram(protein)
 
-        val alphaColour =  Random.random3DVectorFromRange(0f, 1f)
-        val betaColour =  Random.random3DVectorFromRange(0f, 1f)
-        val coilColour =  Random.random3DVectorFromRange(0f, 1f)
-
         ribbon.children.forEach {subProtein ->
-            subProtein.children.forEach { ss ->
-                when {
-                    (ss.name == "alpha") -> {
-                        ss.children.forEach {alpha ->
-                            alpha.children.forEach {
-                                it.material.diffuse.set(alphaColour)
-                            }
-                        }
-                    }
-                    (ss.name == "beta") -> {
-                        ss.children.forEach {beta ->
-                            beta.children.forEach {
-                                it.material.diffuse.set(betaColour)
-                            }
-                        }
-                    }
-                    (ss.name == "coil") -> {
-                        ss.children.forEach {coil ->
-                            coil.children.forEach {
-                                it.material.diffuse.set(coilColour)
-                            }
-                        }
-                    }
+            subProtein.children.forEach { curves ->
+                curves.children.forEach {
+                    it.material.diffuse = Random.random3DVectorFromRange(0f, 1f)
                 }
             }
         }
