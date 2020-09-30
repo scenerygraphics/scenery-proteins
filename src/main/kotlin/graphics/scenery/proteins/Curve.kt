@@ -20,7 +20,8 @@ import kotlin.math.acos
  * @param [spline] the spline along which the geometry will be rendered
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
-class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
+class Curve(spline: Spline, val helixCase: Boolean = false, val axis: Vector3f = Vector3f(0f, 0f, 0f), baseShape: () -> List<List<Vector3f>>):
+        Mesh("CurveGeometry"), HasGeometry {
     private val chain = spline.splinePoints()
     private val sectionVertices = spline.verticesCountPerSection()
     private val countList = ArrayList<Int>(50).toMutableList()
@@ -174,19 +175,25 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
         var min = MIN_VALUE
         val vec = Vector3f()
         val normal = Vector3f()
-        if(frenetFrameList[0].tangent.x() <= min) {
-            min = frenetFrameList[0].tangent.x()
-            normal.set(1f, 0f, 0f)
+        if(helixCase) {
+            vec.set(axis).normalize()
         }
-        if(frenetFrameList[0].tangent.y() <= min) {
-            min = frenetFrameList[0].tangent.y()
-            normal.set(0f, 1f, 0f)
+        else {
+            if (frenetFrameList[0].tangent.x() <= min) {
+                min = frenetFrameList[0].tangent.x()
+                normal.set(1f, 0f, 0f)
+            }
+            if (frenetFrameList[0].tangent.y() <= min) {
+                min = frenetFrameList[0].tangent.y()
+                normal.set(0f, 1f, 0f)
+            }
+            if (frenetFrameList[0].tangent.z() <= min) {
+                normal.set(0f, 0f, 1f)
+            } else {
+                normal.set(1f, 0f, 0f).normalize()
+            }
+            frenetFrameList[0].tangent.cross(normal, vec).normalize()
         }
-        if(frenetFrameList[0].tangent.z() <= min) {
-            normal.set(0f, 0f, 1f)
-        }
-        else { normal.set(1f, 0f, 0f).normalize() }
-        frenetFrameList[0].tangent.cross(normal, vec).normalize()
         frenetFrameList[0].tangent.cross(vec, frenetFrameList[0].normal).normalize()
         frenetFrameList[0].tangent.cross(frenetFrameList[0].normal, frenetFrameList[0].binormal).normalize()
 
@@ -197,11 +204,6 @@ class Curve(spline: Spline, baseShape: () -> List<List<Vector3f>>): Mesh("CurveG
             if (b.length() > 0.00001f) {
                 val firstNormal = firstFrame.normal
                 b.normalize()
-                /*
-                Mathematically speaking, theta would need to be coerced in (-1,1). However, less artifacts show up when
-                we limit the angle to roughly 5° which corresponds to a acos of 0.998, hence the value.
-                TODO allow for angles bigger than 5° by removing the artifacts
-                 */
                 val theta = acos(firstFrame.tangent.dot(secondFrame.tangent).coerceIn(-1f, 1f))
                 val q = Quaternionf(AxisAngle4f(theta, b)).normalize()
                 secondFrame.normal = q.transform(Vector3f(firstNormal)).normalize()

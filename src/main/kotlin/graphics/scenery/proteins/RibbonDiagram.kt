@@ -1,10 +1,10 @@
 package graphics.scenery.proteins
 
+import com.jogamp.opengl.math.FloatUtil.sin
 import graphics.scenery.Mesh
 import org.joml.*
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random
-import graphics.scenery.utils.extensions.plus
 import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
@@ -12,6 +12,9 @@ import org.biojava.nbio.structure.secstruc.SecStrucElement
 import org.biojava.nbio.structure.secstruc.SecStrucTools
 import org.biojava.nbio.structure.secstruc.SecStrucType
 import kotlin.math.min
+import kotlin.math.sqrt
+import kotlin.math.acos
+import kotlin.math.asin
 
 /**
  * A Ribbon Diagram for Proteins. Ribbon models are currently the most common representations of proteins.
@@ -49,7 +52,7 @@ import kotlin.math.min
  * @param [protein] the polypeptide you wish to visualize, stored in the class Protein
  */
 
-class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh("ribbon") {
+class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false): Mesh("ribbon") {
 
     /*
      *[structure] the structure of the protein stored in the class Structure of BioJava
@@ -111,10 +114,10 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(1f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1f, 0.1f, 0f))
-        rectangle.add(Vector3f(-1f, -0.1f, 0f))
-        rectangle.add(Vector3f(1f, -0.1f, 0f))
+        rectangle.add(Vector3f(0.9f, 0f, 0f))
+        rectangle.add(Vector3f(0f, 0.1f, 0f))
+        rectangle.add(Vector3f(-0.9f, 0f, 0f))
+        rectangle.add(Vector3f(0f, -0.1f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -166,7 +169,7 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
             val count = getCount(guidePointList.drop(guidePointsOffset))
             //one subSpline for each secondary structure
             val subSpline = ArrayList<Vector3f>(sectionVerticesCount * count)
-            val ssSubList = ArrayList<ArrayList<Vector3f>>(sectionVerticesCount * count)
+            val ssSubList = ArrayList<List<Vector3f>>(sectionVerticesCount * count)
             val helpSpline = splinePoints.drop(splineOffset)
             guidePointsOffset++
             when {
@@ -184,19 +187,22 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
                     val b2 = ca3?.sub(ca4)
                     val v2 = a2?.add(b2)?.normalize()
                     val axis = v1?.cross(v2)?.normalize()
-
                     for (j in 0..count) {
                         for (i in 0..sectionVerticesCount) {
                             if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
                                 splineOffset++
                                 subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
-                                ssSubList.add(rectangle)
+                                if(axis != null) {
+                                    ssSubList.add(rectangle)
+                                }
                             }
                         }
                     }
-                    val helixCurve = Curve(DummySpline(subSpline)) { baseShape(ssSubList) }
-                    if(displaySS) { alphas.addChild(helixCurve) }
-                    else { subParent.addChild(helixCurve) }
+                    if(axis != null) {
+                        val helixCurve = Curve(DummySpline(subSpline), true, axis) { baseShape(ssSubList) }
+                        if(displaySS) { alphas.addChild(helixCurve) }
+                        else { subParent.addChild(helixCurve) }
+                    }
                 }
                 //the beta sheets are visualized with arrows
                 (guide.type.isBetaStrand) -> {
@@ -531,5 +537,25 @@ class RibbonDiagram(val protein: Protein, val displaySS: Boolean = false): Mesh(
                 }
             }
         return count
+    }
+
+    /**
+     * Assigns a point to a new (x,y) coordinate system, the z-coordinate remains constant. The reference are the
+     * world coordinates and no translation is assumed.
+     */
+    private fun turnPoint(axis: Vector3f, point: Vector3f): Vector3f {
+        //point in polar coordinates
+        val x = point.x()
+        val y = point.y()
+        val r = sqrt(x*x + y*y)
+        val cosPhi = x/r
+        val sinPhi = y/r
+        /*
+        The point in the new coordinate system is the old point in polar coordinates but with the angle between the new
+        and the old coordinate system added: (x,y) = (r*cos(alpha+phi), r*sin(alpha+phi). It follows that:
+         */
+        val newX = r*(cosPhi*axis.x() - sinPhi*sin(acos(axis.x())))
+        val newY = r*(sinPhi*asin(axis.y()) + cosPhi*axis.y())
+        return Vector3f(newX, newY, point.z())
     }
 }
