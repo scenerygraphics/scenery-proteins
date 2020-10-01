@@ -19,10 +19,10 @@ import kotlin.math.acos
  * @author  Justin Buerger <burger@mpi-cbg.de>
  * @param [spline] the spline along which the geometry will be rendered
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
+ * @param [firstPerpendicularVector] vector to which the first frenet tangent shall be perpendicular to.
  */
-class Curve(spline: Spline, private val helixCase: Boolean = false,
-            private val axis: Vector3f = Vector3f(0f, 0f, 0f), baseShape: () -> List<List<Vector3f>>):
-        Mesh("CurveGeometry"), HasGeometry {
+class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vector3f(0f, 0f, 0f),
+            baseShape: () -> List<List<Vector3f>>): Mesh("CurveGeometry"), HasGeometry {
     private val chain = spline.splinePoints()
     private val sectionVertices = spline.verticesCountPerSection()
     private val countList = ArrayList<Int>(50).toMutableList()
@@ -175,11 +175,9 @@ class Curve(spline: Spline, private val helixCase: Boolean = false,
         }
         var min = MIN_VALUE
         val vec = Vector3f()
-        val normal = Vector3f()
-        if(helixCase) {
-            vec.set(axis).normalize()
-        }
-        else {
+        vec.set(firstPerpendicularVector).normalize()
+        if(vec == Vector3f(0f, 0f, 0f)) {
+            val normal = Vector3f()
             if (frenetFrameList[0].tangent.x() <= min) {
                 min = frenetFrameList[0].tangent.x()
                 normal.set(1f, 0f, 0f)

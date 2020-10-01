@@ -199,7 +199,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                         }
                     }
                     if(axis != null) {
-                        val helixCurve = Curve(DummySpline(subSpline), true, axis) { baseShape(ssSubList) }
+                        val helixCurve = Curve(DummySpline(subSpline), axis) { baseShape(ssSubList) }
                         if(displaySS) { alphas.addChild(helixCurve) }
                         else { subParent.addChild(helixCurve) }
                     }
