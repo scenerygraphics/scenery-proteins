@@ -20,7 +20,8 @@ import kotlin.math.acos
  * @param [spline] the spline along which the geometry will be rendered
  * @param [baseShape] a lambda which returns all the baseShapes along the curve
  */
-class Curve(spline: Spline, val helixCase: Boolean = false, val axis: Vector3f = Vector3f(0f, 0f, 0f), baseShape: () -> List<List<Vector3f>>):
+class Curve(spline: Spline, private val helixCase: Boolean = false,
+            private val axis: Vector3f = Vector3f(0f, 0f, 0f), baseShape: () -> List<List<Vector3f>>):
         Mesh("CurveGeometry"), HasGeometry {
     private val chain = spline.splinePoints()
     private val sectionVertices = spline.verticesCountPerSection()

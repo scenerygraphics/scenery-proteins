@@ -115,9 +115,9 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
 
         val rectangle = ArrayList<Vector3f>(4)
         rectangle.add(Vector3f(0.9f, 0f, 0f))
-        rectangle.add(Vector3f(0f, 0.1f, 0f))
+        rectangle.add(Vector3f(0f, 0f, 0.1f))
         rectangle.add(Vector3f(-0.9f, 0f, 0f))
-        rectangle.add(Vector3f(0f, -0.1f, 0f))
+        rectangle.add(Vector3f(0f, 0f, 0.1f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
