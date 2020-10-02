@@ -1,4 +1,4 @@
-package graphics.scenery.tests.examples.sketches
+package graphics.scenery.proteins
 
 import org.joml.Vector3f
 

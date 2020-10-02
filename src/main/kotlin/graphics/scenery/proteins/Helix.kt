@@ -1,16 +1,17 @@
-package graphics.scenery.tests.examples.sketches
+package graphics.scenery.proteins
 
 import graphics.scenery.Mesh
-import graphics.scenery.proteins.Curve
-import graphics.scenery.proteins.Spline
 import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.plus
 import graphics.scenery.utils.extensions.times
 import org.joml.*
 
-class Helix (private val axisVector: Vector3f, val axisPoint: Vector3f, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
-    val splinePoints = spline.splinePoints()
-    val shape = baseShape.invoke()
+class Helix (axis: Line, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
+    private val splinePoints = spline.splinePoints()
+    private val shape = baseShape.invoke()
+    private val axisVector = axis.direction
+    private val axisPoint = axisVector
+
 
     init {
         val verticesList = ArrayList<List<Vector3f>>(splinePoints.size)
@@ -50,7 +51,7 @@ class Helix (private val axisVector: Vector3f, val axisPoint: Vector3f, val spli
                     2
                 }
             }
-            val helixSectionVertices = Curve.VerticesCalculation.calculateTriangles(section, i)
+            val helixSectionVertices = Curve.calculateTriangles(section, i)
             val partialHelix = Curve.PartialCurve(helixSectionVertices)
             this.addChild(partialHelix)
         }

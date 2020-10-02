@@ -1,6 +1,5 @@
 package graphics.scenery.proteins
 
-import com.jogamp.opengl.math.FloatUtil.sin
 import graphics.scenery.Mesh
 import org.joml.*
 import graphics.scenery.Protein
@@ -11,10 +10,8 @@ import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucElement
 import org.biojava.nbio.structure.secstruc.SecStrucTools
 import org.biojava.nbio.structure.secstruc.SecStrucType
+import kotlin.math.absoluteValue
 import kotlin.math.min
-import kotlin.math.sqrt
-import kotlin.math.acos
-import kotlin.math.asin
 
 /**
  * A Ribbon Diagram for Proteins. Ribbon models are currently the most common representations of proteins.
@@ -114,10 +111,10 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(0.9f, 0f, 0f))
-        rectangle.add(Vector3f(0f, 0f, 0.1f))
-        rectangle.add(Vector3f(-0.9f, 0f, 0f))
-        rectangle.add(Vector3f(0f, 0f, 0.1f))
+        rectangle.add(Vector3f(0.1f, 0f, 0f))
+        rectangle.add(Vector3f(0f, 0.9f, 0f))
+        rectangle.add(Vector3f(-0.1f, 0f, 0f))
+        rectangle.add(Vector3f(0f, -0.9f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -180,29 +177,18 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                     val ca2 = guidePointList[guideIndex+1].nextResidue?.getAtom("CA")?.getVector()
                     val ca3 = guidePointList[guideIndex+2].nextResidue?.getAtom("CA")?.getVector()
                     val ca4 = guidePointList[guideIndex+3].nextResidue?.getAtom("CA")?.getVector()
-                    val a1 = ca2?.sub(ca1)
-                    val b1 = ca2?.sub(ca3)
-                    val v1 = a1?.add(b1)?.normalize()
-                    val a2 = ca3?.sub(ca2)
-                    val b2 = ca3?.sub(ca4)
-                    val v2 = a2?.add(b2)?.normalize()
-                    val axis = v1?.cross(v2)?.normalize()
+                    val axis = calculateAxis(ca1, ca2, ca3, ca4)
                     for (j in 0..count) {
                         for (i in 0..sectionVerticesCount) {
                             if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
                                 splineOffset++
                                 subSpline.add(helpSpline[i + (sectionVerticesCount + 1) * j])
-                                if(axis != null) {
-                                    ssSubList.add(rectangle)
-                                }
                             }
                         }
                     }
-                    if(axis != null) {
-                        val helixCurve = Curve(DummySpline(subSpline), axis) { baseShape(ssSubList) }
-                        if(displaySS) { alphas.addChild(helixCurve) }
-                        else { subParent.addChild(helixCurve) }
-                    }
+                    val helixCurve = Helix(axis, DummySpline(subSpline)) { rectangle }
+                    if(displaySS) { alphas.addChild(helixCurve) }
+                    else { subParent.addChild(helixCurve) }
                 }
                 //the beta sheets are visualized with arrows
                 (guide.type.isBetaStrand) -> {
@@ -540,22 +526,35 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
     }
 
     /**
-     * Assigns a point to a new (x,y) coordinate system, the z-coordinate remains constant. The reference are the
-     * world coordinates and no translation is assumed.
+     * Returns the axis of an alpha helix. Axis Vector corresponds to the direction and Axis Point to the
+     * position vector. This algorithm follows the paper from Pater C. Kahn "Defining the axis of a helix".
      */
-    private fun turnPoint(axis: Vector3f, point: Vector3f): Vector3f {
-        //point in polar coordinates
-        val x = point.x()
-        val y = point.y()
-        val r = sqrt(x*x + y*y)
-        val cosPhi = x/r
-        val sinPhi = y/r
-        /*
-        The point in the new coordinate system is the old point in polar coordinates but with the angle between the new
-        and the old coordinate system added: (x,y) = (r*cos(alpha+phi), r*sin(alpha+phi). It follows that:
-         */
-        val newX = r*(cosPhi*axis.x() - sinPhi*sin(acos(axis.x())))
-        val newY = r*(sinPhi*asin(axis.y()) + cosPhi*axis.y())
-        return Vector3f(newX, newY, point.z())
+    private fun calculateAxis(ca1: Vector3f?, ca2: Vector3f?, ca3: Vector3f?, ca4: Vector3f?): Line {
+        if(ca1 != null && ca2 != null && ca3 != null && ca4 != null) {
+            //Calculating the direction
+            val a1 = ca2.sub(ca1)
+            val b1 = ca2.sub(ca3)
+            val v1 = a1.add(b1).normalize()
+            val a2 = ca3.sub(ca2)
+            val b2 = ca3.sub(ca4)
+            val v2 = a2.add(b2).normalize()
+            val axisVector = v1.cross(v2).normalize()
+
+            //Calculating the radius to obtain a point
+            //Distance from ca2 to ca3 in axis direction
+            val d = ca3.sub(ca2).mul(axisVector)
+            //intermediate products
+            val iP1 = (axisVector.mul(d).length())
+            val iP2 = ca3.sub(ca2).length()
+            val iP3 = ca3.sub(ca2).dot(v2).absoluteValue
+            //radius
+            val r = (iP1.times(iP1).minus(iP2.times(iP2))).div(iP3)
+            val axisPoint = v2.mul(r)
+            return Line(axisVector, axisPoint)
+        }
+        else {
+            println("Whoops, your ca-atoms in the axis calculation become null.")
+            return Line(Vector3f(), Vector3f())
+        }
     }
 }

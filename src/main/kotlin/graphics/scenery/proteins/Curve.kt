@@ -109,7 +109,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 partialCurveGeometry.add(shapeVertexList)
             }
             partialCurveGeometry.windowed(sectionVertices, sectionVertices) { section ->
-                var i = when {
+                val i = when {
                     section.contains(partialCurveGeometry.first()) -> {
                         0
                     }
@@ -174,8 +174,8 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
             frenetFrameList.add(frenetFrame)
         }
         var min = MIN_VALUE
-        val vec = Vector3f()
-        vec.set(firstPerpendicularVector).normalize()
+        val vec = Vector3f(0f, 0f, 0f)
+        vec.set(firstPerpendicularVector)
         if(vec == Vector3f(0f, 0f, 0f)) {
             val normal = Vector3f()
             if (frenetFrameList[0].tangent.x() <= min) {
@@ -193,6 +193,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
             }
             frenetFrameList[0].tangent.cross(normal, vec).normalize()
         }
+        else { vec.normalize() }
         frenetFrameList[0].tangent.cross(vec, frenetFrameList[0].normal).normalize()
         frenetFrameList[0].tangent.cross(frenetFrameList[0].normal, frenetFrameList[0].binormal).normalize()
 
@@ -213,62 +214,99 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 it.normal.toFloatArray().all{ value -> value.isNaN()}}
     }
 
-    /**
-     * This function calculates the triangles for the the rendering. It takes as a parameter
-     * the [curveGeometry] List which contains all the baseShapes transformed and translated
-     * along the curve.
-     */
-    private fun calculateTriangles(curveGeometry: List<List<Vector3f>>, addCoverOrTop: Int = 2): ArrayList<Vector3f> {
-        val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size*6+curveGeometry[0].size+1)
-        if(curveGeometry.isEmpty()) {
+    companion object VerticesCalculation {
+        /**
+         * This function calculates the triangles for the the rendering. It takes as a parameter
+         * the [curveGeometry] List which contains all the baseShapes transformed and translated
+         * along the curve.
+         */
+        fun calculateTriangles(curveGeometry: List<List<Vector3f>>, addCoverOrTop: Int = 2): ArrayList<Vector3f> {
+            val verticesVectors = ArrayList<Vector3f>(curveGeometry.flatten().size * 6 + curveGeometry[0].size + 1)
+            if (curveGeometry.isEmpty()) {
+                return verticesVectors
+            }
+            if (addCoverOrTop == 0) {
+                verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
+            }
+            //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
+            if (curveGeometry.distinctBy { it.size }.size == 1) {
+                curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
+                    shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
+
+                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
+                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+
+                        verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
+                        verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+                    }
+                    verticesVectors.add(curveGeometry[shapeIndex][0])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][0])
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+
+                    verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
+                    verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
+                    verticesVectors.add(curveGeometry[shapeIndex][0])
+                }
+            } else {
+                throw IllegalArgumentException("The baseShapes must not differ in size!")
+            }
+            if (addCoverOrTop == 1) {
+                verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
+            }
             return verticesVectors
         }
-        if(addCoverOrTop == 0) {
-            verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
-        }
-        //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
-        if(curveGeometry.distinctBy{ it.size }.size == 1) {
-            curveGeometry.dropLast(1).forEachIndexed { shapeIndex, shape ->
-                shape.dropLast(1).forEachIndexed { vertexIndex, _ ->
 
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex])
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
-
-                    verticesVectors.add(curveGeometry[shapeIndex][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex + 1])
-                    verticesVectors.add(curveGeometry[shapeIndex + 1][vertexIndex])
+        /**
+        This function contains a generalized algorithm for the cover of a curve. It works like a pot and a lit. If you cover
+        the bottom of a curve, the triangles should be arranged counterclockwise, for the top clockwise - this is signified
+        by [ccw].
+         */
+        fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
+            val size = list.size
+            val verticesList = ArrayList<Vector3f>(size + (size / 2))
+            val workList = ArrayList<Vector3f>(size)
+            workList.addAll(list)
+            if (size >= 3) {
+                /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
+            that the last triangle, which contains the last point as well as the first point, is included.
+             */
+                when (size % 3) {
+                    0 -> {
+                    }
+                    1 -> {
+                        workList.add(list[0])
+                        workList.add(list[1])
+                    }
+                    2 -> {
+                        workList.add(list[0])
+                    }
                 }
-                verticesVectors.add(curveGeometry[shapeIndex][0])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][0])
-                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-
-                verticesVectors.add(curveGeometry[shapeIndex + 1][shape.lastIndex])
-                verticesVectors.add(curveGeometry[shapeIndex][shape.lastIndex])
-                verticesVectors.add(curveGeometry[shapeIndex][0])
+                val newList = ArrayList<Vector3f>((size + (size / 2)) / 2)
+                workList.windowed(3, 2) { triangle ->
+                    if (ccw) {
+                        verticesList.add(triangle[0])
+                        verticesList.add(triangle[2])
+                        verticesList.add(triangle[1])
+                        newList.add(triangle[0])
+                    } else {
+                        for (i in 0..2) {
+                            verticesList.add(triangle[i])
+                        }
+                    }
+                }
+                verticesList.addAll(getCoverVertices(newList, ccw))
             }
+            return verticesList
         }
-        else {
-            throw IllegalArgumentException("The baseShapes must not differ in size!")
-        }
-        if(addCoverOrTop == 1) {
-            verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
-        }
-        return verticesVectors
-    }
-
-    /**
-     * Getter for the curve.
-     */
-    fun getCurve(): ArrayList<Vector3f> {
-        return chain as ArrayList<Vector3f>
     }
 
     /**
      * Each children of the curve must be, per definition, another Mesh. Therefore this class turns a List of
      * vertices into a Mesh.
      */
-    class PartialCurve( verticesVectors: ArrayList<Vector3f>): Mesh("PartialCurve"), HasGeometry {
+    class PartialCurve(verticesVectors: ArrayList<Vector3f>) : Mesh("PartialCurve"), HasGeometry {
         init {
             vertices = BufferUtils.allocateFloat(verticesVectors.size * 3)
             verticesVectors.forEach {
@@ -281,38 +319,11 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
     }
 
     /**
-    This function contains a generalized algorithm for the cover of a curve. It works like a pot and a lit. If you cover
-    the bottom of a curve, the triangles should be arranged counterclockwise, for the top clockwise - this is signified
-    by [ccw].
+     * Getter for the curve.
      */
-    private fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
-        val size = list.size
-        val verticesList = ArrayList<Vector3f>(size + (size/2))
-        val workList = ArrayList<Vector3f>(size)
-        workList.addAll(list)
-        if(size >= 3) {
-            /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
-            that the last triangle, which contains the last point as well as the first point, is included.
-             */
-            when(size%3) {
-                0 -> { }
-                1 -> { workList.add(list[0])
-                        workList.add(list[1])}
-                2 -> { workList.add(list[0])}
-            }
-            val newList = ArrayList<Vector3f>((size + (size/2))/2)
-            workList.windowed(3, 2) { triangle ->
-                if(ccw) {
-                    verticesList.add(triangle[0])
-                    verticesList.add(triangle[2])
-                    verticesList.add(triangle[1])
-                    newList.add(triangle[0])
-                }
-                else{ for(i in 0..2) {verticesList.add(triangle[i]) } }
-            }
-            verticesList.addAll(getCoverVertices(newList, ccw))
-        }
-        return verticesList
+    fun getCurve(): ArrayList<Vector3f> {
+        return chain as ArrayList<Vector3f>
     }
+
 }
 
