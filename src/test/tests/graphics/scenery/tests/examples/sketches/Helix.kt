@@ -1,6 +1,7 @@
 package graphics.scenery.tests.examples.sketches
 
 import graphics.scenery.Mesh
+import graphics.scenery.proteins.Curve
 import graphics.scenery.proteins.Spline
 import graphics.scenery.utils.extensions.minus
 import graphics.scenery.utils.extensions.plus
@@ -12,7 +13,8 @@ class Helix (private val axisVector: Vector3f, val axisPoint: Vector3f, val spli
     val shape = baseShape.invoke()
 
     init {
-        val verticesList = ArrayList<Vector3f>(splinePoints.size*shape.size)
+        val verticesList = ArrayList<List<Vector3f>>(splinePoints.size)
+        val sectionVerticesCount = spline.verticesCountPerSection()
         splinePoints.forEach { point ->
             //Calculation of the y-axis which is the vector from spline point which intersects the axis with a 90 degree angle
             val t = (point.minus(axisPoint)).mul(axisVector)/axisVector.absolute()
@@ -31,16 +33,26 @@ class Helix (private val axisVector: Vector3f, val axisPoint: Vector3f, val spli
                                             xAxis.y(), yAxis.y(), zAxis.y(), 0f,
                                             xAxis.z(), yAxis.z(), zAxis.z(), 0f,
                                             point.x(), point.y(), point.z(), 1f)
-            shape.forEach { shapePoint ->
+            verticesList.add(shape.map { shapePoint ->
                 val transformedPoint = Vector3f()
                 transformMatrix.transformPosition(shapePoint, transformedPoint)
-                verticesList.add(transformedPoint)
-            }
+            })
         }
-    }
-
-    private fun getMidPoint(shape: List<Vector3f>): Vector3f {
-        val vec = Vector3f(0f, 0f, 0f)
-        return (shape.fold(vec, { acc, next -> acc.plus(next) }).mul(shape.size.toFloat()))
+        verticesList.windowed(sectionVerticesCount, sectionVerticesCount) { section ->
+            val i = when {
+                section.contains(verticesList.first()) -> {
+                    0
+                }
+                section.contains(verticesList.last()) -> {
+                    1
+                }
+                else -> {
+                    2
+                }
+            }
+            val helixSectionVertices = Curve.VerticesCalculation.calculateTriangles(section, i)
+            val partialHelix = Curve.PartialCurve(helixSectionVertices)
+            this.addChild(partialHelix)
+        }
     }
 }
