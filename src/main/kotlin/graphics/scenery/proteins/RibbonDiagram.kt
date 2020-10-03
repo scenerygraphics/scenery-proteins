@@ -111,10 +111,10 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(0.1f, 0f, 0f))
-        rectangle.add(Vector3f(0f, 0.9f, 0f))
-        rectangle.add(Vector3f(-0.1f, 0f, 0f))
-        rectangle.add(Vector3f(0f, -0.9f, 0f))
+        rectangle.add(Vector3f(0.9f, 0f, 0f))
+        rectangle.add(Vector3f(0f, 0.1f, 0f))
+        rectangle.add(Vector3f(-0.9f, 0f, 0f))
+        rectangle.add(Vector3f(0f, -0.1f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -529,7 +529,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
      * Returns the axis of an alpha helix. Axis Vector corresponds to the direction and Axis Point to the
      * position vector. This algorithm follows the paper from Pater C. Kahn "Defining the axis of a helix".
      */
-    private fun calculateAxis(ca1: Vector3f?, ca2: Vector3f?, ca3: Vector3f?, ca4: Vector3f?): Line {
+    private fun calculateAxis(ca1: Vector3f?, ca2: Vector3f?, ca3: Vector3f?, ca4: Vector3f?): MathLine {
         if(ca1 != null && ca2 != null && ca3 != null && ca4 != null) {
             //Calculating the direction
             val a1 = ca2.sub(ca1)
@@ -550,11 +550,28 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             //radius
             val r = (iP1.times(iP1).minus(iP2.times(iP2))).div(iP3)
             val axisPoint = v2.mul(r)
-            return Line(axisVector, axisPoint)
+            return MathLine(axisVector, axisPoint)
         }
         else {
             println("Whoops, your ca-atoms in the axis calculation become null.")
-            return Line(Vector3f(), Vector3f())
+            return MathLine(Vector3f(), Vector3f())
         }
+    }
+
+    private fun calculateAxisLeastSquareMethod(caPositions: List<Vector3f?>) {
+        val allAxisVectors = ArrayList<Vector3f>(caPositions.size-caPositions.size%4)
+        caPositions.windowed(4, 1) {
+            allAxisVectors.add(calculateAxis(it[0], it[1], it[2], it[3]).direction)
+        }
+        val sumXSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.x()}
+        val sumYSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.y()*next.y()}
+        val sumZSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.z()*next.z()}
+        val sumXY = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.y()}
+        val sumXZ = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.z()}
+        val sumYZ = allAxisVectors.fold(0f) { acc, next -> acc + next.y()*next.z() }
+        val matrix = Matrix3f(sumXSquared, sumXY, sumXZ,
+                                sumXY, sumYSquared, sumYZ,
+                                sumXZ, sumYZ, sumZSquared)
+
     }
 }
