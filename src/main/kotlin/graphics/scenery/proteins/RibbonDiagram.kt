@@ -563,6 +563,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         caPositions.windowed(4, 1) {
             allAxisVectors.add(calculateAxis(it[0], it[1], it[2], it[3]).direction)
         }
+        //TODO translate points so that the centroid is in the origin
         val sumXSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.x()}
         val sumYSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.y()*next.y()}
         val sumZSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.z()*next.z()}
