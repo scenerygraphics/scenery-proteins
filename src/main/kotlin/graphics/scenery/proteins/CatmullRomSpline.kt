@@ -17,7 +17,7 @@ import kotlin.math.pow
  * a chordal Catmull Rom Spline.
  */
 class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int = 100, val alpha: Float = 0.5f,
-                       val addRandomLastAndFirstPoint: Boolean = false): Spline {
+                       private val addRandomLastAndFirstPoint: Boolean = false): Spline {
 
     /**
      * Calculates the parameter t; t is an intermediate product for the calculation of the spline
@@ -33,7 +33,7 @@ class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int =
      * to have a smooth curve.
      * [n] is the number of points between the segments
      */
-    private fun CatmulRomSpline(p0: Vector3f, p1: Vector3f, p2: Vector3f, p3: Vector3f, n: Int = 100): List<Vector3f> {
+    private fun catmulRomSpline(p0: Vector3f, p1: Vector3f, p2: Vector3f, p3: Vector3f, n: Int = 100): List<Vector3f> {
 
         val curvePoints = ArrayList<Vector3f>(n+1)
 
@@ -80,7 +80,7 @@ class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int =
         }
         val chainPoints = ArrayList<Vector3f>(controlPoints.size*(n+1))
         controlPoints.dropLast(3).forEachIndexed {  index, _ ->
-            val c = CatmulRomSpline(controlPoints[index], controlPoints[index+1],
+            val c = catmulRomSpline(controlPoints[index], controlPoints[index+1],
                     controlPoints[index+2], controlPoints[index+3], n)
             chainPoints.addAll(c)
         }
