@@ -6,11 +6,11 @@ import graphics.scenery.utils.extensions.plus
 import graphics.scenery.utils.extensions.times
 import org.joml.*
 
-class Helix (axis: Line, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
+class Helix (axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
     private val splinePoints = spline.splinePoints()
     private val shape = baseShape.invoke()
     private val axisVector = axis.direction
-    private val axisPoint = axisVector
+    private val axisPoint = axis.position
 
 
     init {
@@ -18,11 +18,17 @@ class Helix (axis: Line, val spline: Spline, baseShape: () -> List<Vector3f>): M
         val sectionVerticesCount = spline.verticesCountPerSection()
         splinePoints.forEach { point ->
             //Calculation of the y-axis which is the vector from spline point which intersects the axis with a 90 degree angle
-            val t = (point.minus(axisPoint)).mul(axisVector)/axisVector.absolute()
-            val plumbLine = axisPoint.plus(axisVector.times(t))
-            val xAxisI = axisVector.normalize()
-            val yAxisI = plumbLine.minus(point).normalize()
-            val zAxisI = xAxisI.cross(yAxisI).normalize()
+            val t = (point.sub(axisPoint)).dot(axisVector)/axisVector.length()
+            val intermediateAxis = Vector3f()
+            intermediateAxis.set(axisVector)
+            val plumbLine = Vector3f()
+            axisPoint.add(intermediateAxis.mul(t), plumbLine)
+            val xAxisI = Vector3f()
+            xAxisI.set(axisVector).normalize()
+            val yAxisI = Vector3f()
+            plumbLine.sub(point, yAxisI).normalize()
+            val zAxisI = Vector3f()
+            xAxisI.cross(yAxisI, zAxisI).normalize()
             val inversionMatrix = Matrix3f(xAxisI, yAxisI, zAxisI).invert()
             val xAxis = Vector3f()
             inversionMatrix.getColumn(0, xAxis).normalize()
@@ -39,7 +45,7 @@ class Helix (axis: Line, val spline: Spline, baseShape: () -> List<Vector3f>): M
                 transformMatrix.transformPosition(shapePoint, transformedPoint)
             })
         }
-        verticesList.windowed(sectionVerticesCount, sectionVerticesCount) { section ->
+        verticesList.windowed(sectionVerticesCount, sectionVerticesCount-1) { section ->
             val i = when {
                 section.contains(verticesList.first()) -> {
                     0
