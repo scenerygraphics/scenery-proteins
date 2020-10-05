@@ -1,10 +1,14 @@
 package graphics.scenery.proteins
 
 import com.jogamp.opengl.math.FloatUtil.sqrt
+import graphics.scenery.Arrow
+import graphics.scenery.Icosphere
 import graphics.scenery.Mesh
 import org.joml.*
 import graphics.scenery.Protein
 import graphics.scenery.numerics.Random
+import graphics.scenery.utils.extensions.plus
+import graphics.scenery.utils.extensions.toFloatArray
 import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
 import org.biojava.nbio.structure.secstruc.SecStrucCalc
@@ -532,24 +536,33 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
     private fun calculateAxis(ca1: Vector3f?, ca2: Vector3f?, ca3: Vector3f?, ca4: Vector3f?): MathLine {
         if(ca1 != null && ca2 != null && ca3 != null && ca4 != null) {
             //Calculating the direction
-            val a1 = ca2.sub(ca1)
-            val b1 = ca2.sub(ca3)
-            val v1 = a1.add(b1).normalize()
-            val a2 = ca3.sub(ca2)
-            val b2 = ca3.sub(ca4)
-            val v2 = a2.add(b2).normalize()
-            val axisVector = v1.cross(v2).normalize()
-
+            val a1 = Vector3f()
+            ca2.sub(ca1, a1)
+            val b1 = Vector3f()
+            ca2.sub(ca3, b1)
+            val v1 = Vector3f()
+            a1.add(b1, v1).normalize()
+            val a2 = Vector3f()
+            ca3.sub(ca2, a2)
+            val b2 = Vector3f()
+            ca3.sub(ca4, b2)
+            val v2 = Vector3f()
+            a2.add(b2, v2).normalize()
+            val axisVector = Vector3f()
+            v1.cross(v2, axisVector).normalize()
             //Calculating the radius to obtain a point
             //Distance from ca2 to ca3 in axis direction
-            val d = ca3.sub(ca2).mul(axisVector)
+            val d = b1.dot(axisVector)
             //intermediate products
-            val iP1 = (axisVector.mul(d).length())
-            val iP2 = ca3.sub(ca2).length()
-            val iP3 = ca3.sub(ca2).dot(v2).absoluteValue
+            val iV1 = Vector3f()
+            val iP1 = (axisVector.mul(d, iV1).length())
+            val iP2 = b1.length()
+            val iP3 = b1.dot(v2).absoluteValue
             //radius
             val r = (iP1.times(iP1).minus(iP2.times(iP2))).div(iP3)
-            val axisPoint = v2.mul(r).add(ca2)
+            val iv2 = Vector3f()
+            val axisPoint = Vector3f()
+            v2.mul(r, iv2).add(ca2, axisPoint)
             return MathLine(axisVector, axisPoint)
         }
         else {
@@ -568,13 +581,19 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                 axisPoints.add(line.position)
             }
             val centroid = getCentroid(axis)
-            val axisCentered = axis.map { it.sub(centroid) }
+            val axisCentered = axis.map {
+                val vec = Vector3f()
+                vec.set(centroid)
+                it.sub(vec) }
             val sumXLength = axisCentered.fold(0f) { acc, next -> acc + next.x() * next.length() }
             val sumYLength = axisCentered.fold(0f) { acc, next -> acc + next.y() * next.length() }
             val sumZLength = axisCentered.fold(0f) { acc, next -> acc + next.z() * next.length() }
             val abs = sqrt(sumXLength * sumXLength + sumYLength * sumYLength + sumZLength * sumZLength)
             val direction = Vector3f(sumXLength / abs, sumYLength / abs, sumZLength / abs)
             val averagePoint = getCentroid(axisPoints)
+            val sphere = Icosphere(0.5f, 5)
+            sphere.position = averagePoint
+            this.addChild(sphere)
             return MathLine(direction, averagePoint)
         }
         else {
