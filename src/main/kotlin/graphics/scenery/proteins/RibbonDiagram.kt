@@ -1,5 +1,6 @@
 package graphics.scenery.proteins
 
+import com.jogamp.opengl.math.FloatUtil.sqrt
 import graphics.scenery.Mesh
 import org.joml.*
 import graphics.scenery.Protein
@@ -172,12 +173,11 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             when {
                 (guide.type == SecStrucType.helix4) -> {
                     guidePointsOffset += count
-                    //helix axis, see: "Defining the axis of a helix" by Peter C. Kahn
-                    val ca1 = guidePointList[guideIndex].nextResidue?.getAtom("CA")?.getVector()
-                    val ca2 = guidePointList[guideIndex+1].nextResidue?.getAtom("CA")?.getVector()
-                    val ca3 = guidePointList[guideIndex+2].nextResidue?.getAtom("CA")?.getVector()
-                    val ca4 = guidePointList[guideIndex+3].nextResidue?.getAtom("CA")?.getVector()
-                    val axis = calculateAxis(ca1, ca2, ca3, ca4)
+                    val caList = ArrayList<Vector3f?>(count)
+                    for(k in 0 until count) {
+                        caList.add(guidePointList[guideIndex+k].nextResidue?.getAtom("CA")?.getVector())
+                    }
+                    val axis = calculateAxisLeastSquareMethod(caList)
                     for (j in 0..count) {
                         for (i in 0..sectionVerticesCount) {
                             if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
@@ -549,7 +549,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             val iP3 = ca3.sub(ca2).dot(v2).absoluteValue
             //radius
             val r = (iP1.times(iP1).minus(iP2.times(iP2))).div(iP3)
-            val axisPoint = v2.mul(r)
+            val axisPoint = v2.mul(r).add(ca2)
             return MathLine(axisVector, axisPoint)
         }
         else {
@@ -558,21 +558,34 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         }
     }
 
-    private fun calculateAxisLeastSquareMethod(caPositions: List<Vector3f?>) {
-        val allAxisVectors = ArrayList<Vector3f>(caPositions.size-caPositions.size%4)
-        caPositions.windowed(4, 1) {
-            allAxisVectors.add(calculateAxis(it[0], it[1], it[2], it[3]).direction)
+    private fun calculateAxisLeastSquareMethod(caPositions: List<Vector3f?>): MathLine {
+        if(caPositions.filterNotNull() == caPositions) {
+            val axis = ArrayList<Vector3f>(caPositions.size - caPositions.size % 4)
+            val axisPoints = ArrayList<Vector3f>(caPositions.size - caPositions.size % 4)
+            caPositions.windowed(4, 1) {
+                val line = calculateAxis(it[0], it[1], it[2], it[3])
+                axis.add(line.direction)
+                axisPoints.add(line.position)
+            }
+            val centroid = getCentroid(axis)
+            val axisCentered = axis.map { it.sub(centroid) }
+            val sumXLength = axisCentered.fold(0f) { acc, next -> acc + next.x() * next.length() }
+            val sumYLength = axisCentered.fold(0f) { acc, next -> acc + next.y() * next.length() }
+            val sumZLength = axisCentered.fold(0f) { acc, next -> acc + next.z() * next.length() }
+            val abs = sqrt(sumXLength * sumXLength + sumYLength * sumYLength + sumZLength * sumZLength)
+            val direction = Vector3f(sumXLength / abs, sumYLength / abs, sumZLength / abs)
+            val averagePoint = getCentroid(axisPoints)
+            return MathLine(direction, averagePoint)
         }
-        //TODO translate points so that the centroid is in the origin
-        val sumXSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.x()}
-        val sumYSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.y()*next.y()}
-        val sumZSquared = allAxisVectors.fold(0f) { acc, next -> acc + next.z()*next.z()}
-        val sumXY = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.y()}
-        val sumXZ = allAxisVectors.fold(0f) { acc, next -> acc + next.x()*next.z()}
-        val sumYZ = allAxisVectors.fold(0f) { acc, next -> acc + next.y()*next.z() }
-        val matrix = Matrix3f(sumXSquared, sumXY, sumXZ,
-                                sumXY, sumYSquared, sumYZ,
-                                sumXZ, sumYZ, sumZSquared)
+        else {
+            println("Whoops, your ca-atoms in the axis calculation become null.")
+            return MathLine(Vector3f(), Vector3f())
+        }
+    }
 
+    private fun getCentroid(list: List<Vector3f>): Vector3f {
+        return  Vector3f(list.fold(0f) { acc, next -> acc + next.x() } / list.size,
+                list.fold(0f) { acc, next -> acc + next.y() } / list.size,
+                list.fold(0f) { acc, next -> acc + next.z() } / list.size)
     }
 }
