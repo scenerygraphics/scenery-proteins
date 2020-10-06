@@ -43,9 +43,9 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                     n.y(), b.y(), t.y(), 0f,
                     n.z(), b.z(), t.z(), 0f,
                     0f, 0f, 0f, 1f).invert()
-            val nn = Vector3f(inverseMatrix[0, 0], inverseMatrix[1, 0], inverseMatrix[2, 0]).normalize()
-            val nb = Vector3f(inverseMatrix[0, 1], inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
-            val nt = Vector3f(inverseMatrix[0, 2], inverseMatrix[2, 1], inverseMatrix[2, 2]).normalize()
+            val nn = Vector3f(inverseMatrix[0, 0], inverseMatrix[0, 1], inverseMatrix[0, 2]).normalize()
+            val nb = Vector3f(inverseMatrix[1, 0], inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
+            val nt = Vector3f(inverseMatrix[2, 0], inverseMatrix[2, 1], inverseMatrix[2, 2]).normalize()
             Matrix4f(
                     nn.x(), nb.x(), nt.x(), 0f,
                     nn.y(), nb.y(), nt.y(), 0f,
