@@ -39,17 +39,19 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
             println("The spline provided for the Curve is empty.")
         }
         val bases = computeFrenetFrames(chain as ArrayList<Vector3f>).map { (t, n, b, tr) ->
-            val inverseMatrix = Matrix4f(n.x(), b.x(), t.x(), 0f,
-                    n.y(), b.y(), t.y(), 0f,
-                    n.z(), b.z(), t.z(), 0f,
-                    0f, 0f, 0f, 1f).invert()
-            val nn = Vector3f(inverseMatrix[0, 0], inverseMatrix[0, 1], inverseMatrix[0, 2]).normalize()
-            val nb = Vector3f(inverseMatrix[1, 0], inverseMatrix[1, 1], inverseMatrix[1, 2]).normalize()
-            val nt = Vector3f(inverseMatrix[2, 0], inverseMatrix[2, 1], inverseMatrix[2, 2]).normalize()
+            val inverseMatrix = Matrix3f(b.x(), n.x(), t.x(),
+                    b.y(), n.y(), t.y(),
+                    b.z(), n.z(), t.z()).invert()
+            val nb = Vector3f()
+            inverseMatrix.getColumn(0, nb).normalize()
+            val nn = Vector3f()
+            inverseMatrix.getColumn(1, nn).normalize()
+            val nt = Vector3f()
+            inverseMatrix.getColumn(2, nt).normalize()
             Matrix4f(
-                    nn.x(), nb.x(), nt.x(), 0f,
-                    nn.y(), nb.y(), nt.y(), 0f,
-                    nn.z(), nb.z(), nt.z(), 0f,
+                    nb.x(), nn.x(), nt.x(), 0f,
+                    nb.y(), nn.y(), nt.y(), 0f,
+                    nb.z(), nn.z(), nt.z(), 0f,
                     tr.x(), tr.y(), tr.z(), 1f)
         }
         val baseShapes = baseShape.invoke()
