@@ -18,7 +18,8 @@ class Helix (axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>
         val sectionVerticesCount = spline.verticesCountPerSection()
         splinePoints.forEach { point ->
             //Calculation of the y-axis which is the vector from spline point which intersects the axis with a 90 degree angle
-            val t = (point.sub(axisPoint)).dot(axisVector)/axisVector.length()
+            val iVec = Vector3f()
+            val t = (point.sub(axisPoint, iVec)).dot(axisVector)/(axisVector.length()*axisVector.length())
             val intermediateAxis = Vector3f()
             intermediateAxis.set(axisVector)
             val plumbLine = Vector3f()
