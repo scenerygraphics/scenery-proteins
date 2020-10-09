@@ -1,11 +1,8 @@
 package graphics.scenery.proteins
 
 import com.jogamp.opengl.math.FloatUtil.sqrt
-import graphics.scenery.Arrow
-import graphics.scenery.Icosphere
-import graphics.scenery.Mesh
+import graphics.scenery.*
 import org.joml.*
-import graphics.scenery.Protein
 import graphics.scenery.numerics.Random
 import org.biojava.nbio.structure.Atom
 import org.biojava.nbio.structure.Group
@@ -189,6 +186,17 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                             }
                         }
                     }
+                    /*
+                    val cylinder = Cylinder(0.5f, 1f, 10)
+                    val cP1 = Vector3f()
+                    val cP2 = Vector3f()
+                    axis.direction.mul(5f, cP1).add(axis.position, cP1)
+                    axis.direction.mul(-5f, cP2).add(axis.position, cP2)
+                    cylinder.orientBetweenPoints(cP1, cP2, true)
+                    cylinder.position = axis.position
+                    this.addChild(cylinder)
+
+                     */
                     val helixCurve = Helix(axis, DummySpline(subSpline)) { rectangle }
                     if(displaySS) { alphas.addChild(helixCurve) }
                     else { subParent.addChild(helixCurve) }
@@ -542,15 +550,15 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         if(ca1 != null && ca2 != null && ca3 != null && ca4 != null && ca5 != null && ca6 != null) {
             //Calculating the direction
             val a1 = Vector3f()
-            ca2.sub(ca1, a1)
+            ca1.sub(ca2, a1)
             val b1 = Vector3f()
-            ca2.sub(ca3, b1)
+            ca3.sub(ca2, b1)
             val v1 = Vector3f()
             a1.add(b1, v1).normalize()
             val a2 = Vector3f()
-            ca5.sub(ca4, a2)
+            ca4.sub(ca5, a2)
             val b2 = Vector3f()
-            ca5.sub(ca6, b2)
+            ca6.sub(ca5, b2)
             val v2 = Vector3f()
             a2.add(b2, v2).normalize()
             val axisVector = Vector3f()
@@ -569,6 +577,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             val iP3 = ca5ca2.dot(v2).absoluteValue
             //radius
             val r = (iP1*iP1-iP2*iP2)/(2*iP3)
+            //two points on the axis
             val point1 = Vector3f()
             v1.mul(r, point1).add(ca2, point1)
             val point2 = Vector3f()
@@ -588,29 +597,33 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         if(caPositions.filterNotNull() == caPositions) {
             val allTetrads = ArrayList<CaTetrad>(caPositions.size - caPositions.size%3)
             val axis = ArrayList<Vector3f>(allTetrads.size*allTetrads.size*2)
-            caPositions.windowed(3, 1) {
-                allTetrads.add(CaTetrad(it[0], it[1], it[2]))
-            }
-            allTetrads.forEach {tetrad1 ->
-                allTetrads.forEach { tetrad2 ->
-                    if(tetrad1 != tetrad2) {
-                        val pair = calculateAxis(tetrad1, tetrad2)
-                        axis.add(pair.first)
-                        axis.add(pair.second)
+                caPositions.windowed(3, 1) {
+                    allTetrads.add(CaTetrad(it[0], it[1], it[2]))
+                }
+                allTetrads.forEach { tetrad1 ->
+                    allTetrads.forEach { tetrad2 ->
+                        if (tetrad1 != tetrad2) {
+                            val pair = calculateAxis(tetrad1, tetrad2)
+                            axis.add(pair.first)
+                            axis.add(pair.second)
+                            val sphere = Icosphere(0.05f, 3)
+                            sphere.position = pair.second
+                            this.addChild(sphere)
+                        }
                     }
                 }
-            }
-            val centroid = getCentroid(axis)
-            val axisCentered = axis.map {
-                val vec = Vector3f()
-                vec.set(centroid)
-                it.sub(vec) }
-            val sumXLength = axisCentered.fold(0f) { acc, next -> acc + next.x() * next.length() }
-            val sumYLength = axisCentered.fold(0f) { acc, next -> acc + next.y() * next.length() }
-            val sumZLength = axisCentered.fold(0f) { acc, next -> acc + next.z() * next.length() }
-            val abs = sqrt(sumXLength * sumXLength + sumYLength * sumYLength + sumZLength * sumZLength)
-            val direction = Vector3f(sumXLength / abs, sumYLength / abs, sumZLength / abs)
-            return MathLine(direction, centroid)
+                val centroid = getCentroid(axis)
+                val axisCentered = axis.map {
+                    val vec = Vector3f()
+                    vec.set(centroid)
+                    it.sub(vec)
+                }
+                val sumXLength = axisCentered.fold(0f) { acc, next -> acc + next.x() * next.length() }
+                val sumYLength = axisCentered.fold(0f) { acc, next -> acc + next.y() * next.length() }
+                val sumZLength = axisCentered.fold(0f) { acc, next -> acc + next.z() * next.length() }
+                val abs = sqrt(sumXLength * sumXLength + sumYLength * sumYLength + sumZLength * sumZLength)
+                val direction = Vector3f(sumXLength / abs, sumYLength / abs, sumZLength / abs)
+                return MathLine(direction, centroid)
         }
         else {
             println("Whoops, your ca-atoms in the axis calculation become null.")
