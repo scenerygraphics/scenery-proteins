@@ -608,7 +608,7 @@ class RibbonDiagramTests {
         val p166 = Protein.fromID("6etl")
         val r166 = RibbonDiagram(p166)
         assertNotNull(r166)
-        val p167 = Protein.fromID("63tk")
+        val p167 = Protein.fromID("5lp9")
         val r167 = RibbonDiagram(p167)
         assertNotNull(r167)
         val p168 = Protein.fromID("6aiq")
