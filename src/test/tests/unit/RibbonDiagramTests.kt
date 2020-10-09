@@ -30,9 +30,12 @@ class RibbonDiagramTests {
         val plantChains = plantProtein.getResidues()
         var allPlantPoints = 0
         plantChains.forEach {
-            val guides = RibbonDiagram.GuidePointCalculation.calculateGuidePoints(it, dsspPlant as List<SecStrucElement>)
-            val spline = plantRibbon.callPrivateFunc("ribbonSpline", guides) as DummySpline
-            allPlantPoints += spline.splinePoints().size
+            if(dsspPlant is List<*>) {
+                @Suppress("UNCHECKED_CAST")
+                val guides = RibbonDiagram.GuidePointCalculation.calculateGuidePoints(it, dsspPlant as List<SecStrucElement>)
+                val spline = plantRibbon.callPrivateFunc("ribbonSpline", guides) as DummySpline
+                allPlantPoints += spline.splinePoints().size
+            }
         }
         assertEquals(allPlantPoints, (46)*(10+1))
 
@@ -42,9 +45,12 @@ class RibbonDiagramTests {
         val scChains = saccharomycesCerevisiae.getResidues()
         var allSCPoints = 0
         scChains.forEach {
-            val guides = RibbonDiagram.GuidePointCalculation.calculateGuidePoints(it, dsspSC as List<SecStrucElement>)
-            val spline = scRibbon.callPrivateFunc("ribbonSpline", guides) as DummySpline
-            allSCPoints += spline.splinePoints().size
+            if(dsspSC is List<*>) {
+                @Suppress("UNCHECKED_CAST")
+                val guides = RibbonDiagram.GuidePointCalculation.calculateGuidePoints(it, dsspSC as List<SecStrucElement>)
+                val spline = scRibbon.callPrivateFunc("ribbonSpline", guides) as DummySpline
+                allSCPoints += spline.splinePoints().size
+            }
         }
         assertEquals(allSCPoints, (23448)*(10+1))
 
