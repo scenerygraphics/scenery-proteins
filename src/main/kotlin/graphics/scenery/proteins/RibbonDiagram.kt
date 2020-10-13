@@ -111,10 +111,10 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(0.9f, 0f, 0f))
-        rectangle.add(Vector3f(0f, 0.1f, 0f))
-        rectangle.add(Vector3f(-0.9f, 0f, 0f))
-        rectangle.add(Vector3f(0f, -0.1f, 0f))
+        rectangle.add(Vector3f(0.1f, 0f, 0f))
+        rectangle.add(Vector3f(0f, 0.9f, 0f))
+        rectangle.add(Vector3f(-0.1f, 0f, 0f))
+        rectangle.add(Vector3f(0f, -0.9f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
@@ -186,17 +186,6 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                             }
                         }
                     }
-                    /*
-                    val cylinder = Cylinder(0.5f, 1f, 10)
-                    val cP1 = Vector3f()
-                    val cP2 = Vector3f()
-                    axis.direction.mul(5f, cP1).add(axis.position, cP1)
-                    axis.direction.mul(-5f, cP2).add(axis.position, cP2)
-                    cylinder.orientBetweenPoints(cP1, cP2, true)
-                    cylinder.position = axis.position
-                    this.addChild(cylinder)
-
-                     */
                     val helixCurve = Helix(axis, DummySpline(subSpline)) { rectangle }
                     if(displaySS) { alphas.addChild(helixCurve) }
                     else { subParent.addChild(helixCurve) }
@@ -549,7 +538,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         val ca6 = tetrad2.ca3
         if(ca1 != null && ca2 != null && ca3 != null && ca4 != null && ca5 != null && ca6 != null) {
             //Calculating the direction
-            val a1 = Vector3f()
+             val a1 = Vector3f()
             ca1.sub(ca2, a1)
             val b1 = Vector3f()
             ca3.sub(ca2, b1)
@@ -574,9 +563,9 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             val iv = Vector3f()
             val iP1 = (axisVector.mul(d, iv).length())
             val iP2 = ca2ca5.length()
-            val iP3 = ca5ca2.dot(v2).absoluteValue
+            val iP3 = ca2ca5.dot(v2)
             //radius
-            val r = (iP1*iP1-iP2*iP2)/(2*iP3)
+            val r = ((iP1*iP1-iP2*iP2)/(2*iP3)).absoluteValue
             //two points on the axis
             val point1 = Vector3f()
             v1.mul(r, point1).add(ca2, point1)
@@ -600,9 +589,9 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                 caPositions.windowed(3, 1) {
                     allTetrads.add(CaTetrad(it[0], it[1], it[2]))
                 }
-                allTetrads.forEach { tetrad1 ->
-                    allTetrads.forEach { tetrad2 ->
-                        if (tetrad1 != tetrad2) {
+                allTetrads.forEachIndexed { index1, tetrad1 ->
+                    allTetrads.forEachIndexed { index2, tetrad2 ->
+                        if (index1 < index2) {
                             val pair = calculateAxis(tetrad1, tetrad2)
                             axis.add(pair.first)
                             axis.add(pair.second)
