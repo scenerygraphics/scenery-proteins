@@ -10,7 +10,6 @@ import org.biojava.nbio.structure.secstruc.SecStrucCalc
 import org.biojava.nbio.structure.secstruc.SecStrucElement
 import org.biojava.nbio.structure.secstruc.SecStrucTools
 import org.biojava.nbio.structure.secstruc.SecStrucType
-import kotlin.math.absoluteValue
 import kotlin.math.min
 
 /**
@@ -529,50 +528,24 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
      * Returns the axis of an alpha helix. Axis Vector corresponds to the direction and Axis Point to the
      * position vector. This algorithm follows the paper from Pater C. Kahn "Defining the axis of a helix".
      */
-    private fun calculateAxis(tetrad1: CaTetrad, tetrad2: CaTetrad): Pair<Vector3f, Vector3f> {
-        val ca1 = tetrad1.ca1
-        val ca2 = tetrad1.ca2
-        val ca3 = tetrad1.ca3
-        val ca4 = tetrad2.ca1
-        val ca5 = tetrad2.ca2
-        val ca6 = tetrad2.ca3
-        if(ca1 != null && ca2 != null && ca3 != null && ca4 != null && ca5 != null && ca6 != null) {
-            //Calculating the direction
-             val a1 = Vector3f()
-            ca1.sub(ca2, a1)
-            val b1 = Vector3f()
-            ca3.sub(ca2, b1)
-            val v1 = Vector3f()
-            a1.add(b1, v1).normalize()
-            val a2 = Vector3f()
-            ca4.sub(ca5, a2)
-            val b2 = Vector3f()
-            ca6.sub(ca5, b2)
-            val v2 = Vector3f()
-            a2.add(b2, v2).normalize()
-            val axisVector = Vector3f()
-            v1.cross(v2, axisVector).normalize()
-            //Calculating the radius to obtain a point
-            //Distance from ca2 to ca3 in axis direction
-            val ca2ca5 = Vector3f()
-            ca5.sub(ca2, ca2ca5)
-            val ca5ca2 = Vector3f()
-            ca2.sub(ca5, ca5ca2)
-            val d = ca2ca5.dot(axisVector)
-            //intermediate products
-            val iv = Vector3f()
-            val iP1 = (axisVector.mul(d, iv).length())
-            val iP2 = ca2ca5.length()
-            val iP3 = ca2ca5.dot(v2)
-            //radius
-            val r = ((iP1*iP1-iP2*iP2)/(2*iP3)).absoluteValue
-            //two points on the axis
-            val point1 = Vector3f()
-            v1.mul(r, point1).add(ca2, point1)
-            val point2 = Vector3f()
-            v2.mul(r, point2).add(ca5, point2)
-
-            return Pair(point1, point2)
+    private fun calculateAxis(tetrad: CaTetrad): Pair<Vector3f, Vector3f> {
+        if(tetrad.ca1 != null && tetrad.ca2 != null && tetrad.ca3 != null && tetrad.ca4 != null) {
+            /*
+            Calculating the direction:
+            take four consecutive points (Ca1-Ca4), calculate the midpoint between ca1 and ca3 as well as between
+            a2 and ca4; the vector between these midpoints is the axis vector.
+             */
+            val midpoint1 = Vector3f()
+            tetrad.ca1.sub(tetrad.ca3, midpoint1).mul(0.5f)
+            val midpoint2 = Vector3f()
+            tetrad.ca2.sub(tetrad.ca4, midpoint2).mul(0.5f)
+            val axis = Vector3f()
+            midpoint1.sub(midpoint2, axis).normalize()
+            val head = Vector3f()
+            axis.mul(2f, head).add(midpoint1, head)
+            val tail = Vector3f()
+            tail.set(midpoint2)
+            return Pair(head, tail)
         }
         else {
             println("Whoops, your ca-atoms in the axis calculation become null.")
@@ -580,26 +553,22 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         }
     }
 
-    data class CaTetrad(val ca1: Vector3f?, val ca2: Vector3f?, val ca3: Vector3f?)
+    data class CaTetrad(val ca1: Vector3f?, val ca2: Vector3f?, val ca3: Vector3f?, val ca4: Vector3f?)
 
     private fun calculateAxisLeastSquareMethod(caPositions: List<Vector3f?>): MathLine {
         if(caPositions.filterNotNull() == caPositions) {
             val allTetrads = ArrayList<CaTetrad>(caPositions.size - caPositions.size%3)
             val axis = ArrayList<Vector3f>(allTetrads.size*allTetrads.size*2)
-                caPositions.windowed(3, 1) {
-                    allTetrads.add(CaTetrad(it[0], it[1], it[2]))
+                caPositions.windowed(4, 1) {
+                    allTetrads.add(CaTetrad(it[0], it[1], it[2], it[3]))
                 }
-                allTetrads.forEachIndexed { index1, tetrad1 ->
-                    allTetrads.forEachIndexed { index2, tetrad2 ->
-                        if (index1 < index2) {
-                            val pair = calculateAxis(tetrad1, tetrad2)
-                            axis.add(pair.first)
-                            axis.add(pair.second)
-                            val sphere = Icosphere(0.05f, 3)
-                            sphere.position = pair.second
-                            this.addChild(sphere)
-                        }
-                    }
+                allTetrads.forEach { tetrad ->
+                    val pair = calculateAxis(tetrad)
+                    axis.add(pair.first)
+                    axis.add(pair.second)
+                    val sphere = Icosphere(0.05f, 3)
+                    sphere.position = pair.second
+                    this.addChild(sphere)
                 }
                 val centroid = getCentroid(axis)
                 val axisCentered = axis.map {
