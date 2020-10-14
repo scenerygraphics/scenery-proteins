@@ -110,9 +110,9 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         val splinePoints = spline.splinePoints()
 
         val rectangle = ArrayList<Vector3f>(4)
-        rectangle.add(Vector3f(0f, 0f, 0.9f))
+        rectangle.add(Vector3f(0.9f, 0f, 0f))
         rectangle.add(Vector3f(0f, 0.1f, 0f))
-        rectangle.add(Vector3f(0f, 0f, -0.9f))
+        rectangle.add(Vector3f(-0.9f, 0f, 0f))
         rectangle.add(Vector3f(0f, -0.1f, 0f))
 
         val octagon = ArrayList<Vector3f>(8)
@@ -571,14 +571,14 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                     this.addChild(sphere)
                 }
                 val centroid = getCentroid(axis)
-                val axisCentered = axis.map {
-                    val vec = Vector3f()
-                    vec.set(centroid)
-                    it.sub(vec)
+                val transPoints = ArrayList<Pair<Vector3f, Vector3f>>(axis.size)
+                axis.forEach{ point ->
+                    val transPoint = Vector3f()
+                    transPoints.add(Pair(point, point.sub(centroid, transPoint)))
                 }
-                val sumXLength = axisCentered.fold(0f) { acc, next -> acc + next.x() * next.length() }
-                val sumYLength = axisCentered.fold(0f) { acc, next -> acc + next.y() * next.length() }
-                val sumZLength = axisCentered.fold(0f) { acc, next -> acc + next.z() * next.length() }
+                val sumXLength = transPoints.fold(0f) { acc, next -> acc + next.first.x()*next.second.length()}
+                val sumYLength = transPoints.fold(0f) { acc, next -> acc + next.first.y()*next.second.length()}
+                val sumZLength = transPoints.fold(0f) { acc, next -> acc + next.first.z()*next.second.length()}
                 val abs = sqrt(sumXLength * sumXLength + sumYLength * sumYLength + sumZLength * sumZLength)
                 val direction = Vector3f(sumXLength / abs, sumYLength / abs, sumZLength / abs)
                 return MathLine(direction, centroid)
