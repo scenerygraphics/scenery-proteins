@@ -566,9 +566,6 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                     val pair = calculateAxis(tetrad)
                     axis.add(pair.first)
                     axis.add(pair.second)
-                    val sphere = Icosphere(0.05f, 3)
-                    sphere.position = pair.second
-                    this.addChild(sphere)
                 }
                 val centroid = getCentroid(axis)
                 val transPoints = ArrayList<Pair<Vector3f, Vector3f>>(axis.size)
