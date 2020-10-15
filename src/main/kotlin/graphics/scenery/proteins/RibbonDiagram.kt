@@ -175,7 +175,7 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                     for(k in 0 until count) {
                         caList.add(guidePointList[guideIndex+k].nextResidue?.getAtom("CA")?.getVector())
                     }
-                    val axis = calculateAxisLeastSquareMethod(caList)
+                    val axis = leastSquare(caList)
                     for (j in 0..count) {
                         for (i in 0..sectionVerticesCount) {
                             if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
@@ -526,19 +526,19 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
 
     /**
      * Returns the axis of an alpha helix. Axis Vector corresponds to the direction and Axis Point to the
-     * position vector. This algorithm follows the paper from Pater C. Kahn "Defining the axis of a helix".
+     * position vector.
      */
-    private fun calculateAxis(tetrad: CaTetrad): Pair<Vector3f, Vector3f> {
-        if(tetrad.ca1 != null && tetrad.ca2 != null && tetrad.ca3 != null && tetrad.ca4 != null) {
+    private fun calculateAxis(foursome: CaFoursome): Pair<Vector3f, Vector3f> {
+        if(foursome.ca1 != null && foursome.ca2 != null && foursome.ca3 != null && foursome.ca4 != null) {
             /*
             Calculating the direction:
             take four consecutive points (Ca1-Ca4), calculate the midpoint between ca1 and ca3 as well as between
             a2 and ca4; the vector between these midpoints is the axis vector.
              */
             val midpoint1 = Vector3f()
-            tetrad.ca1.sub(tetrad.ca3, midpoint1).mul(0.5f)
+            foursome.ca1.sub(foursome.ca3, midpoint1).mul(0.5f)
             val midpoint2 = Vector3f()
-            tetrad.ca2.sub(tetrad.ca4, midpoint2).mul(0.5f)
+            foursome.ca2.sub(foursome.ca4, midpoint2).mul(0.5f)
             val axis = Vector3f()
             midpoint1.sub(midpoint2, axis).normalize()
             val head = Vector3f()
@@ -553,26 +553,46 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         }
     }
 
-    data class CaTetrad(val ca1: Vector3f?, val ca2: Vector3f?, val ca3: Vector3f?, val ca4: Vector3f?)
+    /**
+     * data class to store exactly four ca atom positions.
+     */
+    data class CaFoursome(val ca1: Vector3f?, val ca2: Vector3f?, val ca3: Vector3f?, val ca4: Vector3f?)
 
-    private fun calculateAxisLeastSquareMethod(caPositions: List<Vector3f?>): MathLine {
+    /**
+     * Least square method to best approximate the helix axis. The method was developed by Peter C. Kahn ("Simple methods
+     * for computing the least square line in three dimensions", Kahn 1989), a detailed mathematical derivation can be
+     * found there.
+     */
+    private fun leastSquare(caPositions: List<Vector3f?>): MathLine {
         if(caPositions.filterNotNull() == caPositions) {
-            val allTetrads = ArrayList<CaTetrad>(caPositions.size - caPositions.size%3)
-            val axis = ArrayList<Vector3f>(allTetrads.size*allTetrads.size*2)
+            val allFoursomes = ArrayList<CaFoursome>(caPositions.size - caPositions.size%3)
+            val axis = ArrayList<Vector3f>(allFoursomes.size*allFoursomes.size*2)
                 caPositions.windowed(4, 1) {
-                    allTetrads.add(CaTetrad(it[0], it[1], it[2], it[3]))
+                    allFoursomes.add(CaFoursome(it[0], it[1], it[2], it[3]))
                 }
-                allTetrads.forEach { tetrad ->
+                allFoursomes.forEach { tetrad ->
                     val pair = calculateAxis(tetrad)
                     axis.add(pair.first)
                     axis.add(pair.second)
                 }
+                /*
+                 Summarizing the calculation, first all the points are translated so that their centroid is in the
+                 origin of the coordinate system. The following sum is calculated:
+                 Sx = Σ x*|v'|
+                 where x is the x component of the original (which means not yet translated) point and v is the
+                 point vector of the translated point. This is done for y, z respectively. This yields a vector
+                 s = (Sx, Sy, Sz)
+                 The direction cosine to the x axis is: Sx/|s|, the same applies to the other axes. Conveniently, the
+                 vector of all three cosines is the direction vector of the fitted line. The centroid is chosen as the
+                 positional vector.
+                 */
                 val centroid = getCentroid(axis)
                 val transPoints = ArrayList<Pair<Vector3f, Vector3f>>(axis.size)
                 axis.forEach{ point ->
                     val transPoint = Vector3f()
                     transPoints.add(Pair(point, point.sub(centroid, transPoint)))
                 }
+
                 val sumXLength = transPoints.fold(0f) { acc, next -> acc + next.first.x()*next.second.length()}
                 val sumYLength = transPoints.fold(0f) { acc, next -> acc + next.first.y()*next.second.length()}
                 val sumZLength = transPoints.fold(0f) { acc, next -> acc + next.first.z()*next.second.length()}
@@ -586,6 +606,9 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         }
     }
 
+    /**
+     * Returns the centroid of a given list of points.
+     */
     private fun getCentroid(list: List<Vector3f>): Vector3f {
         return  Vector3f(list.fold(0f) { acc, next -> acc + next.x() } / list.size,
                 list.fold(0f) { acc, next -> acc + next.y() } / list.size,
