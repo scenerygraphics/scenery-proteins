@@ -6,7 +6,13 @@ import graphics.scenery.utils.extensions.plus
 import graphics.scenery.utils.extensions.times
 import org.joml.*
 
-class Helix (axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
+/**
+ * This class represents a Helix in 3D space. Currently, it needs a Spline which winds around an axis defined as a line
+ * in space. Each spline point is assigned a baseShape. Finally, all the shapes get connected with triangles.
+ * [axis] line around which the spline should wind
+ * [spline] spline
+ */
+class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
     private val splinePoints = spline.splinePoints()
     private val shape = baseShape.invoke()
     private val axisVector = axis.direction
@@ -17,7 +23,22 @@ class Helix (axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>
         val verticesList = ArrayList<List<Vector3f>>(splinePoints.size)
         val sectionVerticesCount = spline.verticesCountPerSection()
         splinePoints.forEach { point ->
-            //Calculation of the y-axis which is the vector from spline point which intersects the axis with a 90 degree angle
+            /*
+            The coordinate systems which walk along the spline are calculated like so:
+            The x axis is the axis direction.
+            The y axis is the normalized vector from the spline point its neighbor on the axis with least distance
+            between them. The y axis vector is then perpendicular to the axis vector, therefore, perpendicular to
+            the x axis.*
+            The z axis is the normalized cross product between the x and the y axis.
+
+            *Calculate y
+            - axis line: l = a + tb (a is the positional vector and b the direction)
+            - spline point as: p
+            The point on the line with the least distance to the spline point is:
+            p' = a + t'b
+            with t' = (p-a)*b / |b|^2  (with * being the dot product)
+            Then y = (p-p') / |p-p'|
+             */
             val iVec = Vector3f()
             val t = (point.sub(axisPoint, iVec)).dot(axisVector)/(axisVector.length()*axisVector.length())
             val intermediateAxis = Vector3f()
@@ -27,9 +48,10 @@ class Helix (axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>
             val xAxisI = Vector3f()
             xAxisI.set(axisVector).normalize()
             val yAxisI = Vector3f()
-            plumbLine.sub(point, yAxisI).normalize()
+            point.sub(plumbLine, yAxisI).normalize()
             val zAxisI = Vector3f()
             xAxisI.cross(yAxisI, zAxisI).normalize()
+            //point transformation
             val inversionMatrix = Matrix3f(xAxisI, yAxisI, zAxisI).invert()
             val xAxis = Vector3f()
             inversionMatrix.getColumn(0, xAxis).normalize()
@@ -46,6 +68,7 @@ class Helix (axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>
                 transformMatrix.transformPosition(shapePoint, transformedPoint)
             })
         }
+        //algorithms from the curve class, see Curve (line 219-322)
         verticesList.windowed(sectionVerticesCount, sectionVerticesCount-1) { section ->
             val i = when {
                 section.contains(verticesList.first()) -> {
