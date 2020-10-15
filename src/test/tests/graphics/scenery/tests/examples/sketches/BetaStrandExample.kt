@@ -7,7 +7,6 @@ import graphics.scenery.proteins.CatmullRomSpline
 import graphics.scenery.proteins.Curve
 import org.joml.Vector3f
 import org.junit.Test
-typealias ShapeOnCurve = ArrayList<ArrayList<Vector3f>>
 
 class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, windowHeight = 720) {
 
