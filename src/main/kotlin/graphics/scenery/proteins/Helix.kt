@@ -20,6 +20,9 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
 
 
     init {
+        if(axisVector == Vector3f(0f, 0f, 0f)) {
+            throw Exception("The direction vector of the axis must no become the null vector.")
+        }
         val verticesList = ArrayList<List<Vector3f>>(splinePoints.size)
         val sectionVerticesCount = spline.verticesCountPerSection()
         splinePoints.forEach { point ->
