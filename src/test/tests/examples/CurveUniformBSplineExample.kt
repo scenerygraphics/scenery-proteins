@@ -36,9 +36,9 @@ class CurveUniformBSplineExample: SceneryBase("CurveUniformBSplineExample", wind
             val shapeList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
             for (i in 0 until splineVerticesCount) {
                 val list = ArrayList<Vector3f>()
-                list.add(Vector3f(0.3f, 0.3f, 0f))
-                list.add(Vector3f(0.3f, -0.3f, 0f))
-                list.add(Vector3f(-0.3f, -0.3f, 0f))
+                list.add(Vector3f(0.15f, 0.15f, 0f))
+                list.add(Vector3f(0.15f, -0.15f, 0f))
+                list.add(Vector3f(-0.15f, -0.15f, 0f))
                 shapeList.add(list)
             }
             return shapeList
