@@ -110,7 +110,10 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            partialCurveGeometry.windowed(sectionVertices, sectionVertices-1) { section ->
+            val remainder = partialCurveGeometry.size%sectionVertices
+            val n = (partialCurveGeometry.size-remainder)/sectionVertices
+            val add = remainder/n
+            partialCurveGeometry.windowed(sectionVertices + add, sectionVertices + add) { section ->
                 val i = when {
                     section.contains(partialCurveGeometry.first()) -> {
                         0
