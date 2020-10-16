@@ -5,6 +5,11 @@ import graphics.scenery.utils.LazyLogger
 import org.junit.Test
 import kotlin.test.assertFails
 
+/**
+ * Unit test for the Protein class
+ *
+ * @author Justin Bürger
+ */
 class ProteinTests {
     private val logger by LazyLogger()
 
