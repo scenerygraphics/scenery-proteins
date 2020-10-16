@@ -7,12 +7,14 @@ class Axis(positions: List<Vector3f?>) {
     val direction = Vector3f()
     val position = Vector3f()
     init {
-        if(positions.size < 4) {
-            throw Exception("Please provide at least four points for the axis calculation")
+        if(positions.size >= 4) {
+            val line = leastSquare(positions)
+            direction.set(line.direction)
+            position.set(line.position)
         }
-        val line = leastSquare(positions)
-        direction.set(line.direction)
-        position.set(line.position)
+        else {
+            println("Please provide at least four points for the axis calculation.")
+        }
     }
 
     /**
