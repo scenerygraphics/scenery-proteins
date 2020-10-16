@@ -85,8 +85,6 @@ class HelixTests {
                 }
             }
         }
-
-
     }
 
     //Inline function to access private function in the RibbonDiagram
