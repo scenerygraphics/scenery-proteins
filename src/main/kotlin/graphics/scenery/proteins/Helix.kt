@@ -20,11 +20,35 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
 
 
     init {
+        val sectionVerticesCount = spline.verticesCountPerSection()
+        val verticesList = calculateVertices()
+        //algorithms from the curve class, see Curve (line 219-322)
+        verticesList.windowed(sectionVerticesCount, sectionVerticesCount-1) { section ->
+            val i = when {
+                section.contains(verticesList.first()) -> {
+                    0
+                }
+                section.contains(verticesList.last()) -> {
+                    1
+                }
+                else -> {
+                    2
+                }
+            }
+            val helixSectionVertices = Curve.calculateTriangles(section, i)
+            val partialHelix = Curve.PartialCurve(helixSectionVertices)
+            this.addChild(partialHelix)
+        }
+    }
+
+    /**
+     * Transformation of the baseShapes along the spline, aligned with the helix axis.
+     */
+    private fun calculateVertices(): ArrayList<List<Vector3f>> {
         if(axisVector == Vector3f(0f, 0f, 0f)) {
             throw Exception("The direction vector of the axis must no become the null vector.")
         }
         val verticesList = ArrayList<List<Vector3f>>(splinePoints.size)
-        val sectionVerticesCount = spline.verticesCountPerSection()
         splinePoints.forEach { point ->
             /*
             The coordinate systems which walk along the spline are calculated like so:
@@ -63,30 +87,14 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
             val zAxis = Vector3f()
             inversionMatrix.getColumn(2, zAxis).normalize()
             val transformMatrix = Matrix4f(xAxis.x(), yAxis.x(), zAxis.x(), 0f,
-                                            xAxis.y(), yAxis.y(), zAxis.y(), 0f,
-                                            xAxis.z(), yAxis.z(), zAxis.z(), 0f,
-                                            point.x(), point.y(), point.z(), 1f)
+                    xAxis.y(), yAxis.y(), zAxis.y(), 0f,
+                    xAxis.z(), yAxis.z(), zAxis.z(), 0f,
+                    point.x(), point.y(), point.z(), 1f)
             verticesList.add(shape.map { shapePoint ->
                 val transformedPoint = Vector3f()
                 transformMatrix.transformPosition(shapePoint, transformedPoint)
             })
         }
-        //algorithms from the curve class, see Curve (line 219-322)
-        verticesList.windowed(sectionVerticesCount, sectionVerticesCount-1) { section ->
-            val i = when {
-                section.contains(verticesList.first()) -> {
-                    0
-                }
-                section.contains(verticesList.last()) -> {
-                    1
-                }
-                else -> {
-                    2
-                }
-            }
-            val helixSectionVertices = Curve.calculateTriangles(section, i)
-            val partialHelix = Curve.PartialCurve(helixSectionVertices)
-            this.addChild(partialHelix)
-        }
+        return verticesList
     }
 }
