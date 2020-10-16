@@ -168,10 +168,10 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             val helpSpline = splinePoints.drop(splineOffset)
             guidePointsOffset++
             when {
-                (guide.type == SecStrucType.helix4) -> {
+                (guide.type == SecStrucType.helix4 && count >= 3) -> {
                     guidePointsOffset += count
                     val caList = ArrayList<Vector3f?>(count)
-                    for(k in 0 until count) {
+                    for(k in 0 .. count) {
                         caList.add(guidePointList[guideIndex+k].nextResidue?.getAtom("CA")?.getVector())
                     }
                     val axis = Axis(caList)
