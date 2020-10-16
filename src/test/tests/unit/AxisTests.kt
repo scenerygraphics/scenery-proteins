@@ -11,6 +11,8 @@ import kotlin.test.assertTrue
 
 /**
  * This is the test for the axis class.
+ *
+ * @author Justin Buerger, burger@mpi-cbg.com
  */
 class AxisTests {
     private val logger by LazyLogger()

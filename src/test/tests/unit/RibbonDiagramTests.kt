@@ -14,6 +14,8 @@ import kotlin.test.assertNotNull
 
 /**
  * This is the test for the RibbonCalculation, i.e. the pdb-support.
+ *
+ * @author Justin Buerger, burger@mpi-cbg.com
  */
 class RibbonDiagramTests {
     private val logger by LazyLogger()

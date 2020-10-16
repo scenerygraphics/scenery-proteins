@@ -3,6 +3,12 @@ package graphics.scenery.proteins
 import com.jogamp.opengl.math.FloatUtil
 import org.joml.Vector3f
 
+/**
+ * Axis class to calculate the axis of a helix and store it as a mathematical line.
+ * @param[positions] List of the ca atom positions or respective points on a helix
+ *
+ * @author Justin Buerger, burger@mpi-cbg.com
+ */
 class Axis(positions: List<Vector3f?>) {
     val direction = Vector3f()
     val position = Vector3f()

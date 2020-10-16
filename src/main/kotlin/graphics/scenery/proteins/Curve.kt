@@ -265,7 +265,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
         the bottom of a curve, the triangles should be arranged counterclockwise, for the top clockwise - this is signified
         by [ccw].
          */
-        fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
+        private fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
             val size = list.size
             val verticesList = ArrayList<Vector3f>(size + (size / 2))
             val workList = ArrayList<Vector3f>(size)

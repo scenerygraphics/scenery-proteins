@@ -11,6 +11,8 @@ import org.joml.*
  * in space. Each spline point is assigned a baseShape. Finally, all the shapes get connected with triangles.
  * [axis] line around which the spline should wind
  * [spline] spline
+ *
+ * @author Justin Buerger, burger@mpi-cbg.com
  */
 class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
     private val splinePoints = spline.splinePoints()
