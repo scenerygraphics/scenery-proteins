@@ -1,4 +1,4 @@
-package graphics.scenery.tests.examples.sketches
+package examples
 
 import graphics.scenery.*
 import org.joml.*
@@ -9,7 +9,12 @@ import graphics.scenery.proteins.Helix
 import graphics.scenery.proteins.MathLine
 import org.junit.Test
 
-class HelixTest: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
+/**
+ * This is an example of how to set up a helix.
+ *
+ * @author Justin Bürger
+ */
+class HelixExample: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
