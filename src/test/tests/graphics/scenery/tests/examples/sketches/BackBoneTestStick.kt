@@ -5,6 +5,7 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.BackBoneSticks
+import graphics.scenery.proteins.Protein
 import org.junit.Test
 
 class BackBoneTestStick: SceneryBase("BackBoneTest", windowWidth = 1280, windowHeight = 720) {

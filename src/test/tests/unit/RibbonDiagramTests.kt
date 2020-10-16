@@ -1,6 +1,6 @@
 package unit
 
-import graphics.scenery.Protein
+import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.DummySpline
 import graphics.scenery.proteins.RibbonDiagram
 import graphics.scenery.utils.LazyLogger

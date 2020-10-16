@@ -1,5 +1,6 @@
-package graphics.scenery
+package graphics.scenery.proteins
 
+import graphics.scenery.Mesh
 import org.biojava.nbio.structure.*
 import org.biojava.nbio.structure.io.PDBFileReader
 import java.io.FileNotFoundException
@@ -8,8 +9,8 @@ import java.nio.file.InvalidPathException
 /**
  * Constructs a protein from a pdb-file.
  * @author  Justin Buerger <burger@mpi-cbg.de>
- * @param [fromID] loads a pbd-file with an ID. See also: https://www.rcsb.org/pages/help/advancedsearch/pdbIDs
- * @param [fromFile] loads a pdb-file from memory.
+ * [fromID] loads a pbd-file with an ID. See also: https://www.rcsb.org/pages/help/advancedsearch/pdbIDs
+ * [fromFile] loads a pdb-file from memory.
  */
 
 class Protein(val structure: Structure): Mesh("Protein") {
@@ -39,7 +40,7 @@ class Protein(val structure: Structure): Mesh("Protein") {
             val reader = PDBFileReader()
             //print("Please enter the path of your PDB-File: ")
             //val readPath = readLine()
-            val struc = try { reader.getStructure(path) }
+            try { reader.getStructure(path) }
             catch (struc: InvalidPathException) {
                 print("Path was invalid, maybe this helps: ${struc.reason} " +
                     "or the index: ${struc.index}")
@@ -53,8 +54,7 @@ class Protein(val structure: Structure): Mesh("Protein") {
 
             finally {
                 val struc = reader.getStructure(path)
-                val protein = Protein(struc)
-                return protein
+                return Protein(struc)
             }
         }
 

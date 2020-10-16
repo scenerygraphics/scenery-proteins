@@ -4,6 +4,7 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import org.joml.*
 import graphics.scenery.numerics.Random
+import graphics.scenery.proteins.Protein
 import org.biojava.nbio.structure.*
 import org.junit.Test
 

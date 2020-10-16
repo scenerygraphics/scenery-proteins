@@ -4,6 +4,7 @@ import org.joml.*
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
+import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
