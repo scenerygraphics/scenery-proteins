@@ -7,15 +7,17 @@ import org.joml.Vector3f
 import org.junit.Test
 import kotlin.math.absoluteValue
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
 /**
- * This is the test for the axis class
+ * This is the test for the axis class.
  */
 class AxisTests {
     private val logger by LazyLogger()
 
+    /**
+     * Tests what happens when the axis gets a list of less then four points as a parameter
+     */
     @Test
     fun testTooFewPositions() {
         logger.info("Tests the result if to few positions are provided.")
@@ -26,6 +28,9 @@ class AxisTests {
         assertEquals(axis.position, Vector3f())
     }
 
+    /**
+     * Test what happens when one of the positions for the axis becomes null.
+     */
     @Test
     fun testNullPositions() {
         logger.info("Test the behaviour of the axis if one of the positions is null")
@@ -36,6 +41,9 @@ class AxisTests {
         assertEquals(axis.position, Vector3f())
     }
 
+    /**
+     * Tests the least square approach for approximating the axis line.
+     */
     @Test
     fun testLeastSquare() {
         logger.info("Test if the least square algorithm works good enough")
