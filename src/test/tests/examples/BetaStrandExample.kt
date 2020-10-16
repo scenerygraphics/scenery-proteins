@@ -8,6 +8,11 @@ import graphics.scenery.proteins.Curve
 import org.joml.Vector3f
 import org.junit.Test
 
+/**
+ * Example of a beta strand visualized with an arrow.
+ *
+ * @author Justin Bürger
+ */
 class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, windowHeight = 720) {
 
 
