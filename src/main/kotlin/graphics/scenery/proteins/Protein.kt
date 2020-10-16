@@ -22,7 +22,8 @@ class Protein(val structure: Structure): Mesh("Protein") {
                 //val id = readLine()
             try { StructureIO.getStructure(id) }
             catch (struc: IOException) {
-                print("Something went wrong with the loading- are you sure you chose the right ID?")
+                print("Something went wrong in the loading process, " +
+                        "maybe a typo in the pdb entry or you chose a deprecated one?")
                 struc.printStackTrace()
             }
             catch(struc: StructureException) {
