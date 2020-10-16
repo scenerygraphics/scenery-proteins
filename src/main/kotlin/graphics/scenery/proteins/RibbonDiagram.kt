@@ -97,7 +97,6 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         }
     }
 
-
     /**
      * The baseShape for the Spline, the coil is represented with an octagon,
      * the helices with rectangles, and the sheets with arrows.

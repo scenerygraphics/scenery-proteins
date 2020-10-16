@@ -1,4 +1,4 @@
-package graphics.scenery.tests.examples.sketches
+package examples
 
 import org.joml.*
 import graphics.scenery.*
@@ -22,7 +22,7 @@ class RibbonExampleSecondaryStructures: SceneryBase("FlatRibbonSketch", windowWi
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2w49")
+        val protein = Protein.fromID("2zzt")
 
         val ribbon = RibbonDiagram(protein, displaySS = true)
 
@@ -42,15 +42,21 @@ class RibbonExampleSecondaryStructures: SceneryBase("FlatRibbonSketch", windowWi
                     }
                     (ss.name == "beta") -> {
                         ss.children.forEach { beta ->
-                            beta.children.forEach {
-                                it.material.diffuse.set(betaColour)
+                            beta.children.forEach {child ->
+                                //due to the partition of the curve we need to take one step further down the tree
+                                child.children.forEach {
+                                    it.material.diffuse.set(betaColour)
+                                }
                             }
                         }
                     }
                     (ss.name == "coil") -> {
                         ss.children.forEach {coil ->
-                            coil.children.forEach {
-                                it.material.diffuse.set(coilColour)
+                            coil.children.forEach { child ->
+                                //due to the partition of the curve we need to take one step further down the tree
+                                child.children.forEach {
+                                    it.material.diffuse.set(coilColour)
+                                }
                             }
                         }
                     }
