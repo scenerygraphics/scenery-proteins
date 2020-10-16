@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 /**
  * This is the test class for the [Curve]
  *
- * @author Justin Bürger, burger@mpi-cbg.com
+ * @author Justin Buerger, burger@mpi-cbg.com
  */
 class CurveTests {
     private val logger by LazyLogger()
@@ -198,14 +198,6 @@ class CurveTests {
     @Test
     fun testBigPolygon() {
         logger.info("Tests if the algorithm for the cover of the curve works for a polygon with 16 points.")
-        val point1 = Random.random3DVectorFromRange(-30f, -10f)
-        val point2 = Random.random3DVectorFromRange(-9f, 20f)
-        val point3 = Random.random3DVectorFromRange(21f, 30f)
-        val point4 = Random.random3DVectorFromRange(31f, 100f)
-
-        val controlPoints = arrayListOf(point1, point2, point3, point4)
-
-        val spline = UniformBSpline(controlPoints)
 
         val sixteenPoints = ArrayList<Vector3f>(16)
         sixteenPoints.add(Vector3f(1f, 0f, 0f))
@@ -224,16 +216,6 @@ class CurveTests {
         sixteenPoints.add(Vector3f(0.45f, -0.9f, 0f))
         sixteenPoints.add(Vector3f(0.75f, -0.75f, 0f))
         sixteenPoints.add(Vector3f(0.9f, -0.45f, 0f))
-
-        fun shapeGenerator(splineVerticesCount: Int): ArrayList<ArrayList<Vector3f>> {
-            val finalList = ArrayList<ArrayList<Vector3f>>(splineVerticesCount)
-            for (i in 0 until splineVerticesCount) {
-                finalList.add(sixteenPoints)
-            }
-            return finalList
-        }
-
-        val curve = Curve(spline) { shapeGenerator(spline.splinePoints().size) }
 
         //list of the vertices of the triangles from the cover of the curve
         val correctVerticesList = ArrayList<Vector3f>(14*3)
@@ -297,7 +279,7 @@ class CurveTests {
         correctVerticesList.add(sixteenPoints[0])
         correctVerticesList.add(sixteenPoints[12])
 
-        val calculatedVerticesList = curve.callPrivateFunc("getCoverVertices", sixteenPoints, true)
+        val calculatedVerticesList = Curve.VerticesCalculation.callPrivateFunc("getCoverVertices", sixteenPoints, true)
 
         assertEquals(calculatedVerticesList, correctVerticesList)
     }
