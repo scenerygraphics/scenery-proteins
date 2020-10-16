@@ -41,6 +41,8 @@ class BackBoneTestStick: SceneryBase("BackBoneTest", windowWidth = 1280, windowH
             l
         }
 
+        lights.forEach { lightbox.addChild(it) }
+
         val stageLight = PointLight(radius = 35.0f)
         stageLight.name = "StageLight"
         stageLight.intensity = 0.5f

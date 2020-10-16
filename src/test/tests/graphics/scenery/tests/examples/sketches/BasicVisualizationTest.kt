@@ -103,6 +103,9 @@ class BasicVisualizationTest: SceneryBase("LoadingAndShowing", windowWidth = 128
             l
         }
 
+        lights.forEach { lightbox.addChild(it) }
+
+
         val stageLight = PointLight(radius = 35.0f)
         stageLight.name = "StageLight"
         stageLight.intensity = 0.5f

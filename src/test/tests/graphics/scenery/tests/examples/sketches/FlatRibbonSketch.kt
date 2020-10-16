@@ -73,6 +73,8 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
             l
         }
 
+        lights.forEach { lightbox.addChild(it) }
+
         val stageLight = PointLight(radius = 35.0f)
         stageLight.name = "StageLight"
         stageLight.intensity = 0.5f

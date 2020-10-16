@@ -27,13 +27,12 @@ class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth
         points.add(Vector3f(9f, 7f, 3f))
         points.add(Vector3f(12f, 8f, -1f))
 
-        fun baseShape(n: Int): ArrayList<ArrayList<Vector3f>> {
-            val list = ArrayList<ArrayList<Vector3f>>()
-            return list
+        fun baseShape(): ArrayList<ArrayList<Vector3f>> {
+            return ArrayList()
         }
         val catmullRom = CatmullRomSpline(points, 4)
         val catmulChain = catmullRom.splinePoints()
-        val geo = Curve(catmullRom) { baseShape(0) }
+        val geo = Curve(catmullRom) { baseShape() }
         val frenet = geo.computeFrenetFrames(geo.getCurve())
 
 
@@ -44,22 +43,20 @@ class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth
 
         for(i in 0 until catmulChain.size) {
             val arrow1 = Arrow(frenet[i].tangent)
-            val arrow2 = frenet[i].normal?.let { Arrow(it) }
-            val arrow3 = frenet[i].binormal?.let { Arrow(it) }
+            val arrow2 = frenet[i].normal.let { Arrow(it) }
+            val arrow3 = frenet[i].binormal.let { Arrow(it) }
             val p = catmulChain[i]
             val e = 0.005f
-            if( arrow2 != null && arrow3 != null) {
-                arrow1.position = p
-                arrow2.position = p
-                arrow3.position = p
-                arrow1.edgeWidth = e
-                arrow2.edgeWidth = e
-                arrow3.edgeWidth = e
-                scene.addChild(arrow1)
-                scene.addChild(arrow2)
-                scene.addChild(arrow3)
-            }
-        }
+            arrow1.position = p
+            arrow2.position = p
+            arrow3.position = p
+            arrow1.edgeWidth = e
+            arrow2.edgeWidth = e
+            arrow3.edgeWidth = e
+            scene.addChild(arrow1)
+            scene.addChild(arrow2)
+            scene.addChild(arrow3)
+    }
 
 
         val spheres = catmulChain.map {
@@ -95,6 +92,8 @@ class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth
             lightbox.addChild(l)
             l
         }
+
+        lights.forEach { lightbox.addChild(it) }
 
         val stageLight = PointLight(radius = 10.0f)
         stageLight.name = "StageLight"
