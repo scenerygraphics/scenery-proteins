@@ -96,7 +96,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
                     val vec = Vector3f()
-                    shapeVertexList.add(bases[helpPosition-1].transformPosition(it, vec))
+                    shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
@@ -110,7 +110,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            partialCurveGeometry.windowed(sectionVertices, sectionVertices) { section ->
+            partialCurveGeometry.windowed(sectionVertices, sectionVertices-1) { section ->
                 val i = when {
                     section.contains(partialCurveGeometry.first()) -> {
                         0
