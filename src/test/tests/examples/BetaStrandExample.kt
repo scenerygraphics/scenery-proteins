@@ -11,7 +11,7 @@ import org.junit.Test
 /**
  * Example of a beta strand visualized with an arrow.
  *
- * @author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, windowHeight = 720) {
 

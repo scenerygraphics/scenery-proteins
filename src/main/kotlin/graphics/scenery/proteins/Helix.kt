@@ -9,7 +9,7 @@ import org.joml.*
  * [axis] line around which the spline should wind
  * [spline] spline
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> List<Vector3f>): Mesh("Helix") {
     private val splinePoints = spline.splinePoints()

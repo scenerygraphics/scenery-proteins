@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 /**
  * This is the test class for the [Curve]
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class CurveTests {
     private val logger by LazyLogger()

@@ -7,7 +7,7 @@ import org.joml.Vector3f
  * Axis class to calculate the axis of a helix and store it as a mathematical line.
  * @param[positions] List of the ca atom positions or respective points on a helix
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class Axis(positions: List<Vector3f?>) {
     val direction = Vector3f()

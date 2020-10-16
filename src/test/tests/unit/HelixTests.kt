@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
 /**
  * This is the test class for the Helix class.
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 
 class HelixTests {

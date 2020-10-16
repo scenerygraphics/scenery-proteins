@@ -12,7 +12,7 @@ import org.junit.Test
 /**
  * This is an example of how to set up a helix.
  *
- * @author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class HelixExample: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
     override fun init() {

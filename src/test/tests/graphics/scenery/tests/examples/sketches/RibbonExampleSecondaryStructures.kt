@@ -8,7 +8,14 @@ import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
-class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
+/**
+ * Example for the ribbon visualization. In this example each secondary structure (bends, helices and sheets) gets
+ * assigned a random colour value.
+ * You can change the displayed protein by changing the pdb entry in line 23.
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
+class RibbonExampleSecondaryStructures: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
@@ -17,7 +24,7 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
 
         val protein = Protein.fromID("2w49")
 
-        val ribbon = RibbonDiagram(protein)
+        val ribbon = RibbonDiagram(protein, displaySS = true)
 
         val alphaColour =  Random.random3DVectorFromRange(0f, 1f)
         val betaColour =  Random.random3DVectorFromRange(0f, 1f)
@@ -27,14 +34,14 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
             subProtein.children.forEach { ss ->
                 when {
                     (ss.name == "alpha") -> {
-                        ss.children.forEach {alpha ->
+                        ss.children.forEach { alpha ->
                             alpha.children.forEach {
                                 it.material.diffuse.set(alphaColour)
                             }
                         }
                     }
                     (ss.name == "beta") -> {
-                        ss.children.forEach {beta ->
+                        ss.children.forEach { beta ->
                             beta.children.forEach {
                                 it.material.diffuse.set(betaColour)
                             }

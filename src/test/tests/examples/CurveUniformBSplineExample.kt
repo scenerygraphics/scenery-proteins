@@ -12,7 +12,7 @@ import org.junit.Test
 /**
  * Just a quick example a UniformBSpline with a triangle as a baseShape.
  *
- * @author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class CurveUniformBSplineExample: SceneryBase("CurveUniformBSplineExample", windowWidth = 1280, windowHeight = 720) {
 

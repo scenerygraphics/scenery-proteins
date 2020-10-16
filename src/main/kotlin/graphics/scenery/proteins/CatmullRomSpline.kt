@@ -16,7 +16,7 @@ import kotlin.math.pow
  * resulting curve for alpha = 0 is a standart Catmull Rom Spline, for alpha = 1 we get
  * a chordal Catmull Rom Spline.
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class CatmullRomSpline(private val controlPoints: List<Vector3f>, val n: Int = 100, val alpha: Float = 0.5f,
                        private val addRandomLastAndFirstPoint: Boolean = false): Spline {

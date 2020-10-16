@@ -7,6 +7,6 @@ import org.joml.Vector3f
  * [direction] direction vector
  * [position] positional vector
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 data class MathLine(val direction: Vector3f, val position: Vector3f)

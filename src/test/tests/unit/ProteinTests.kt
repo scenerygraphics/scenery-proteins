@@ -8,7 +8,7 @@ import kotlin.test.assertFails
 /**
  * Unit test for the Protein class
  *
- * @author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class ProteinTests {
     private val logger by LazyLogger()

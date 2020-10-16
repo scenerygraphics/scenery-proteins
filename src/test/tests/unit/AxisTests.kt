@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 /**
  * This is the test for the axis class.
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class AxisTests {
     private val logger by LazyLogger()
