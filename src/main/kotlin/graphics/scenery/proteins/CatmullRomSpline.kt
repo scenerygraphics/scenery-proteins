@@ -18,7 +18,7 @@ import kotlin.math.pow
  *
  * @author Justin Buerger, burger@mpi-cbg.com
  */
-class CatmullRomSpline(protected val controlPoints: List<Vector3f>, val n: Int = 100, val alpha: Float = 0.5f,
+class CatmullRomSpline(private val controlPoints: List<Vector3f>, val n: Int = 100, val alpha: Float = 0.5f,
                        private val addRandomLastAndFirstPoint: Boolean = false): Spline {
 
     /**

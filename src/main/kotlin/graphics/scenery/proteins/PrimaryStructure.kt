@@ -63,18 +63,17 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
         val groups = chains.flatMap { it.atomGroups }
 
         //This creates bonds for all the amino acids stored in the pdb
-        aminoList.aminoAcids().forEach {
-            val name = it.name
+        aminoList.aminoAcids().forEach {residue ->
+            val name = residue.name
             //please not that these bonds are not the bonds stored in the pdb-file but the hardcoded bonds from the AminoList
-            val bondList = it.bonds
-            //TODO maybe the few lines below can be written more elegant?
-            groups.forEach{
-                val atoms = it.atoms
-                if(it.pdbName == name){
-                    bondList.forEach { val triple = it
-                        atoms.forEach{ val atom1 = it
-                            atoms.forEach {
-                                val atom2 = it
+            val bondList = residue.bonds
+            //TODO maybe the few lines below can be written more elegantly?
+            groups.forEach{ group ->
+                val atoms = group.atoms
+                if(group.pdbName == name) {
+                    bondList.forEach { triple ->
+                        atoms.forEach{ atom1 ->
+                            atoms.forEach {atom2 ->
                                 if((atom1.name + "'") == triple.first && (atom2.name +"'") == triple.second){
                                     val bond = BondImpl(atom1, atom2, triple.third)
                                     bonds.add(bond)
@@ -86,8 +85,8 @@ class PrimaryStructure(val structure: Structure): Mesh("PrimaryStructure") {
         }
 
         //calculates the bonds between amino acids
-        chains.forEach{
-            val groups = it.atomGroups
+        chains.forEach{ chain ->
+            val groups = chain.atomGroups
             while(groups.size > 1) {
                 val group1 = groups[0]
                 val group2 = groups[1]

@@ -1,9 +1,6 @@
 package graphics.scenery.proteins
 
 import graphics.scenery.Mesh
-import graphics.scenery.utils.extensions.minus
-import graphics.scenery.utils.extensions.plus
-import graphics.scenery.utils.extensions.times
 import org.joml.*
 
 /**

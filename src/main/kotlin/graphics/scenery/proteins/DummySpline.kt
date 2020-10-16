@@ -8,7 +8,7 @@ import org.joml.*
  *
  * @author Justin Bürger
  */
-class DummySpline(protected val controlPoints: ArrayList<Vector3f>): Spline {
+class DummySpline(private val controlPoints: ArrayList<Vector3f>): Spline {
 
     /**
      * Simply returns the control points as the spline points.
