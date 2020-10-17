@@ -15,17 +15,23 @@ class RainbowRibbonTest: SceneryBase("RainbowRibbon", windowWidth = 1280, window
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2w49")
+        val protein = Protein.fromID("2zzt")
 
         val ribbon = RibbonDiagram(protein)
 
-        ribbon.children.forEach {subProtein ->
-            subProtein.children.forEach { curves ->
-                curves.children.forEach {
-                    it.material.diffuse = Random.random3DVectorFromRange(0f, 1f)
+        ribbon.children.forEach { subProtein ->
+            subProtein.children.forEach { ss ->
+                ss.children.forEach { partialcurve ->
+                    partialcurve.children.forEach { sub ->
+                        sub.children.forEach {
+                            it.material.diffuse = Random.random3DVectorFromRange(0f, 1f)
+                        }
+                    }
                 }
             }
         }
+
+
 
         scene.addChild(ribbon)
 
