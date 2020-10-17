@@ -1,4 +1,4 @@
-package graphics.scenery.tests.examples.sketches
+package examples
 
 import org.joml.*
 import graphics.scenery.*
@@ -8,28 +8,16 @@ import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
-class RainbowRibbonTest: SceneryBase("RainbowRibbon", windowWidth = 1280, windowHeight = 720) {
+class RainbowRibbonExample: SceneryBase("RainbowRibbon", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2zzt")
+        val protein = Protein.fromID("5mbn")
 
         val ribbon = RibbonDiagram(protein)
-
-        ribbon.children.forEach { subProtein ->
-            subProtein.children.forEach { ss ->
-                ss.children.forEach { partialcurve ->
-                    partialcurve.children.forEach {
-                        it.material.diffuse = Random.random3DVectorFromRange(0f, 1f)
-                    }
-                }
-            }
-        }
-
-
 
         scene.addChild(ribbon)
 
