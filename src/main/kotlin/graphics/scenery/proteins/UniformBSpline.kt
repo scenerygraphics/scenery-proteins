@@ -19,7 +19,7 @@ import java.lang.IllegalArgumentException
  *
  * @author Justin Bürger <burger@mpi-cbg.de>
  */
-class UniformBSpline(protected val controlPoints: ArrayList<Vector3f>, val n: Int = 100): Spline {
+class UniformBSpline(private val controlPoints: ArrayList<Vector3f>, private val n: Int = 100): Spline {
 
     /**
      * This is a list of the equidistant parameters at which the curve is calculated.
