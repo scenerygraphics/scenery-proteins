@@ -22,7 +22,10 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
         val sectionVerticesCount = spline.verticesCountPerSection()
         val verticesList = calculateVertices()
         //algorithms from the curve class, see Curve (line 219-322)
-        verticesList.windowed(sectionVerticesCount, sectionVerticesCount-1) { section ->
+        val remainder = verticesList.size%sectionVerticesCount
+        val n = (verticesList.size-remainder)/sectionVerticesCount
+        val add = remainder/n
+        verticesList.windowed(sectionVerticesCount + add, sectionVerticesCount+ add) { section ->
             val i = when {
                 section.contains(verticesList.first()) -> {
                     0
@@ -47,6 +50,7 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
         if(axisVector == Vector3f(0f, 0f, 0f)) {
             throw Exception("The direction vector of the axis must no become the null vector.")
         }
+        //TODO close the gaps
         val verticesList = ArrayList<List<Vector3f>>(splinePoints.size)
         splinePoints.forEach { point ->
             /*
