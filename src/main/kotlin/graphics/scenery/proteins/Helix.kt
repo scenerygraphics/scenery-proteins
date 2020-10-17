@@ -21,7 +21,6 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
     init {
         val sectionVerticesCount = spline.verticesCountPerSection()
         val verticesList = calculateVertices()
-        //algorithms from the curve class, see Curve (line 219-322)
         val remainder = verticesList.size%sectionVerticesCount
         val n = (verticesList.size-remainder)/sectionVerticesCount
         val add = remainder/n
@@ -37,9 +36,13 @@ class Helix (private val axis: MathLine, val spline: Spline, baseShape: () -> Li
                     2
                 }
             }
+            //algorithms from the curve class, see Curve (line 219-322)
             val helixSectionVertices = Curve.calculateTriangles(section, i)
             val partialHelix = Curve.PartialCurve(helixSectionVertices)
-            this.addChild(partialHelix)
+            //add a dummy so that the helix children match the iteration depth of the curve
+            val dummyMesh = Mesh("dummy")
+            dummyMesh.addChild(partialHelix)
+            this.addChild(dummyMesh)
         }
     }
 

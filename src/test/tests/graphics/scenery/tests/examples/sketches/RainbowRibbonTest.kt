@@ -22,10 +22,8 @@ class RainbowRibbonTest: SceneryBase("RainbowRibbon", windowWidth = 1280, window
         ribbon.children.forEach { subProtein ->
             subProtein.children.forEach { ss ->
                 ss.children.forEach { partialcurve ->
-                    partialcurve.children.forEach { sub ->
-                        sub.children.forEach {
-                            it.material.diffuse = Random.random3DVectorFromRange(0f, 1f)
-                        }
+                    partialcurve.children.forEach {
+                        it.material.diffuse = Random.random3DVectorFromRange(0f, 1f)
                     }
                 }
             }
