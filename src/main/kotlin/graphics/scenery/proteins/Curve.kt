@@ -113,7 +113,8 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
             val remainder = partialCurveGeometry.size%sectionVertices
             val n = (partialCurveGeometry.size-remainder)/sectionVertices
             val add = remainder/n
-            partialCurveGeometry.windowed(sectionVertices + add, sectionVertices + add) { section ->
+            partialCurveGeometry.windowed(sectionVertices + add, sectionVertices-1 + add, partialWindows = true)
+            { section ->
                 val i = when {
                     section.contains(partialCurveGeometry.first()) && section.contains(partialCurveGeometry.last()) -> {
                         0
