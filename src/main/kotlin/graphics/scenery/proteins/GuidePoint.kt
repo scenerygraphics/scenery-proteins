@@ -16,6 +16,8 @@ import org.joml.Vector3f
  * @param[type] the type of the Secondary Structure the nextResidue is assigned to
  * @param[ssLength] stands for the numbers of following residues which are elements of the
  * same secondary structure (counting down to 1).
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 data class GuidePoint(val finalPoint: Vector3f, val cVec: Vector3f, val dVec: Vector3f,
                       val offset: Float = 0f, var widthFactor: Float = 0f,

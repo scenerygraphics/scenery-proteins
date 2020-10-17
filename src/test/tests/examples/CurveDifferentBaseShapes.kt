@@ -10,9 +10,9 @@ import graphics.scenery.proteins.Curve
 import org.junit.Test
 
 /**
- * Just a quick example a UniformBSpline with a triangle as a baseShape.
+ * Example of a curve with different baseShapes.
  *
- * @author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class CurveDifferentBaseShapes: SceneryBase("CurveDifferentBaseShapes", windowWidth = 1280, windowHeight = 720) {
 

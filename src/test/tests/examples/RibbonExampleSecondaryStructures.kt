@@ -1,22 +1,30 @@
-package graphics.scenery.tests.examples.sketches
+package examples
 
 import org.joml.*
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
+import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
-class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
+/**
+ * Example for the ribbon visualization. In this example each secondary structure (bends, helices and sheets) gets
+ * assigned a random colour value.
+ * You can change the displayed protein by changing the pdb entry in line 23.
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
+class RibbonExampleSecondaryStructures: SceneryBase("FlatRibbonSketch", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
 
         val rowSize = 10f
 
-        val protein = Protein.fromID("2qxw")
+        val protein = Protein.fromID("2zzt")
 
-        val ribbon = RibbonDiagram(protein)
+        val ribbon = RibbonDiagram(protein, displaySS = true)
 
         val alphaColour =  Random.random3DVectorFromRange(0f, 1f)
         val betaColour =  Random.random3DVectorFromRange(0f, 1f)
@@ -26,23 +34,29 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
             subProtein.children.forEach { ss ->
                 when {
                     (ss.name == "alpha") -> {
-                        ss.children.forEach {alpha ->
+                        ss.children.forEach { alpha ->
                             alpha.children.forEach {
                                 it.material.diffuse.set(alphaColour)
                             }
                         }
                     }
                     (ss.name == "beta") -> {
-                        ss.children.forEach {beta ->
-                            beta.children.forEach {
-                                it.material.diffuse.set(betaColour)
+                        ss.children.forEach { beta ->
+                            beta.children.forEach {child ->
+                                //due to the partition of the curve we need to take one step further down the tree
+                                child.children.forEach {
+                                    it.material.diffuse.set(betaColour)
+                                }
                             }
                         }
                     }
                     (ss.name == "coil") -> {
                         ss.children.forEach {coil ->
-                            coil.children.forEach {
-                                it.material.diffuse.set(coilColour)
+                            coil.children.forEach { child ->
+                                //due to the partition of the curve we need to take one step further down the tree
+                                child.children.forEach {
+                                    it.material.diffuse.set(coilColour)
+                                }
                             }
                         }
                     }
@@ -72,6 +86,8 @@ class FlatRibbonSketch: SceneryBase("FlatRibbonSketch", windowWidth = 1280, wind
             lightbox.addChild(l)
             l
         }
+
+        lights.forEach { lightbox.addChild(it) }
 
         val stageLight = PointLight(radius = 35.0f)
         stageLight.name = "StageLight"

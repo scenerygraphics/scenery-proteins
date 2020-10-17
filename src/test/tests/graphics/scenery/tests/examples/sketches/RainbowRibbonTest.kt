@@ -4,6 +4,7 @@ import org.joml.*
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.numerics.Random
+import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
@@ -48,6 +49,8 @@ class RainbowRibbonTest: SceneryBase("RainbowRibbon", windowWidth = 1280, window
             lightbox.addChild(l)
             l
         }
+
+        lights.forEach { lightbox.addChild(it) }
 
         val stageLight = PointLight(radius = 35.0f)
         stageLight.name = "StageLight"

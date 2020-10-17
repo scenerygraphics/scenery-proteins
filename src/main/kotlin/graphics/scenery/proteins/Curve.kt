@@ -96,7 +96,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 val shapeVertexList = ArrayList<Vector3f>(shape.size)
                 shape.forEach {
                     val vec = Vector3f()
-                    shapeVertexList.add(bases[helpPosition-1].transformPosition(it, vec))
+                    shapeVertexList.add(bases[helpPosition].transformPosition(it, vec))
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
@@ -110,16 +110,22 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                 }
                 partialCurveGeometry.add(shapeVertexList)
             }
-            partialCurveGeometry.windowed(sectionVertices, sectionVertices) { section ->
+            val remainder = partialCurveGeometry.size%sectionVertices
+            val n = (partialCurveGeometry.size-remainder)/sectionVertices
+            val add = remainder/n
+            partialCurveGeometry.windowed(sectionVertices + add, sectionVertices + add) { section ->
                 val i = when {
-                    section.contains(partialCurveGeometry.first()) -> {
+                    section.contains(partialCurveGeometry.first()) && section.contains(partialCurveGeometry.last()) -> {
                         0
                     }
-                    section.contains(partialCurveGeometry.last()) -> {
+                    section.contains(partialCurveGeometry.first()) -> {
                         1
                     }
-                    else -> {
+                    section.contains(partialCurveGeometry.last()) -> {
                         2
+                    }
+                    else -> {
+                        3
                     }
                 }
                 val partialCurveSectionVertices = calculateTriangles(section, i)
@@ -227,7 +233,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
             if (curveGeometry.isEmpty()) {
                 return verticesVectors
             }
-            if (addCoverOrTop == 0) {
+            if (addCoverOrTop == 0 || addCoverOrTop == 1) {
                 verticesVectors.addAll(getCoverVertices(curveGeometry[0], true))
             }
             //if none of the lists in the curveGeometry differ in size, distinctBy leaves only one element
@@ -254,7 +260,7 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
             } else {
                 throw IllegalArgumentException("The baseShapes must not differ in size!")
             }
-            if (addCoverOrTop == 1) {
+            if (addCoverOrTop == 0 || addCoverOrTop == 2) {
                 verticesVectors.addAll(getCoverVertices(curveGeometry.last(), false))
             }
             return verticesVectors
@@ -265,25 +271,19 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
         the bottom of a curve, the triangles should be arranged counterclockwise, for the top clockwise - this is signified
         by [ccw].
          */
-        fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
+        private fun getCoverVertices(list: List<Vector3f>, ccw: Boolean): ArrayList<Vector3f> {
             val size = list.size
             val verticesList = ArrayList<Vector3f>(size + (size / 2))
             val workList = ArrayList<Vector3f>(size)
             workList.addAll(list)
             if (size >= 3) {
                 /* The algorithm must not stop before the last triangle. The next five lines ensure, therefore,
-            that the last triangle, which contains the last point as well as the first point, is included.
+                   that the last triangle, which contains the last point as well as the first point, is included.
              */
-                when (size % 3) {
-                    0 -> {
-                    }
-                    1 -> {
-                        workList.add(list[0])
-                        workList.add(list[1])
-                    }
-                    2 -> {
-                        workList.add(list[0])
-                    }
+                when (size % 1) {
+                    0 -> {  workList.add(list[0])
+                        workList.add(list[1]) }
+                    1 -> { workList.add(list[0]) }
                 }
                 val newList = ArrayList<Vector3f>((size + (size / 2)) / 2)
                 workList.windowed(3, 2) { triangle ->
@@ -291,12 +291,12 @@ class Curve(spline: Spline, private val firstPerpendicularVector: Vector3f = Vec
                         verticesList.add(triangle[0])
                         verticesList.add(triangle[2])
                         verticesList.add(triangle[1])
-                        newList.add(triangle[0])
                     } else {
                         for (i in 0..2) {
                             verticesList.add(triangle[i])
                         }
                     }
+                    newList.add(triangle[0])
                 }
                 verticesList.addAll(getCoverVertices(newList, ccw))
             }

@@ -1,4 +1,4 @@
-package graphics.scenery.tests.examples.sketches
+package examples
 
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
@@ -8,6 +8,11 @@ import graphics.scenery.proteins.Curve
 import org.joml.Vector3f
 import org.junit.Test
 
+/**
+ * Example of a beta strand visualized with an arrow.
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
 class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, windowHeight = 720) {
 
 
@@ -32,16 +37,16 @@ class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, wi
             val seventyeightPercent = (splineVerticesCount*0.78).toInt()
             for (i in 0 until seventyeightPercent) {
                 val list = ArrayList<Vector3f>()
-                list.add(Vector3f(0.1f, 0.5f, 0f))
-                list.add(Vector3f(-0.1f, 0.5f, 0f))
-                list.add(Vector3f(-0.1f, -0.5f, 0f))
-                list.add(Vector3f(0.1f, -0.5f, 0f))
+                list.add(Vector3f(0.08f, 0.3f, 0f))
+                list.add(Vector3f(-0.08f, 0.3f, 0f))
+                list.add(Vector3f(-0.08f, -0.3f, 0f))
+                list.add(Vector3f(0.08f, -0.3f, 0f))
                 shapeList.add(list)
             }
             val twentytwoPercent = splineVerticesCount-seventyeightPercent
             for(i in twentytwoPercent downTo 1) {
-                val y = 0.8f*i/twentytwoPercent
-                val x = 0.1f
+                val y = 0.65f*i/twentytwoPercent
+                val x = 0.08f
                 val arrowHeadList = ArrayList<Vector3f>(twentytwoPercent)
                 arrowHeadList.add(Vector3f(x, y, 0f))
                 arrowHeadList.add(Vector3f(-x, y, 0f))
@@ -78,6 +83,8 @@ class BetaStrandExample: SceneryBase("BetaStrandExample", windowWidth = 1280, wi
             lightbox.addChild(l)
             l
         }
+
+        lights.forEach { lightbox.addChild(it) }
 
         val stageLight = PointLight(radius = 10.0f)
         stageLight.name = "StageLight"

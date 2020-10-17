@@ -2,7 +2,6 @@ package graphics.scenery.proteins
 
 class AminoList  {
 
-
     fun aminoAcids(): List<AminoAcid> {
 
         val ACE = AminoAcid("ACE", listOf(

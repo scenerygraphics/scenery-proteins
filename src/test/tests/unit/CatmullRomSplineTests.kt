@@ -11,7 +11,7 @@ import kotlin.math.roundToInt
 /**
  * This is the test class for the [CatmullRomSpline]
  *
- *@author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class CatmullRomSplineTests {
     private val logger by LazyLogger()

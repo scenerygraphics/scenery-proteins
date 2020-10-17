@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 /**
  * This is the test for the [UniformBSpline].
  *
- * @author Justin Bürger
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class UniformBSplineTests {
     private val logger by LazyLogger()

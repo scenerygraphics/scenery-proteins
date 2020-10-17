@@ -4,6 +4,7 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import org.joml.*
 import graphics.scenery.numerics.Random
+import graphics.scenery.proteins.Protein
 import org.biojava.nbio.structure.*
 import org.junit.Test
 
@@ -102,6 +103,9 @@ class BasicVisualizationTest: SceneryBase("LoadingAndShowing", windowWidth = 128
             lightbox.addChild(l)
             l
         }
+
+        lights.forEach { lightbox.addChild(it) }
+
 
         val stageLight = PointLight(radius = 35.0f)
         stageLight.name = "StageLight"

@@ -1,6 +1,5 @@
 package graphics.scenery.proteins
 
-import com.jogamp.opengl.math.FloatUtil.sqrt
 import graphics.scenery.*
 import org.joml.*
 import graphics.scenery.numerics.Random
@@ -98,7 +97,6 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
         }
     }
 
-
     /**
      * The baseShape for the Spline, the coil is represented with an octagon,
      * the helices with rectangles, and the sheets with arrows.
@@ -169,13 +167,13 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
             val helpSpline = splinePoints.drop(splineOffset)
             guidePointsOffset++
             when {
-                (guide.type == SecStrucType.helix4) -> {
+                (guide.type == SecStrucType.helix4 && count >= 3) -> {
                     guidePointsOffset += count
                     val caList = ArrayList<Vector3f?>(count)
-                    for(k in 0 until count) {
+                    for(k in 0 .. count) {
                         caList.add(guidePointList[guideIndex+k].nextResidue?.getAtom("CA")?.getVector())
                     }
-                    val axis = calculateAxisLeastSquareMethod(caList)
+                    val axis = Axis(caList)
                     for (j in 0..count) {
                         for (i in 0..sectionVerticesCount) {
                             if (i + (sectionVerticesCount + 1) * j <= helpSpline.lastIndex) {
@@ -185,7 +183,8 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                             }
                         }
                     }
-                    val helixCurve = Helix(axis, DummySpline(subSpline)) { rectangle }
+                    val axisLine = MathLine(axis.direction, axis.position)
+                    val helixCurve = Helix(axisLine, DummySpline(subSpline)) { rectangle }
                     if(displaySS) { alphas.addChild(helixCurve) }
                     else { subParent.addChild(helixCurve) }
                 }
@@ -522,73 +521,5 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
                 }
             }
         return count
-    }
-
-    /**
-     * Returns the axis of an alpha helix. Axis Vector corresponds to the direction and Axis Point to the
-     * position vector. This algorithm follows the paper from Pater C. Kahn "Defining the axis of a helix".
-     */
-    private fun calculateAxis(tetrad: CaTetrad): Pair<Vector3f, Vector3f> {
-        if(tetrad.ca1 != null && tetrad.ca2 != null && tetrad.ca3 != null && tetrad.ca4 != null) {
-            /*
-            Calculating the direction:
-            take four consecutive points (Ca1-Ca4), calculate the midpoint between ca1 and ca3 as well as between
-            a2 and ca4; the vector between these midpoints is the axis vector.
-             */
-            val midpoint1 = Vector3f()
-            tetrad.ca1.sub(tetrad.ca3, midpoint1).mul(0.5f)
-            val midpoint2 = Vector3f()
-            tetrad.ca2.sub(tetrad.ca4, midpoint2).mul(0.5f)
-            val axis = Vector3f()
-            midpoint1.sub(midpoint2, axis).normalize()
-            val head = Vector3f()
-            axis.mul(2f, head).add(midpoint1, head)
-            val tail = Vector3f()
-            tail.set(midpoint2)
-            return Pair(head, tail)
-        }
-        else {
-            println("Whoops, your ca-atoms in the axis calculation become null.")
-            return Pair(Vector3f(), Vector3f())
-        }
-    }
-
-    data class CaTetrad(val ca1: Vector3f?, val ca2: Vector3f?, val ca3: Vector3f?, val ca4: Vector3f?)
-
-    private fun calculateAxisLeastSquareMethod(caPositions: List<Vector3f?>): MathLine {
-        if(caPositions.filterNotNull() == caPositions) {
-            val allTetrads = ArrayList<CaTetrad>(caPositions.size - caPositions.size%3)
-            val axis = ArrayList<Vector3f>(allTetrads.size*allTetrads.size*2)
-                caPositions.windowed(4, 1) {
-                    allTetrads.add(CaTetrad(it[0], it[1], it[2], it[3]))
-                }
-                allTetrads.forEach { tetrad ->
-                    val pair = calculateAxis(tetrad)
-                    axis.add(pair.first)
-                    axis.add(pair.second)
-                }
-                val centroid = getCentroid(axis)
-                val transPoints = ArrayList<Pair<Vector3f, Vector3f>>(axis.size)
-                axis.forEach{ point ->
-                    val transPoint = Vector3f()
-                    transPoints.add(Pair(point, point.sub(centroid, transPoint)))
-                }
-                val sumXLength = transPoints.fold(0f) { acc, next -> acc + next.first.x()*next.second.length()}
-                val sumYLength = transPoints.fold(0f) { acc, next -> acc + next.first.y()*next.second.length()}
-                val sumZLength = transPoints.fold(0f) { acc, next -> acc + next.first.z()*next.second.length()}
-                val abs = sqrt(sumXLength * sumXLength + sumYLength * sumYLength + sumZLength * sumZLength)
-                val direction = Vector3f(sumXLength / abs, sumYLength / abs, sumZLength / abs)
-                return MathLine(direction, centroid)
-        }
-        else {
-            println("Whoops, your ca-atoms in the axis calculation become null.")
-            return MathLine(Vector3f(), Vector3f())
-        }
-    }
-
-    private fun getCentroid(list: List<Vector3f>): Vector3f {
-        return  Vector3f(list.fold(0f) { acc, next -> acc + next.x() } / list.size,
-                list.fold(0f) { acc, next -> acc + next.y() } / list.size,
-                list.fold(0f) { acc, next -> acc + next.z() } / list.size)
     }
 }
