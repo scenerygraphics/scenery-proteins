@@ -6,6 +6,7 @@ import org.joml.Vector3f
 /**
  * This is the class which stores the calculation for a color vector along a Mesh.
  *
+ * @author Justin Buerger <burger@mpi-cbg.de>
  */
 //TODO implement iteration depth that the number of children is flexible
 class Rainbow {
