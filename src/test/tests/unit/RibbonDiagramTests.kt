@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 /**
  * This is the test for the RibbonCalculation, i.e. the pdb-support.
  *
- * @author Justin Buerger, burger@mpi-cbg.com
+ * @author Justin Buerger <burger@mpi-cbg.de>
  */
 class RibbonDiagramTests {
     private val logger by LazyLogger()
@@ -55,7 +55,6 @@ class RibbonDiagramTests {
             }
         }
         assertEquals(allSCPoints, (23448)*(10+1))
-
     }
 
     /**
@@ -725,7 +724,6 @@ class RibbonDiagramTests {
         val r202 = RibbonDiagram(p202)
         assertNotNull(r202)
     }
-
 }
 
 //Inline function for the protein to access residues
