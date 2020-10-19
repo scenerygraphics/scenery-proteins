@@ -8,6 +8,15 @@ import graphics.scenery.proteins.Protein
 import graphics.scenery.proteins.RibbonDiagram
 import org.junit.Test
 
+/**
+ * This is an example for the default visualization of a ribbon diagram. There is a color vector implemented so that
+ * the rainbow spectrum runs along the backbone (starting with red at the n terminal and ending with purple at the
+ * c terminal).
+ * If you want to change the visualized protein, enter the pdb entry into the Protein.fromID(//your entry goes here).
+ * If you want the secondary structures to have a different color, go to "RibbonExampleSecondaryStructures".
+ *
+ * @author Justin Buerger <burger@mpi-cbg.de>
+ */
 class RainbowRibbonExample: SceneryBase("RainbowRibbon", windowWidth = 1280, windowHeight = 720) {
     override fun init() {
 
@@ -21,7 +30,7 @@ class RainbowRibbonExample: SceneryBase("RainbowRibbon", windowWidth = 1280, win
 
         scene.addChild(ribbon)
 
-        val lightbox = Box(Vector3f(100.0f, 100.0f, 100.0f), insideNormals = true)
+        val lightbox = Box(Vector3f(110.0f, 110.0f, 110.0f), insideNormals = true)
         lightbox.name = "Lightbox"
         lightbox.material.diffuse = Vector3f(0.1f, 0.1f, 0.1f)
         lightbox.material.roughness = 1.0f

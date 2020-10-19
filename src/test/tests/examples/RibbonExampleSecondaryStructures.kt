@@ -11,7 +11,8 @@ import org.junit.Test
 /**
  * Example for the ribbon visualization. In this example each secondary structure (bends, helices and sheets) gets
  * assigned a random colour value.
- * You can change the displayed protein by changing the pdb entry in line 23.
+ * You can change the displayed protein by changing the pdb entry at Protein.fromID(//your pdb entry goes here).
+ * If you wish to see the protein with a rainbow color vector along its backbone, use the "RainbowRibbonExample".
  *
  * @author  Justin Buerger <burger@mpi-cbg.de>
  */
