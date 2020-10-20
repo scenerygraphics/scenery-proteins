@@ -22,15 +22,15 @@ class RainbowRibbonExample: SceneryBase("RainbowRibbon", windowWidth = 1280, win
 
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, windowWidth, windowHeight))
 
-        val rowSize = 10f
+        val rowSize = 20f
 
-        val protein = Protein.fromID("5mbn")
+        val protein = Protein.fromID("2w49")
 
         val ribbon = RibbonDiagram(protein)
 
         scene.addChild(ribbon)
 
-        val lightbox = Box(Vector3f(110.0f, 110.0f, 110.0f), insideNormals = true)
+        val lightbox = Box(Vector3f(500.0f, 500.0f, 500.0f), insideNormals = true)
         lightbox.name = "Lightbox"
         lightbox.material.diffuse = Vector3f(0.1f, 0.1f, 0.1f)
         lightbox.material.roughness = 1.0f
@@ -53,7 +53,7 @@ class RainbowRibbonExample: SceneryBase("RainbowRibbon", windowWidth = 1280, win
 
         lights.forEach { lightbox.addChild(it) }
 
-        val stageLight = PointLight(radius = 35.0f)
+        val stageLight = PointLight(radius = 350.0f)
         stageLight.name = "StageLight"
         stageLight.intensity = 0.5f
         stageLight.position = Vector3f(0.0f, 0.0f, 5.0f)

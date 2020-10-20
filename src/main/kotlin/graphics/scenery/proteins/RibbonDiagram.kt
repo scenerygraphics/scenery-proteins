@@ -74,7 +74,6 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
     private val chainList =  ArrayList<List<Group>>(groups.size)
     private val sectionVerticesCount = 10
     private val secStruc = dssp()
-    private var childrenSize = 0
 
     /**
      * Returns the final Ribbon Diagram
@@ -121,14 +120,14 @@ class RibbonDiagram(val protein: Protein, private val displaySS: Boolean = false
 
         val octagon = ArrayList<Vector3f>(8)
         val sin45 = kotlin.math.sqrt(2f) / 40f
-        octagon.add(Vector3f(0.05f, 0f, 0f))
-        octagon.add(Vector3f(sin45, sin45, 0f))
-        octagon.add(Vector3f(0f, 0.05f, 0f))
-        octagon.add(Vector3f(-sin45, sin45, 0f))
-        octagon.add(Vector3f(-0.05f, 0f, 0f))
-        octagon.add(Vector3f(-sin45, -sin45, 0f))
-        octagon.add(Vector3f(0f, -0.05f, 0f))
-        octagon.add(Vector3f(sin45, -sin45, 0f))
+        octagon.add(Vector3f(0.1f, 0f, 0f))
+        octagon.add(Vector3f(sin45*2, sin45*2, 0f))
+        octagon.add(Vector3f(0f, 0.1f, 0f))
+        octagon.add(Vector3f(-sin45*2, sin45*2, 0f))
+        octagon.add(Vector3f(-0.1f, 0f, 0f))
+        octagon.add(Vector3f(-sin45*2, -sin45*2, 0f))
+        octagon.add(Vector3f(0f, -0.1f, 0f))
+        octagon.add(Vector3f(sin45*2, -sin45*2, 0f))
 
         val reversedRectangle = ArrayList<Vector3f>(4)
         reversedRectangle.add(Vector3f(0.1f, 0.8f, 0f))
