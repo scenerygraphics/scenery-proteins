@@ -2,7 +2,12 @@ package graphics.scenery.proteins
 
 import kotlin.collections.ArrayList as ArrayList1
 
-class AminoList: ArrayList1<AminoAcid>() {
+/**
+ * This is a list of all existing amino acids.
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
+class AminoList: ArrayList1<AminoAcid>(28) {
 
     init {
 
