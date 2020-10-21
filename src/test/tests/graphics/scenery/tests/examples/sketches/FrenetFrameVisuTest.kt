@@ -8,7 +8,7 @@ import graphics.scenery.proteins.CatmullRomSpline
 import graphics.scenery.proteins.Curve
 import org.junit.Test
 
-class FrenetFrameVisuTest: SceneryBase("Catmull Visualization Test", windowWidth = 1280, windowHeight = 720) {
+class FrenetFrameVisuTest: SceneryBase("Frenet Frame Visualization Test", windowWidth = 1280, windowHeight = 720) {
 
     override fun init() {
 
