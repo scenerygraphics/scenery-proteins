@@ -91,18 +91,17 @@ class PrimaryStructure(protein: Protein): Mesh("PrimaryStructure") {
 
         //computes the bonds between amino acids
         chains.forEach{ chain ->
-            while(groups.size > 1) {
-                val group1 = chain.atomGroups[0]
-                val group2 = chain.atomGroups[1]
+            chain.atomGroups.windowed(2, 1) {
+                val group1 = it[0]
+                val group2 = it[1]
                 group1.atoms.forEach{ atom1 ->
-                    group2.atoms.forEach{ atom2 ->
-                        if(atom1.name == "C" && atom2.name == "N") {
+                    group2.atoms.forEach { atom2 ->
+                        if (atom1.name == "CA" && atom2.name == "N") {
                             val bond = BondImpl(atom1, atom2, 1)
                             bonds.add(bond)
                         }
                     }
                 }
-                chain.atomGroups.removeAt(0)
             }
         }
 
