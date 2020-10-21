@@ -1,4 +1,4 @@
-package graphics.scenery.tests.examples.sketches
+package examples
 
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
@@ -6,11 +6,13 @@ import org.joml.*
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.PrimaryStructure
 import graphics.scenery.proteins.Protein
-import org.biojava.nbio.structure.*
 import org.junit.Test
 
 /**
- * Example for a basic representation of a Protein. This example only shows the bonds between
+ * Example for a basic representation of a Protein. This example only shows the bonds between atoms- if you would like
+ * to visualize the protein with a ribbon diagram, please consult the RainbowRibbonExample.
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
  */
 class PrimaryStructureExample: SceneryBase("LoadingAndShowing", windowWidth = 1280, windowHeight = 720) {
 
