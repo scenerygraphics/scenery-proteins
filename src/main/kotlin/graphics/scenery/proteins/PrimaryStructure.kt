@@ -4,10 +4,17 @@ import org.joml.*
 import graphics.scenery.*
 import org.biojava.nbio.structure.*
 
+/**
+ * This is a representation of a protein structure. Displayed are the covalent bonds of the protein with atoms being
+ * represented with Icospheres and cylinders for the connections between them.
+ * @param [protein] Protein which is to be visualized.
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
+class PrimaryStructure(protein: Protein): Mesh("PrimaryStructure") {
+    val structure = protein.structure
 
-class PrimaryStructure(private val structure: Structure): Mesh("PrimaryStructure") {
-
-    fun primaryStructure(): Node {
+    init {
 
         val atoms: Array<Atom> = StructureTools.getAllAtomArray(structure)
 
@@ -47,9 +54,8 @@ class PrimaryStructure(private val structure: Structure): Mesh("PrimaryStructure
             master?.instances?.add(s)
         }
 
-        val primaryStruc = Node("Primary Structure")
         atomMasters.filter { it.value.instances.isNotEmpty() }
-                .forEach { primaryStruc.addChild(it.value) }
+                .forEach { this.addChild(it.value) }
 
         val c = Cylinder(0.025f, 1.0f, 10)
         c.material = ShaderMaterial.fromFiles("DefaultDeferredInstanced.vert", "DefaultDeferred.frag")
@@ -63,7 +69,7 @@ class PrimaryStructure(private val structure: Structure): Mesh("PrimaryStructure
         val groups = chains.flatMap { it.atomGroups }
 
         //This creates bonds for all the amino acids stored in the pdb
-        aminoList.aminoAcids().forEach {residue ->
+        aminoList.forEach {residue ->
             val name = residue.name
             //please note that these bonds are not the bonds stored in the pdb-file but the hardcoded bonds from the AminoList
             val bondList = residue.bonds
@@ -102,7 +108,7 @@ class PrimaryStructure(private val structure: Structure): Mesh("PrimaryStructure
 
         val cylinders = bonds.map {
             val bond = Mesh()
-            bond.parent = primaryStruc
+            bond.parent = this
             val atomA = it.atomA
             val atomB = it.atomB
             bond.orientBetweenPoints(Vector3f(atomA.x.toFloat(), atomA.y.toFloat(), atomA.z.toFloat()),
@@ -112,9 +118,6 @@ class PrimaryStructure(private val structure: Structure): Mesh("PrimaryStructure
         }
         c.instances.addAll(cylinders)
 
-        primaryStruc.addChild(c)
-
-        return primaryStruc
-
+        this.addChild(c)
     }
 }

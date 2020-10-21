@@ -1,8 +1,10 @@
 package graphics.scenery.proteins
 
-class AminoList  {
+import kotlin.collections.ArrayList as ArrayList1
 
-    fun aminoAcids(): List<AminoAcid> {
+class AminoList: ArrayList1<AminoAcid>() {
+
+    init {
 
         val ACE = AminoAcid("ACE", listOf(
                 Triple("1HH3'", "CA'", 1),
@@ -1155,21 +1157,8 @@ class AminoList  {
                 Triple("HN'", "N'", 1)
         ))
 
-        return (listOf(ACE, ALA, ARG, ASH, ASN, ASP, CYM, CYS, CYX, GLN, GLP, GLU, GLY, HID,
-                HIE,
-                HIP,
-                ILE,
-                LEU,
-                LYS,
-                MET,
-                NME,
-                PHE,
-                PRO,
-                SER,
-                THR,
-                TRP,
-                TYR,
-                VAL))
+         this.addAll(listOf(ACE, ALA, ARG, ASH, ASN, ASP, CYM, CYS, CYX, GLN, GLP, GLU, GLY, HID,
+                HIE, HIP, ILE, LEU, LYS, MET, NME, PHE, PRO, SER, THR, TRP, TYR, VAL))
         }
 
     }
