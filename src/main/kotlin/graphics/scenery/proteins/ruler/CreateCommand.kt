@@ -43,13 +43,16 @@ open class CreateCommand @JvmOverloads constructor(protected val name: String,
      * the screen-space coordinates.
      */
     override fun click(x: Int, y: Int) {
+        val width = cam!!.width
+        val height = cam!!.height
+        val posX = (x - width / 2.0f) / (width / 2.0f)
+        val posY = -1.0f * (y - height / 2.0f) / (height / 2.0f)
         scene.updateWorld(true)
         mesh.parent = scene
-        val position = Vector3f()
-        position.set(cam!!.position)
-        val z = Vector3f()
-        z.set(cam!!.cameraTripod().z)
-        mesh.position = position.add(z.normalize().mul(5f))
+        val mousePosition = cam!!.viewportToView(Vector2f(posX, posY))
+        val position4D = cam!!.viewToWorld(mousePosition)
+        val position = Vector3f(position4D.x(), position4D.y(), position4D.z())
+        mesh.position = position
         scene.addChild(mesh)
     }
 }
