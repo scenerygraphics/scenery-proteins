@@ -3,12 +3,11 @@ package sketches
 import org.joml.Vector3f
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
-import graphics.scenery.controls.behaviours.SelectCommand
 import graphics.scenery.numerics.Random
 import graphics.scenery.proteins.ruler.CreateCommand
-import graphics.scenery.utils.extensions.plus
+import graphics.scenery.proteins.ruler.Ruler
+import org.joml.Vector4f
 import org.junit.Test
-import kotlin.concurrent.thread
 
 /**
  */
@@ -35,16 +34,26 @@ class CreationSketch: SceneryBase("CreationSketch", wantREPL = true) {
             scene.addChild(this)
         }
     }
-    private val sphere = Icosphere(0.5f, 6)
 
     override fun inputSetup() {
         super.inputSetup()
 
+        val sphere = Icosphere(0.25f, 6)
+        val sphere2 = Icosphere(0.25f, 6)
+
         renderer?.let { r ->
             inputHandler?.addBehaviour("create", CreateCommand("create", r, scene,
-                    { scene.findObserver()}, sphere))
+                    { scene.findObserver()}) { sphere })
             inputHandler?.addKeyBinding("create", "double-click button1")
         }
+
+        renderer?.let { r ->
+            inputHandler?.addBehaviour("ruler", Ruler("create", r, scene,
+                    { scene.findObserver()}, sphere, sphere2))
+            inputHandler?.addKeyBinding("ruler", "R")
+        }
+
+
     }
 
     @Test override fun main() {
