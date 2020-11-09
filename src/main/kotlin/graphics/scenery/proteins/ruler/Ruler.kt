@@ -8,14 +8,22 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.scijava.ui.behaviour.DragBehaviour
 
-class NodeDrag(private val name: String, private val camera: () -> Camera?, private val scene: Scene): DragBehaviour {
+/**
+ * Draws a line on a mouse drag - just like when you draw a line in paint.
+ *
+ * @author Justin Buerger <burger@mpi-cbg.de>
+ */
+class Ruler(private val name: String, private val camera: () -> Camera?, private val scene: Scene): DragBehaviour {
 
+    //line which is to be drawn
     private val line = Line(simple = true)
+    //position on the mouse click; start of the line
     private val origin = Vector3f()
     private val finalLength = Vector3f()
     private val logger by LazyLogger()
     private val cam = camera.invoke()
 
+    /** Setup the line */
     override fun init(p0: Int, p1: Int) {
         origin.set(getMousePositionIn3D(p0, p1))
         line.addPoint(origin)
@@ -23,6 +31,7 @@ class NodeDrag(private val name: String, private val camera: () -> Camera?, priv
         scene.addChild(line)
     }
 
+    /** Drag the line*/
     override fun drag(p0: Int, p1: Int) {
         val position = getMousePositionIn3D(p0, p1)
         line.clearPoints()
@@ -30,6 +39,7 @@ class NodeDrag(private val name: String, private val camera: () -> Camera?, priv
         line.addPoint(position)
     }
 
+    /**Finish the line*/
     override fun end(p0: Int, p1: Int) {
         val endPosition = getMousePositionIn3D(p0, p1)
         line.clearPoints()
@@ -39,6 +49,7 @@ class NodeDrag(private val name: String, private val camera: () -> Camera?, priv
         logger.info("The line is ${finalLength.length()}")
     }
 
+    /** Get the position of your mouse in 3D world coordinates*/
     private fun getMousePositionIn3D(p0: Int, p1: Int): Vector3f {
         val width = cam!!.width
         val height = cam.height
