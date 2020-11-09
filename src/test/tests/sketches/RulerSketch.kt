@@ -2,7 +2,7 @@ package sketches
 
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
-import graphics.scenery.proteins.ruler.NodeDrag
+import graphics.scenery.proteins.ruler.Ruler
 import org.joml.Vector3f
 import org.junit.Test
 
@@ -32,9 +32,8 @@ override fun init() {
 
 override fun inputSetup() {
     super.inputSetup()
-
     val sphere = Icosphere(0.25f, 6)
-    inputHandler?.addBehaviour("ruler", NodeDrag("create", { scene.findObserver() }, scene))
+    inputHandler?.addBehaviour("ruler", Ruler("create", { scene.findObserver() }, scene))
     inputHandler?.addKeyBinding("ruler", "R")
 }
 
