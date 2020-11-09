@@ -34,9 +34,8 @@ override fun inputSetup() {
     super.inputSetup()
 
     val sphere = Icosphere(0.25f, 6)
-    renderer?.let { r ->
-        inputHandler?.addBehaviour("ruler", NodeDrag("create", { scene.findObserver() }, scene))
-    }
+    inputHandler?.addBehaviour("ruler", NodeDrag("create", { scene.findObserver() }, scene))
+    inputHandler?.addKeyBinding("ruler", "R")
 }
 
 @Test
