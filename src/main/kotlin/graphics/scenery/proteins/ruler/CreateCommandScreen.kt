@@ -13,11 +13,11 @@ import kotlin.reflect.KProperty
 /**
  *
  */
-open class CreateCommand constructor(protected val name: String,
-                                     protected val renderer: Renderer,
-                                     protected val scene: Scene,
-                                     protected val camera: () -> Camera?,
-                                     meshLambda: () -> Mesh) : ClickBehaviour {
+open class CreateCommandScreen constructor(protected val name: String,
+                                           protected val renderer: Renderer,
+                                           protected val scene: Scene,
+                                           protected val camera: () -> Camera?,
+                                           meshLambda: () -> Mesh) : ClickBehaviour {
     protected val logger by LazyLogger()
 
     protected val cam: Camera? by CameraDelegate()

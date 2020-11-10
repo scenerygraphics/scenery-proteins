@@ -3,7 +3,7 @@ package sketches
 import org.joml.Vector3f
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
-import graphics.scenery.proteins.ruler.CreateCommand
+import graphics.scenery.proteins.ruler.CreateCommandScreen
 import org.junit.Test
 
 /**
@@ -37,7 +37,7 @@ class CreationSketch: SceneryBase("CreationSketch", wantREPL = true) {
 
         val sphere = Icosphere(0.25f, 6)
         renderer?.let { r ->
-            inputHandler?.addBehaviour("create", CreateCommand("create", r, scene,
+            inputHandler?.addBehaviour("create", CreateCommandScreen("create", r, scene,
                     { scene.findObserver() }) { sphere })
             inputHandler?.addKeyBinding("create", "R")
         }
