@@ -14,12 +14,11 @@ import kotlin.reflect.KProperty
 /**
  *
  */
-open class CreateCommandRayCast constructor(protected val name: String,
-                                           protected val renderer: Renderer,
-                                           protected val scene: Scene,
-                                           protected val camera: () -> Camera?,
-                                           protected val isHorizontal: Boolean,
-                                           meshLambda: () -> Mesh) : ScrollBehaviour, ClickBehaviour {
+open class CreateCommandRayCast(protected val name: String,
+                                protected val renderer: Renderer,
+                                protected val scene: Scene,
+                                protected val camera: () -> Camera?,
+                                meshLambda: () -> Mesh) : ScrollBehaviour, ClickBehaviour {
     protected val logger by LazyLogger()
 
     protected val cam: Camera? by CameraDelegate()
@@ -42,7 +41,9 @@ open class CreateCommandRayCast constructor(protected val name: String,
 
     override fun scroll(p0: Double, p1: Boolean, p2: Int, p3: Int) {
         val viewAndWheel = Vector3f()
+        print(cam!!.target)
         if(cam != null) {
+            print(cam!!.target)
             cam!!.target.mul(p0.toFloat(), viewAndWheel)
         }
         mesh.position.add(viewAndWheel)
