@@ -5,7 +5,9 @@ import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.controls.behaviours.SelectCommand
 import graphics.scenery.numerics.Random
+import graphics.scenery.utils.extensions.plus
 import org.junit.Test
+import kotlin.concurrent.thread
 
 /**
  * Test for [SelectCommand], produces a lot of (clickable) spheres, that
@@ -54,6 +56,13 @@ class VolumeMeasurementExample: SceneryBase("VolumeMeasurementExample", wantREPL
                     val volume =
                     if(mesh != null){ volumeMeasurer.calculateVolume(nearest.node as Mesh) } else { 0f }
                     logger.info("The volume is: $volume")
+                }
+                val originalPosition = Vector3f(nearest.node.position)
+                thread {
+                    for(i in 0 until 200) {
+                        nearest.node.position = originalPosition + Random.random3DVectorFromRange(-0.05f, 0.05f)
+                        Thread.sleep(2)
+                    }
                 }
             }
         }
