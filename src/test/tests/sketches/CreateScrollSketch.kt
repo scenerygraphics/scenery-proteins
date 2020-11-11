@@ -5,7 +5,7 @@ import org.joml.Vector3f
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
 import graphics.scenery.proteins.ruler.CreateCommandRayCast
-import graphics.scenery.proteins.ruler.CreateCommandScreen
+import graphics.scenery.proteins.ruler.NodeScroller
 import org.junit.Test
 
 /**
@@ -40,8 +40,11 @@ class CreateScrollSketch: SceneryBase("CreateScrollSketch", wantREPL = true) {
         val sphere = Icosphere(0.25f, 6)
         renderer?.let { r ->
             inputHandler?.addBehaviour("create", CreateCommandRayCast("create", r, scene,
-                    { scene.findObserver() }, true) { sphere })
+                    { scene.findObserver() }) { sphere })
             inputHandler?.addKeyBinding("create", "R")
+            inputHandler?.addBehaviour("scroll", NodeScroller("scroll", scene,
+                    {scene.findObserver()}) {sphere})
+            inputHandler?.addKeyBinding("scroll", "T")
         }
     }
 
