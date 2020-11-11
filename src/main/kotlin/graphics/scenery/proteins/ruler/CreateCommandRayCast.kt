@@ -19,7 +19,7 @@ open class CreateCommandRayCast constructor(protected val name: String,
                                            protected val scene: Scene,
                                            protected val camera: () -> Camera?,
                                            protected val isHorizontal: Boolean,
-                                           meshLambda: () -> Mesh) : ScrollBehaviour {
+                                           meshLambda: () -> Mesh) : ScrollBehaviour, ClickBehaviour {
     protected val logger by LazyLogger()
 
     protected val cam: Camera? by CameraDelegate()
@@ -41,10 +41,18 @@ open class CreateCommandRayCast constructor(protected val name: String,
 
 
     override fun scroll(p0: Double, p1: Boolean, p2: Int, p3: Int) {
+        val viewAndWheel = Vector3f()
+        if(cam != null) {
+            cam!!.target.mul(p0.toFloat(), viewAndWheel)
+        }
+        mesh.position.add(viewAndWheel)
+    }
+
+    override fun click(p0: Int, p1: Int) {
         val width = cam!!.width
         val height = cam!!.height
-        val posX = (p2 - width / 2.0f) / (width / 2.0f)
-        val posY = -1.0f * (p3 - height / 2.0f) / (height / 2.0f)
+        val posX = (p0 - width / 2.0f) / (width / 2.0f)
+        val posY = -1.0f * (p1 - height / 2.0f) / (height / 2.0f)
         scene.updateWorld(true)
         mesh.parent = scene
         val mousePosition = cam!!.viewportToView(Vector2f(posX, posY))
@@ -52,12 +60,5 @@ open class CreateCommandRayCast constructor(protected val name: String,
         val position = Vector3f(position4D.x(), position4D.y(), position4D.z())
         mesh.position = position
         scene.addChild(mesh)
-        val viewAndWheel = Vector3f()
-        if(cam != null) {
-            cam!!.target.mul(p0.toFloat(), viewAndWheel)
-        }
-        val newPosition = Vector3f()
-        position.add(viewAndWheel, newPosition)
-        mesh.position = newPosition
     }
 }
