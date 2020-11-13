@@ -2,12 +2,23 @@ package volumeMeasurement
 
 import graphics.scenery.GeometryType
 import graphics.scenery.Mesh
+import graphics.scenery.utils.LazyLogger
 import kotlin.math.absoluteValue
 
+/**
+ * This class contains the functionality of measuring the volume of a mesh. The algorithm is taken from:
+ * EFFICIENT FEATURE EXTRACTION FOR 2D/3D OBJECTS IN MESH REPRESENTATION by Cha Zhang and Tsuhan Cheng
+ *
+ * @author  Justin Buerger <burger@mpi-cbg.de>
+ */
 class VolumeMeasurement {
+    val logger by LazyLogger()
     fun calculateVolume(mesh: Mesh): Double {
         val vertices = mesh.vertices
         val vertexBuffer = vertices.asReadOnlyBuffer()
+        if(vertexBuffer.limit() == 0) {
+            logger.info("The vertex buffer of the mesh provided for the volume-measurement is empty")
+        }
         val arraySize = vertexBuffer.limit()
         val numberOfSubVolumes = arraySize%9
         val subVolumes = ArrayList<Float>(numberOfSubVolumes)
