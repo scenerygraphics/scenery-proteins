@@ -38,7 +38,7 @@ class CreationSketch: SceneryBase("CreationSketch", wantREPL = true) {
     override fun inputSetup() {
         super.inputSetup()
 
-        val sphere = Icosphere(0.25f, 6)
+        val sphere = Icosphere(0.1f, 6)
         renderer?.let { r ->
             inputHandler?.addBehaviour("create", CreateCommandScreen("create", r, scene,
                     { scene.findObserver() }) { sphere })
