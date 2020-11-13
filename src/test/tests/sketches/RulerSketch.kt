@@ -6,6 +6,12 @@ import graphics.scenery.proteins.ruler.Ruler
 import org.joml.Vector3f
 import org.junit.Test
 
+/**
+ * Sketch that shows how the ruler works. Run, press R (and hold it) then you can create a line on a Mouse-click, and
+ * drag it on your screen.
+ *
+ * @author Justin Buerger <burger@mpi-cbg.de>
+ */
 class RulerSketch: SceneryBase("RulerSketch", wantREPL = true) {
 override fun init() {
     renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, 512, 512))

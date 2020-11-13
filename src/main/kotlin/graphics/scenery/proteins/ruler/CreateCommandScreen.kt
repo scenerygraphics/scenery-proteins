@@ -11,7 +11,9 @@ import org.scijava.ui.behaviour.ClickBehaviour
 import kotlin.reflect.KProperty
 
 /**
+ * Creates a Mesh with a click at the mouse position.
  *
+ * @author Justin Buerger <burger@mpi-cbg.de>
  */
 open class CreateCommandScreen constructor(protected val name: String,
                                            protected val renderer: Renderer,

@@ -10,10 +10,9 @@ import org.junit.Test
 import kotlin.concurrent.thread
 
 /**
- * Test for [SelectCommand], produces a lot of (clickable) spheres, that
- * wiggle when selected by double-click.
+ * Example of how to measure the distance between two nodes.
  *
- * @author Ulrik Günther <hello@ulrik.is>
+ * @author Justin Buerger <burger@mpi-cbg.de>
  */
 class RulerPick: SceneryBase("RulerPick", wantREPL = true) {
 

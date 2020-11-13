@@ -7,6 +7,9 @@ import graphics.scenery.proteins.ruler.CreateCommandScreen
 import org.junit.Test
 
 /**
+ * Sketch for Node-Creation on-click. Press R to create a node at your mouse position.
+ *
+ * @author Justin Buerger <burger@mpi-cbg.de>
  */
 class CreationSketch: SceneryBase("CreationSketch", wantREPL = true) {
     override fun init() {
