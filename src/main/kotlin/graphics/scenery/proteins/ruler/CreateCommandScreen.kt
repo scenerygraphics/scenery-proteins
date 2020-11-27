@@ -49,7 +49,6 @@ open class CreateCommandScreen constructor(protected val name: String,
         val height = cam!!.height
         val posX = (x - width / 2.0f) / (width / 2.0f)
         val posY = -1.0f * (y - height / 2.0f) / (height / 2.0f)
-        scene.updateWorld(true)
         mesh.parent = scene
         val mousePosition = cam!!.viewportToView(Vector2f(posX, posY))
         val position4D = cam!!.viewToWorld(mousePosition)
