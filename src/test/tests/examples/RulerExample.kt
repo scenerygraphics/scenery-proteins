@@ -1,4 +1,4 @@
-package sketches
+package examples
 
 import graphics.scenery.*
 import graphics.scenery.backends.Renderer
@@ -12,7 +12,7 @@ import org.junit.Test
  *
  * @author Justin Buerger <burger@mpi-cbg.de>
  */
-class RulerSketch: SceneryBase("RulerSketch", wantREPL = true) {
+class RulerExample: SceneryBase("RulerSketch", wantREPL = true) {
 override fun init() {
     renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, 512, 512))
 

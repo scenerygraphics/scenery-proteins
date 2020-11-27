@@ -1,4 +1,4 @@
-package sketches
+package examples
 
 import org.joml.Vector3f
 import graphics.scenery.*
@@ -11,7 +11,7 @@ import org.junit.Test
  *
  * @author Justin Buerger <burger@mpi-cbg.de>
  */
-class CreationSketch: SceneryBase("CreationSketch", wantREPL = true) {
+class CreationExample: SceneryBase("CreationSketch", wantREPL = true) {
     override fun init() {
         renderer = hub.add(Renderer.createRenderer(hub, applicationName, scene, 512, 512))
 
