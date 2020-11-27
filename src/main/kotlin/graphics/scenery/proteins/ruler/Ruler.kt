@@ -1,11 +1,10 @@
 package graphics.scenery.proteins.ruler
 
-import graphics.scenery.Camera
-import graphics.scenery.Line
-import graphics.scenery.Scene
+import graphics.scenery.*
 import graphics.scenery.utils.LazyLogger
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.Vector4f
 import org.scijava.ui.behaviour.DragBehaviour
 
 /**
@@ -23,12 +22,13 @@ class Ruler(private val name: String, private val camera: () -> Camera?, private
     private val logger by LazyLogger()
     private val cam = camera.invoke()
 
-    /** Setup the line */
+    /** Setup the line and delete the old one */
     override fun init(p0: Int, p1: Int) {
         origin.set(getMousePositionIn3D(p0, p1))
         line.addPoint(origin)
         line.parent = scene
         scene.addChild(line)
+        scene.removeChild("DistanceTextBoard")
     }
 
     /** Drag the line*/
@@ -47,6 +47,17 @@ class Ruler(private val name: String, private val camera: () -> Camera?, private
         line.addPoint(endPosition)
         endPosition.sub(origin, finalLength)
         logger.info("The line is ${finalLength.length()}")
+        val board = TextBoard()
+        board.text = "Distance: ${finalLength.length()} units"
+        board.name = "DistanceTextBoard"
+        board.transparent = 0
+        board.fontColor = Vector4f(0.0f, 0.0f, 0.0f, 1.0f)
+        board.backgroundColor = Vector4f(100f, 100f, 100f, 1.0f)
+        val boardPosition = Vector3f()
+        origin.add(endPosition, boardPosition).mul(0.5f)
+        board.position = boardPosition.mul(0.5f)
+        board.scale = Vector3f(0.5f, 0.5f, 0.5f)
+        scene.addChild(board)
     }
 
     /** Get the position of your mouse in 3D world coordinates*/
