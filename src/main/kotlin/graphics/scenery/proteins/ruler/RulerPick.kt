@@ -6,6 +6,7 @@ import graphics.scenery.backends.Renderer
 import graphics.scenery.controls.behaviours.SelectCommand
 import graphics.scenery.numerics.Random
 import graphics.scenery.utils.extensions.plus
+import org.joml.Vector4f
 import org.junit.Test
 import kotlin.concurrent.thread
 
@@ -56,7 +57,7 @@ class RulerPick: SceneryBase("RulerPick", wantREPL = true) {
                 val originalPosition = Vector3f(nearest.node.position)
                 thread {
                     for(i in 0 until 200) {
-                        nearest.node.position = originalPosition + Random.random3DVectorFromRange(-0.05f, 0.05f)
+                        nearest.node.position = originalPosition  + Random.random3DVectorFromRange(-0.05f, 0.05f)
                         Thread.sleep(2)
                     }
                 }
@@ -72,6 +73,17 @@ class RulerPick: SceneryBase("RulerPick", wantREPL = true) {
                     line.addPoint(position0)
                     line.addPoint(position1)
                     scene.addChild(line)
+                    val board = TextBoard()
+                    board.text = "Distance: ${lastToPresent.length()} units"
+                    board.name = "DistanceTextBoard"
+                    board.transparent = 0
+                    board.fontColor = Vector4f(0.0f, 0.0f, 0.0f, 1.0f)
+                    board.backgroundColor = Vector4f(100f, 100f, 100f, 1.0f)
+                    val boardPosition = Vector3f()
+                    position0.add(position1, boardPosition)
+                    board.position = boardPosition.mul(0.5f)
+                    board.scale = Vector3f(0.5f, 0.5f, 0.5f)
+                    scene.addChild(board)
                 }
                 secondNode = !secondNode
             }
