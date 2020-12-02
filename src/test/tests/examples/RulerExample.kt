@@ -31,14 +31,12 @@ override fun init() {
     with(cam) {
         position = Vector3f(0.0f, 0.0f, 5.0f)
         perspectiveCamera(50.0f, 512, 512)
-
         scene.addChild(this)
     }
 }
 
 override fun inputSetup() {
     super.inputSetup()
-    val sphere = Icosphere(0.25f, 6)
     inputHandler?.addBehaviour("ruler", Ruler("create", { scene.findObserver() }, scene))
     inputHandler?.addKeyBinding("ruler", "R")
 }
