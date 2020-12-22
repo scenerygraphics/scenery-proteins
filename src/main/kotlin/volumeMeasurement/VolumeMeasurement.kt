@@ -22,28 +22,37 @@ class VolumeMeasurement {
         val arraySize = vertexBuffer.limit()
         val numberOfSubVolumes = arraySize%9
         val subVolumes = ArrayList<Float>(numberOfSubVolumes)
-        if(arraySize%9 == 0 && mesh.geometryType == GeometryType.TRIANGLES) {
-            var i = 0
-            while (i < arraySize) {
-                val x1 = vertexBuffer.get(i)
-                val y1 = vertexBuffer.get(i+1)
-                val z1 = vertexBuffer.get(i+2)
-                val x3 = vertexBuffer.get(i+3)
-                val y3 = vertexBuffer.get(i+4)
-                val z3 = vertexBuffer.get(i+5)
-                val x2 = vertexBuffer.get(i+6)
-                val y2 = vertexBuffer.get(i+7)
-                val z2 = vertexBuffer.get(i+8)
-                val i1 = (x3 * y2 * z1)
-                val i2 = (x2 * y3 * z1)
-                val i3 = (x3 * y1 * z2)
-                val i4 = (x1 * y3 * z2)
-                val i5 = (x2 * y1 * z3)
-                val i6 = (x1 * y2 * z3)
-                val volume = (-i1 + i2 + i3 - i4 - i5 + i6)/6f
-                subVolumes.add(volume)
+        var i = 0
+        while (i < arraySize) {
+            val x1 = vertexBuffer.get(i)
+            val y1 = vertexBuffer.get(i+1)
+            val z1 = vertexBuffer.get(i+2)
+            val x3 = vertexBuffer.get(i+3)
+            val y3 = vertexBuffer.get(i+4)
+            val z3 = vertexBuffer.get(i+5)
+            val x2 = vertexBuffer.get(i+6)
+            val y2 = vertexBuffer.get(i+7)
+            val z2 = vertexBuffer.get(i+8)
+            val i1 = (x3 * y2 * z1)
+            val i2 = (x2 * y3 * z1)
+            val i3 = (x3 * y1 * z2)
+            val i4 = (x1 * y3 * z2)
+            val i5 = (x2 * y1 * z3)
+            val i6 = (x1 * y2 * z3)
+            //The absolute value is not needed for the original algorithm, however,
+            //the clockwise ordering in triangle strips makes it necessary.
+            val volume = ((-i1 + i2 + i3 - i4 - i5 + i6)/6f).absoluteValue
+            subVolumes.add(volume)
+            if(arraySize%9 == 0 && mesh.geometryType == GeometryType.TRIANGLES) {
                 i += 9
             }
+            else if (arraySize%3 == 0 && mesh.geometryType == GeometryType.TRIANGLE_STRIP) {
+                if(i < arraySize-9) {
+                    i += 3
+                }
+                else { break }
+            }
+            else { break }
         }
         return (subVolumes.fold(0.0) {acc, next -> acc + next }.absoluteValue)
     }
